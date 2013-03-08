@@ -246,7 +246,7 @@ void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr,
         pi_tensor_lab[3][2] = pi_tensor_lab[2][3];
         pi_tensor_lab[3][3] = frameptr->pi33[i][j];
 
-        double prefactor_pimunu = 1./(2.*pow(temp_local, deltaf_alpha)*(e_local + p_local));
+        double prefactor_pimunu = 1./(2.*(e_local + p_local));
         for(int jj=0; jj<neta; jj++)
         {
           vz_local = tanheta_ptr[jj];
@@ -284,7 +284,7 @@ void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr,
             double pi_zz_photon = Rotation_Tensor_zz(pi_tensor_localrest, Rotation_Rzi);
 
             Eq_localrest_Tb[idx_Tb] = p_localrest[0];
-            pi_zz_photon_Tb[idx_Tb] = - pi_zz_photon*prefactor_pimunu;
+            pi_zz_photon_Tb[idx_Tb] = pi_zz_photon*prefactor_pimunu;
             idx_Tb++;
           }
           }
