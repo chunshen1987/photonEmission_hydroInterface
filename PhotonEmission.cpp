@@ -255,7 +255,7 @@ void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr,
           boost_matrix(lambda_transverse, vx_local, vy_local, 0.0e0);   // calculate the boost matrix
 
           //boost shear stress tensor to fluid local rest frame
-          boost_Tensor2_trans(pi_tensor_lab, pi_tensor_localrest, lambda_transverse);
+//          boost_Tensor2_trans(pi_tensor_lab, pi_tensor_localrest, lambda_transverse);
 
           //photon momentum loop
           for(int k=0;k<nrapidity;k++) 
@@ -280,7 +280,7 @@ void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr,
 
             Rotation_Tensor2_trans(pi_tensor_localrest, pi_tensor_photon, RotationM);*/
 
-            Rotation_Matrix_R_z_i(Rotation_Rzi, p_localrest);
+//            Rotation_Matrix_R_z_i(Rotation_Rzi, p_localrest);
             double pi_zz_photon = Rotation_Tensor_zz(pi_tensor_localrest, Rotation_Rzi);
 
             Eq_localrest_Tb[idx_Tb] = p_localrest[0];
