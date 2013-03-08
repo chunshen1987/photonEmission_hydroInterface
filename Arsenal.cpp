@@ -69,7 +69,7 @@ vector< vector<double>* >* readBlockData(istream &stream_in)
 // is stored in a vector<double> array and the collection is the returned
 // object. Data are read from the input stream "stream_in". Each line
 // of data is processed by the stringToDoubles function. Note that the
-// data block is dynamicall allocated and is not release within the
+// data block is dynamically allocated and is not release within the
 // function.
 // Note that all "vectors" are "new" so don't forget to delete them.
 // Note also that the last line of data needs a return in order to be read.
