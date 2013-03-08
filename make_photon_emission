@@ -1,0 +1,124 @@
+SHELL=/bin/sh
+
+# This file contains a set of rules used by the "make"
+#   command.  This makefile $(MAKEFILE) tells "make" how the
+#   executable diffeq_oscillations $(COMMAND) should be created
+#   from the source files $(SRCS) via the object
+#   files $(OBJS) and the header files $(HDRS); type the command:
+#        "make -f make_diffeq_oscillations"
+#   where make_diffeq_oscillations should be replaced by the name of
+#   the makefile.
+# 
+# This file also tells make what to do if arguments
+#   follow the "make" command.
+#
+# To remove the OBJS files; type the command:
+#        "make -f make_diffeq_oscillations clean"
+#
+# To create a zip archive with name $(COMMAND).zip containing this 
+#   makefile and the SRCS and HDRS files, type the command:
+#        "make -f make_diffeq_oscillations zip"
+ 
+# The name of this makefile
+MAKEFILE= make_photon_emission
+
+# The command you type to run the program (executable name)
+COMMAND=  hydro_photon_emission
+
+# Here are the C++ (or whatever) source files to be compiled, with \'s as
+#  continuation lines.  If you get a "missing separator" error pointing 
+#  to a line here, make sure that each \ has NO spaces following it.
+ 
+SRCS= \
+main.cpp \
+OSCARreader.cpp \
+Arsenal.cpp \
+ThermalPhoton.cpp \
+Table.cpp \
+Table2D.cpp \
+tensor_trans.cpp \
+PhotonEmission.cpp \
+BjorkenExpansion.cpp \
+gauss.cpp
+  
+OBJS= \
+main.o \
+OSCARreader.o \
+Arsenal.o \
+ThermalPhoton.o \
+Table.o \
+Table2D.o \
+tensor_trans.o \
+PhotonEmission.o \
+BjorkenExpansion.o
+
+HDRS= \
+OSCARreader.h \
+Arsenal.h \
+ThermalPhoton.h \
+Table.h \
+Table2D.h \
+Stopwatch.h \
+tensor_trans.h \
+PhotonEmission.h \
+BjorkenExpansion.h \
+parameter.h
+
+###########################################################################
+# Commands and options for compiling
+########################################################################### 
+OBJS= $(addsuffix .o, $(basename $(SRCS)))
+ 
+CC= g++
+CFLAGS= -g 
+WARNFLAGS= -Wall -W -Wshadow -fno-common
+MOREFLAGS= -ansi -pedantic -Wpointer-arith -Wcast-qual -Wcast-align \
+           -Wwrite-strings -fshort-enums 
+LDFLAGS=
+#LDFLAGS= -lgsl -lgslcblas 
+#LIBS= -L/sw/lib -I/sw/include
+ 
+###########################################################################
+# Instructions to compile and link -- allow for different dependencies
+########################################################################### 
+ 
+#$(COMMAND): $(OBJS) $(HDRS) $(MAKEFILE) 
+#	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS) $(LIBS)
+
+$(COMMAND): $(OBJS) $(HDRS) $(MAKEFILE) 
+	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS)
+
+main.o : main.cpp OSCARreader.h Arsenal.h Stopwatch.h PhotonEmission.h parameter.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS)  -c main.cpp -o main.o
+                 
+OSCARreader.o : OSCARreader.cpp OSCARreader.h parameter.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS)  -c OSCARreader.cpp -o OSCARreader.o
+
+Arsenal.o : Arsenal.cpp Arsenal.h OSCARreader.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS)  -c Arsenal.cpp -o Arsenal.o
+
+ThermalPhoton.o : ThermalPhoton.cpp ThermalPhoton.h Arsenal.h OSCARreader.h parameter.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS)  -c ThermalPhoton.cpp -o ThermalPhoton.o
+
+tensor_trans.o : tensor_trans.cpp tensor_trans.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS)  -c tensor_trans.cpp -o tensor_trans.o
+
+PhotonEmission.o : PhotonEmission.cpp PhotonEmission.h ThermalPhoton.h tensor_trans.h parameter.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS)  -c PhotonEmission.cpp -o PhotonEmission.o
+
+BjorkenExpansion.o : BjorkenExpansion.cpp BjorkenExpansion.h Table.h OSCARreader.h parameter.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS)  -c BjorkenExpansion.cpp -o BjorkenExpansion.o
+
+##########################################################################
+# Additional tasks 
+##########################################################################
+ 
+clean:
+	rm -f $(OBJS)
+  
+zip:
+	zip -r $(COMMAND).zip $(MAKEFILE) $(SRCS) $(HDRS)
+
+##########################################################################
+# End of makefile 
+##########################################################################
