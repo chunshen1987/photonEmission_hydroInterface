@@ -18,12 +18,9 @@ using namespace std;
 class PhotonEmission
 {
    private:
-      double** lambda;  // Lorentz boost transverse+longitudinal
-      double** lambda_transverse; // Lorentz boost transverse only
-      double** RotationM; // Rotation matrix
-      double* Rotation_Rzi;
+      double** lambda; // Lorentz boost transverse only
       double* Eq_localrest_Tb;
-      double* pi_zz_photon_Tb;
+      double* pi_photon_Tb;
 
       double dNd2pTdphidy_hadrontot_eq[np][nphi][nrapidity];
       double dNd2pT_hadrontot_eq[np];
@@ -57,7 +54,7 @@ class PhotonEmission
 
       void print_info();
       void InitializePhotonEmissionRateTables();
-      void calPhotonemission(readindata* frameptr,double* tanheta_ptr, double* volume);
+      void calPhotonemission(readindata* frameptr, double* eta_ptr, double* tanheta_ptr, double* volume);
       void calPhoton_total_SpMatrix();
       void calPhoton_SpvnpT_individualchannel();
       void calPhoton_total_Spvn();

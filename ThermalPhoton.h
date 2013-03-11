@@ -54,6 +54,7 @@ class ThermalPhoton
       double getPhotonphi(int i) {return(phi[i]);};
       double getPhoton_phiweight(int i) {return(phi_weight[i]);};
       double getPhotontheta(int i) {return(theta[i]);};
+      double getPhotonrapidity(int i) {return(y[i]);};
       double getPhotonSpMatrix_eq(int i, int j, int k) {return(dNd2pTdphidy_eq[i][j][k]);};
       double getPhotonSpMatrix_tot(int i, int j, int k) {return(dNd2pTdphidy_tot[i][j][k]);};
 

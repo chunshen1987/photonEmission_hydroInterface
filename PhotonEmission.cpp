@@ -22,30 +22,23 @@ PhotonEmission::PhotonEmission()
    InitializePhotonEmissionRateTables();
 
    lambda = new double* [4];
-   lambda_transverse = new double* [4];
-   RotationM = new double* [4];
-   Rotation_Rzi = new double [4];
    for(int i=0; i<4; i++)
    {
        lambda[i] = new double [4];
-       lambda_transverse[i] = new double [4];
-       RotationM[i] = new double [4];
    }
    for(int i=0;i<4;i++)    //initial by 0
        for(int j=0;j<4;j++)
        {
           lambda[i][j] = 0.0e0;
-          lambda_transverse[i][j] = 0.0e0;
-          RotationM[i][j] = 0.0e0;
        }
 
    int Eqtb_length = neta*nrapidity*np*nphi;
    Eq_localrest_Tb = new double [Eqtb_length];
-   pi_zz_photon_Tb = new double [Eqtb_length];
+   pi_photon_Tb = new double [Eqtb_length];
    for(int i=0;i<Eqtb_length;i++)
    {
      Eq_localrest_Tb[i] = 0.0;
-     pi_zz_photon_Tb[i] = 0.0;
+     pi_photon_Tb[i] = 0.0;
    }
 
    for(int i=0; i<np; i++)
@@ -79,15 +72,10 @@ PhotonEmission::~PhotonEmission()
    for(int i=0; i<4; i++)
    {
       delete [] lambda[i];
-      delete [] lambda_transverse[i];
-      delete [] RotationM[i];
    }
-   delete [] RotationM;
-   delete [] Rotation_Rzi;
    delete [] lambda;
-   delete [] lambda_transverse;
    delete [] Eq_localrest_Tb;
-   delete [] pi_zz_photon_Tb;
+   delete [] pi_photon_Tb;
    return;
 }
 
@@ -173,17 +161,17 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    return;
 }
 
-void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr, double* volume)
+void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, double* tanheta_ptr, double* volume)
 {
   //photon momentum in the lab frame
-  double p_q[np], phi_q[nphi], theta_q[nrapidity];
+  double p_q[np], phi_q[nphi], theta_q[nrapidity], y_q[nrapidity];
   double sin_phiq[nphi], cos_phiq[nphi];
   double sin_thetaq[nrapidity], cos_thetaq[nrapidity];
   double p_lab_array[4][np][nphi][nrapidity];
-  double p_lab_local[4], p_photon[4];
-  double* p_localrest = new double [4];
+  double p_lab_local[4], p_lab_hat_lowmu[4];
   for(int k=0;k<nrapidity;k++)
   {
+     y_q[k] = photon_pirho.getPhotonrapidity(k);
      theta_q[k] = photon_pirho.getPhotontheta(k);
      sin_thetaq[k] = sin(theta_q[k]);
      cos_thetaq[k] = cos(theta_q[k]);
@@ -206,15 +194,10 @@ void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr,
   }
 
   double e_local, p_local, temp_local, vx_local, vy_local, vz_local;
+  double eta_local;
   double** pi_tensor_lab = new double* [4];
-  double** pi_tensor_localrest = new double* [4];
-  double** pi_tensor_photon = new double* [4];
   for(int i=0; i<4; i++)
-  {
     pi_tensor_lab[i] = new double [4];
-    pi_tensor_localrest[i] = new double [4];
-    pi_tensor_photon[i] = new double [4];
-  }
 
   //loops over the transverse plane
   for(int i=0;i<nx;i++)
@@ -250,41 +233,37 @@ void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr,
         for(int jj=0; jj<neta; jj++)
         {
           vz_local = tanheta_ptr[jj];
+          eta_local = eta_ptr[jj];
 
           boost_matrix(lambda, vx_local, vy_local, vz_local);   // calculate the boost matrix
-          boost_matrix(lambda_transverse, vx_local, vy_local, 0.0e0);   // calculate the boost matrix
-
-          //boost shear stress tensor to fluid local rest frame
-//          boost_Tensor2_trans(pi_tensor_lab, pi_tensor_localrest, lambda_transverse);
 
           //photon momentum loop
           for(int k=0;k<nrapidity;k++) 
           {
-          for(int l=0;l<np;l++)
-          { 
+             double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
+             double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
           for(int m=0;m<nphi;m++)
           {
-            for(int iii=0; iii<4; iii++) p_lab_local[iii] = p_lab_array[iii][l][m][k];
-       
+             p_lab_hat_lowmu[0] = 1.0e0;
+             p_lab_hat_lowmu[1] = - cos_phiq[m]/cosh_y_minus_eta;
+             p_lab_hat_lowmu[2] = - sin_phiq[m]/cosh_y_minus_eta;
+             p_lab_hat_lowmu[3] = - sinh_y_minus_eta/cosh_y_minus_eta;
+          for(int l=0;l<np;l++)
+          { 
+            for(int local_i=0; local_i<4; local_i++) 
+               p_lab_local[local_i] = p_lab_array[local_i][l][m][k];
             //boost photon momentum from lab frame to local rest frame
-            boost_vec_trans(p_lab_local, p_localrest, lambda);
+            double Eq_localrest_temp = 0.0e0;
+            double pi_photon = 0.0e0;
+            for(int local_i = 0; local_i < 4; local_i++)
+               Eq_localrest_temp += lambda[0][local_i]*p_lab_local[local_i];
+           
+            for(int local_i = 0; local_i < 4; local_i++)
+               for(int local_j = 0; local_j < 4; local_j++)
+                  pi_photon += pi_tensor_lab[local_i][local_j]*p_lab_hat_lowmu[local_i]*p_lab_hat_lowmu[local_j];
 
-            /*double photon_phi_q = atan2(p_localrest[2], p_localrest[1]);
-            if(photon_phi_q < 0) photon_phi_q = photon_phi_q + 2*M_PI;
-            double photon_theta_q = acos(p_localrest[3]/p_localrest[0]);
-
-            double Rotation_phi = - M_PI/2.;
-            double Rotation_theta = - photon_theta_q;
-            double Rotation_psi = -(M_PI/2. + photon_phi_q);
-            RotationMatrix(RotationM, Rotation_phi, Rotation_theta, Rotation_psi);
-
-            Rotation_Tensor2_trans(pi_tensor_localrest, pi_tensor_photon, RotationM);*/
-
-//            Rotation_Matrix_R_z_i(Rotation_Rzi, p_localrest);
-            double pi_zz_photon = Rotation_Tensor_zz(pi_tensor_localrest, Rotation_Rzi);
-
-            Eq_localrest_Tb[idx_Tb] = p_localrest[0];
-            pi_zz_photon_Tb[idx_Tb] = pi_zz_photon*prefactor_pimunu;
+            Eq_localrest_Tb[idx_Tb] = Eq_localrest_temp;
+            pi_photon_Tb[idx_Tb] = pi_photon*prefactor_pimunu;
             idx_Tb++;
           }
           }
@@ -293,34 +272,34 @@ void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr,
         if(temp_local > T_sw_high)
         {
           double QGP_fraction = 1.0;
-          photon_QGP.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
+          photon_QGP.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
         }
         else if(temp_local > T_sw_low)
         {
           double QGP_fraction = (temp_local - T_sw_low)/(T_sw_high - T_sw_low);
           double HG_fraction = 1 - QGP_fraction;
-          photon_QGP.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
+          photon_QGP.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
 
-          photon_pirho.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_KstarK.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_piK.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_piKstar.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_pipi.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_rhoK.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_rho.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_pirho_omegat.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_pirho.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_KstarK.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_piK.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_piKstar.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_pipi.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_rhoK.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_rho.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_pirho_omegat.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
         }
         else
         {
           double HG_fraction = 1.0;
-          photon_pirho.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_KstarK.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_piK.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_piKstar.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_pipi.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_rhoK.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_rho.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_pirho_omegat.calPhotonemission(Eq_localrest_Tb, pi_zz_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_pirho.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_KstarK.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_piK.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_piKstar.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_pipi.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_rhoK.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_rho.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+          photon_pirho_omegat.calPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
         }
       }
     }
@@ -328,13 +307,8 @@ void PhotonEmission::calPhotonemission(readindata* frameptr,double* tanheta_ptr,
   for(int i=0; i<4; i++)
   {
      delete [] pi_tensor_lab[i];
-     delete [] pi_tensor_localrest[i];
-     delete [] pi_tensor_photon[i];
   }
   delete [] pi_tensor_lab;
-  delete [] pi_tensor_localrest;
-  delete [] pi_tensor_photon;
-  delete [] p_localrest;
 
   return;
 }

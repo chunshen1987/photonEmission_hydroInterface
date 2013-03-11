@@ -85,7 +85,7 @@ int main()
     for(int k=0; k<neta; k++)
        volume_element[k] = 2 * tau_local * dvolume[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
 
-    testphoton.calPhotonemission(frameptr, tanheta_ptr, volume_element);
+    testphoton.calPhotonemission(frameptr, eta_ptr, tanheta_ptr, volume_element);
 
     cout<<"frame "<< itime << " : ";
     cout<<" tau = " << setw(4) << setprecision(3) << tau_local 
