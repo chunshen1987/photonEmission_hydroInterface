@@ -67,7 +67,7 @@ class ThermalPhoton
 
       //void calPhotonemission(double Eq, double T, double volume, int i, int j, int k);
       
-      void calPhotonemission(double* Eq, double* pi_zz, int Tb_length, double T, double* volume, double fraction);
+      void calThermalPhotonemission(double* Eq, double* pi_zz, int Tb_length, double T, double* volume, double fraction);
       void calPhoton_SpvnpT();
       void outputPhoton_SpvnpT();
       void interpolation2D_bilinear(double varX, double* varY, int Y_length, double** Table2D_ptr, double* results);

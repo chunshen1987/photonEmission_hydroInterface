@@ -125,7 +125,7 @@ void ThermalPhoton::getPhotonemissionRate(double* Eq, double* pi_zz, int Eq_leng
     return;
 }
 
-void ThermalPhoton::calPhotonemission(double* Eq, double* pi_zz, int Tb_length, double T, double* volume, double fraction)
+void ThermalPhoton::calThermalPhotonemission(double* Eq, double* pi_zz, int Tb_length, double T, double* volume, double fraction)
 {
     double* em_eqrate = new double [Tb_length];   //photon emission equilibrium rate at local rest cell
     double* em_visrate = new double [Tb_length];   //photon emission viscous correction at local rest cell
@@ -137,9 +137,9 @@ void ThermalPhoton::calPhotonemission(double* Eq, double* pi_zz, int Tb_length, 
     int idx=0;
     for(int k=0; k<nrapidity; k++)
     {
-      for(int l=0; l<np; l++)
+      for(int m=0; m<nphi; m++)
       {
-        for(int m=0; m<nphi; m++)
+        for(int l=0; l<np; l++)
         {
           temp_eq_sum = 0.0;
           temp_vis_sum = 0.0;
