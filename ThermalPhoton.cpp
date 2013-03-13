@@ -80,8 +80,8 @@ void ThermalPhoton::readEmissionrate(string emissionProcess)
     emissionProcess_name = emissionProcess;
     ostringstream eqrate_filename_stream;
     ostringstream visrate_filename_stream;
-    eqrate_filename_stream << rate_path << "eqrate_" << emissionProcess << ".dat";
-    visrate_filename_stream << rate_path << "visrate_" << emissionProcess << ".dat";
+    eqrate_filename_stream << rate_path << "rate_" << emissionProcess << "_eqrate.dat";
+    visrate_filename_stream << rate_path << "rate_" << emissionProcess << "_viscous.dat";
     Photonemission_eqrateTable_ptr = new Table2D(eqrate_filename_stream.str().c_str());
     Photonemission_viscous_rateTable_ptr = new Table2D(visrate_filename_stream.str().c_str());
 
