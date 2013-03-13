@@ -44,7 +44,6 @@ int main()
   grid_dy = OSCARinputfile.getGriddy();
 
   int ntime = OSCARinputfile.getTimestep() + (int)((grid_t0 - tau_start)/grid_dt);
-  ntime = 2;
 
   double* eta_ptr = new double [neta];
   double* etaweight_ptr = new double [neta];

@@ -46,44 +46,17 @@ void boost_matrix(double** lambda_munu, double vx, double vy, double vz)
       lambda_munu[3][3] = 1+(gamma-1)*beta_3*beta_3/beta/beta;
 }
 
-void boost_matrix_zeromucomponents(double** lambda_munu, double vx, double vy, double vz)
-//only calculate 0mu components of the boost matrix, other components are set to 0
+void getTransverseflow_u_mu_low(double* flow_u_mu_low, double vx, double vy)
 {
-      double gamma_perp, gamma_L, gamma;
-      double beta, beta_1, beta_2, beta_3;
+      double gamma;
       double eps = 1e-100;
       
-      gamma_perp = 1/sqrt(1 - vx*vx - vy*vy + eps);
-      gamma_L = 1/sqrt(1 - vz*vz + eps);
-      gamma = gamma_perp * gamma_L;
-      /*if(isnan(gamma))
-      {
-         cout<<"gamma is nan!" << endl;
-         cout<<"v:" << vx << "  " << vy << "   " << vz << endl;
-         exit(1);
-      }*/
-      beta_1 = vx/gamma_L;
-      beta_2 = vy/gamma_L;
-      beta_3 = vz;
-      beta = sqrt(beta_1*beta_1 + beta_2*beta_2 + beta_3*beta_3 + eps);
+      gamma = 1./sqrt(1. - vx*vx - vy*vy + eps);
       
-      lambda_munu[0][0] = gamma;
-      lambda_munu[0][1] = -gamma*beta_1;
-      lambda_munu[0][2] = -gamma*beta_2;
-      lambda_munu[0][3] = -gamma*beta_3;
-      lambda_munu[1][0] = 0.0e0; 
-      lambda_munu[1][1] = 0.0e0; 
-      lambda_munu[1][2] = 0.0e0; 
-      lambda_munu[1][3] = 0.0e0; 
-      lambda_munu[2][0] = 0.0e0; 
-      lambda_munu[2][1] = 0.0e0; 
-      lambda_munu[2][2] = 0.0e0; 
-      lambda_munu[2][3] = 0.0e0; 
-      lambda_munu[3][0] = 0.0e0; 
-      lambda_munu[3][1] = 0.0e0; 
-      lambda_munu[3][2] = 0.0e0; 
-      lambda_munu[3][3] = 0.0e0; 
-
+      flow_u_mu_low[0] = gamma;
+      flow_u_mu_low[1] = - gamma*vx;
+      flow_u_mu_low[2] = - gamma*vy;
+      flow_u_mu_low[3] = 0.0;
 }
 
 void boost_vec_trans(double* p, double* p_prime, double** lambda)

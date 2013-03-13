@@ -164,18 +164,12 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
 void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, double* tanheta_ptr, double* volume)
 {
   //photon momentum in the lab frame
-  double p_q[np], phi_q[nphi], theta_q[nrapidity], y_q[nrapidity];
+  double p_q[np], phi_q[nphi], y_q[nrapidity];
   double sin_phiq[nphi], cos_phiq[nphi];
-  double sin_thetaq[nrapidity], cos_thetaq[nrapidity];
-  double p_lab_array[4][np][nphi][nrapidity];
-  double p_lab_local[4], p_lab_hat_lowmu[4];
+  double p_lab_local[4], p_lab_lowmu[4];
+  double flow_u_mu_low[4];
   for(int k=0;k<nrapidity;k++)
-  {
      y_q[k] = photon_pirho.getPhotonrapidity(k);
-     theta_q[k] = photon_pirho.getPhotontheta(k);
-     sin_thetaq[k] = sin(theta_q[k]);
-     cos_thetaq[k] = cos(theta_q[k]);
-  }
   for(int l=0;l<np;l++) p_q[l] = photon_pirho.getPhotonp(l);
   for(int m=0;m<nphi;m++)
   {
@@ -183,17 +177,8 @@ void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, do
      sin_phiq[m] = sin(phi_q[m]);
      cos_phiq[m] = cos(phi_q[m]);
   }
-  for(int k=0; k<nrapidity;k++)
-  for(int l=0;l<np;l++)
-  for(int m=0;m<nphi;m++)
-  {
-     p_lab_array[0][l][m][k] = p_q[l];
-     p_lab_array[1][l][m][k] = p_q[l]*sin_thetaq[k]*cos_phiq[m];
-     p_lab_array[2][l][m][k] = p_q[l]*sin_thetaq[k]*sin_phiq[m];
-     p_lab_array[3][l][m][k] = p_q[l]*cos_thetaq[k];
-  }
 
-  double e_local, p_local, temp_local, vx_local, vy_local, vz_local;
+  double e_local, p_local, temp_local, vx_local, vy_local;
   double eta_local;
   double** pi_tensor_lab = new double* [4];
   for(int i=0; i<4; i++)
@@ -229,14 +214,12 @@ void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, do
         pi_tensor_lab[3][2] = pi_tensor_lab[2][3];
         pi_tensor_lab[3][3] = frameptr->pi33[i][j];
 
+        getTransverseflow_u_mu_low(flow_u_mu_low, vx_local, vy_local);
         double prefactor_pimunu = 1./(2.*(e_local + p_local));
         for(int jj=0; jj<neta; jj++)
         {
-          vz_local = tanheta_ptr[jj];
           eta_local = eta_ptr[jj];
-
-          boost_matrix(lambda, vx_local, vy_local, vz_local);   // calculate the boost matrix
-
+          
           //photon momentum loop
           for(int k=0;k<nrapidity;k++) 
           {
@@ -244,23 +227,24 @@ void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, do
              double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
           for(int m=0;m<nphi;m++)
           {
-             p_lab_hat_lowmu[0] = 1.0e0;
-             p_lab_hat_lowmu[1] = - cos_phiq[m]/cosh_y_minus_eta;
-             p_lab_hat_lowmu[2] = - sin_phiq[m]/cosh_y_minus_eta;
-             p_lab_hat_lowmu[3] = - sinh_y_minus_eta/cosh_y_minus_eta;
           for(int l=0;l<np;l++)
           { 
-            for(int local_i=0; local_i<4; local_i++) 
-               p_lab_local[local_i] = p_lab_array[local_i][l][m][k];
-            //boost photon momentum from lab frame to local rest frame
+            p_lab_local[0] = p_q[l]*cosh_y_minus_eta;
+            p_lab_local[1] = p_q[l]*cos_phiq[m];
+            p_lab_local[2] = p_q[l]*sin_phiq[m];
+            p_lab_local[3] = p_q[l]*sinh_y_minus_eta;
+            p_lab_lowmu[0] = p_lab_local[0];
+            for(int local_i = 1; local_i < 4; local_i++)
+               p_lab_lowmu[local_i] = - p_lab_local[local_i];
+
             double Eq_localrest_temp = 0.0e0;
             double pi_photon = 0.0e0;
             for(int local_i = 0; local_i < 4; local_i++)
-               Eq_localrest_temp += lambda[0][local_i]*p_lab_local[local_i];
+               Eq_localrest_temp += flow_u_mu_low[local_i]*p_lab_local[local_i];
            
             for(int local_i = 0; local_i < 4; local_i++)
                for(int local_j = 0; local_j < 4; local_j++)
-                  pi_photon += pi_tensor_lab[local_i][local_j]*p_lab_hat_lowmu[local_i]*p_lab_hat_lowmu[local_j];
+                  pi_photon += pi_tensor_lab[local_i][local_j]*p_lab_lowmu[local_i]*p_lab_lowmu[local_j];
 
             Eq_localrest_Tb[idx_Tb] = Eq_localrest_temp;
             pi_photon_Tb[idx_Tb] = pi_photon*prefactor_pimunu;

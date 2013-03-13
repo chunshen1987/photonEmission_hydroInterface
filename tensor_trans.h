@@ -2,7 +2,7 @@
 #define TNESOR_TRANS_H
 
 void boost_matrix(double** , double , double , double);
-void boost_matrix_zeromucomponents(double** lambda_munu, double vx, double vy, double vz);
+void getTransverseflow_u_mu_low(double* flow_u_mu_low, double vx, double vy);
 void boost_vec_trans(double* , double* , double** );
 void boost_Tensor2_trans(double** , double** , double** );
 
