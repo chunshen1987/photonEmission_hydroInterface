@@ -108,7 +108,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    photon_QGP.setRateTableVarYmin(photonrate_tb_Emin);
    photon_QGP.setRateTabledvarX(photonrate_tb_dT);
    photon_QGP.setRateTabledvarY(photonrate_tb_dE);
-   photon_QGP.readEmissionrate("QGP_threeflavor");
+   photon_QGP.readEmissionrate("QGP_2to2_total");
 
    photon_pirho.setRateTableVarXmin(photonrate_tb_Tmin);
    photon_pirho.setRateTableVarYmin(photonrate_tb_Emin);
@@ -120,7 +120,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    photon_KstarK.setRateTableVarYmin(photonrate_tb_Emin);
    photon_KstarK.setRateTabledvarX(photonrate_tb_dT);
    photon_KstarK.setRateTabledvarY(photonrate_tb_dE);
-   photon_KstarK.readEmissionrate("Kstar_K_to_pion_gamma");
+   photon_KstarK.readEmissionrate("K_Kstar_to_pion_gamma");
    
    photon_piK.setRateTableVarXmin(photonrate_tb_Tmin);
    photon_piK.setRateTableVarYmin(photonrate_tb_Emin);
@@ -156,7 +156,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    photon_pirho_omegat.setRateTableVarYmin(photonrate_tb_Emin);
    photon_pirho_omegat.setRateTabledvarX(photonrate_tb_dT);
    photon_pirho_omegat.setRateTabledvarY(photonrate_tb_dE);
-   photon_pirho_omegat.readEmissionrate("pion_rho_to_omegat_to_pion_gamma");
+   photon_pirho_omegat.readEmissionrate("pion_rho_to_omega_to_pion_gamma");
    
    return;
 }
