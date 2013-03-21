@@ -49,10 +49,14 @@ PhotonEmission::PhotonEmission()
       dNd2pT[i] = 0.0e0;
       for(int order=0; order<norder; order++)
       {
-         vnpT_eq[order][i] = 0.0e0;
-         vnpT_hadrontot[order][i] = 0.0e0;
-         vnpT_hadrontot_eq[order][i] = 0.0e0;
-         vnpT[order][i] = 0.0e0;
+         vnpT_cos_eq[order][i] = 0.0e0;
+         vnpT_hadrontot_cos[order][i] = 0.0e0;
+         vnpT_hadrontot_cos_eq[order][i] = 0.0e0;
+         vnpT_cos[order][i] = 0.0e0;
+         vnpT_sin_eq[order][i] = 0.0e0;
+         vnpT_hadrontot_sin[order][i] = 0.0e0;
+         vnpT_hadrontot_sin_eq[order][i] = 0.0e0;
+         vnpT_sin[order][i] = 0.0e0;
       }
       for(int j=0; j<nphi; j++)
          for(int k=0; k<nrapidity; k++)
@@ -161,7 +165,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    return;
 }
 
-void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, double* tanheta_ptr, double* volume)
+void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, double* volume)
 {
   //photon momentum in the lab frame
   double p_q[np], phi_q[nphi], y_q[nrapidity];
@@ -382,18 +386,26 @@ void PhotonEmission::calPhoton_total_Spvn()
          dNd2pT[i] += dNd2pTdphidy[i][j][k]*phiweight;
          for(int order=1; order<norder; order++)
          {
-            vnpT_hadrontot_eq[order][i] += dNd2pTdphidy_hadrontot_eq[i][j][k]*cos(order*phi)*phiweight;
-            vnpT_hadrontot[order][i] += dNd2pTdphidy_hadrontot[i][j][k]*cos(order*phi)*phiweight;
-            vnpT_eq[order][i] += dNd2pTdphidy_eq[i][j][k]*cos(order*phi)*phiweight;
-            vnpT[order][i] += dNd2pTdphidy[i][j][k]*cos(order*phi)*phiweight;
+            vnpT_hadrontot_cos_eq[order][i] += dNd2pTdphidy_hadrontot_eq[i][j][k]*cos(order*phi)*phiweight;
+            vnpT_hadrontot_cos[order][i] += dNd2pTdphidy_hadrontot[i][j][k]*cos(order*phi)*phiweight;
+            vnpT_cos_eq[order][i] += dNd2pTdphidy_eq[i][j][k]*cos(order*phi)*phiweight;
+            vnpT_cos[order][i] += dNd2pTdphidy[i][j][k]*cos(order*phi)*phiweight;
+            vnpT_hadrontot_sin_eq[order][i] += dNd2pTdphidy_hadrontot_eq[i][j][k]*sin(order*phi)*phiweight;
+            vnpT_hadrontot_sin[order][i] += dNd2pTdphidy_hadrontot[i][j][k]*sin(order*phi)*phiweight;
+            vnpT_sin_eq[order][i] += dNd2pTdphidy_eq[i][j][k]*sin(order*phi)*phiweight;
+            vnpT_sin[order][i] += dNd2pTdphidy[i][j][k]*sin(order*phi)*phiweight;
          }
        }
        for(int order=1; order<norder; order++)
        {
-          vnpT_hadrontot_eq[order][i] = vnpT_hadrontot_eq[order][i]/dNd2pT_hadrontot_eq[i];
-          vnpT_hadrontot[order][i] = vnpT_hadrontot[order][i]/dNd2pT_hadrontot[i];
-          vnpT_eq[order][i] = vnpT_eq[order][i]/dNd2pT_eq[i];
-          vnpT[order][i] = vnpT[order][i]/dNd2pT[i];
+          vnpT_hadrontot_cos_eq[order][i] = vnpT_hadrontot_cos_eq[order][i]/dNd2pT_hadrontot_eq[i];
+          vnpT_hadrontot_cos[order][i] = vnpT_hadrontot_cos[order][i]/dNd2pT_hadrontot[i];
+          vnpT_cos_eq[order][i] = vnpT_cos_eq[order][i]/dNd2pT_eq[i];
+          vnpT_cos[order][i] = vnpT_cos[order][i]/dNd2pT[i];
+          vnpT_hadrontot_sin_eq[order][i] = vnpT_hadrontot_sin_eq[order][i]/dNd2pT_hadrontot_eq[i];
+          vnpT_hadrontot_sin[order][i] = vnpT_hadrontot_sin[order][i]/dNd2pT_hadrontot[i];
+          vnpT_sin_eq[order][i] = vnpT_sin_eq[order][i]/dNd2pT_eq[i];
+          vnpT_sin[order][i] = vnpT_sin[order][i]/dNd2pT[i];
        }
        
        dNd2pT_hadrontot_eq[i] = dNd2pT_hadrontot_eq[i]/(2*M_PI);
@@ -470,13 +482,17 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename)
       for(int order=1; order<norder; order++)
       {
          fphoton_Hdtot_eq_Spvn << scientific << setprecision(6) << setw(16) 
-                     << vnpT_hadrontot_eq[order][i] << "  ";
+                     << vnpT_hadrontot_cos_eq[order][i] << "  "
+                     << vnpT_hadrontot_sin_eq[order][i] << "  ";
          fphoton_Hdtot_Spvn << scientific << setprecision(6) << setw(16) 
-                     << vnpT_hadrontot[order][i] << "  ";
+                     << vnpT_hadrontot_cos[order][i] << "  "
+                     << vnpT_hadrontot_sin[order][i] << "  ";
          fphoton_eq_Spvn << scientific << setprecision(6) << setw(16) 
-                     << vnpT_eq[order][i] << "  ";
+                     << vnpT_cos_eq[order][i] << "  "
+                     << vnpT_sin_eq[order][i] << "  ";
          fphotonSpvn << scientific << setprecision(6) << setw(16) 
-                     << vnpT[order][i] << "  ";
+                     << vnpT_cos[order][i] << "  "
+                     << vnpT_sin[order][i] << "  ";
       }
       fphoton_Hdtot_eq_Spvn << endl;
       fphoton_Hdtot_Spvn << endl;

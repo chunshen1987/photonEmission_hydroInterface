@@ -47,14 +47,10 @@ int main()
 
   double* eta_ptr = new double [neta];
   double* etaweight_ptr = new double [neta];
-  double* tanheta_ptr = new double [neta];
   double* dvolume = new double [neta];
   gauss(neta, 0, eta_i, eta_f, eta_ptr, etaweight_ptr);
   for(int i=0; i<neta ; i++)
-  {
-     tanheta_ptr[i] = tanh(eta_ptr[i]);
      dvolume[i] = grid_dt*grid_dx*grid_dy*etaweight_ptr[i]; //dtau*dx*dy*deta
-  }
   
   OSCARinputfile.readframe_2Dboostinvariant(frameptr);
 
@@ -84,7 +80,7 @@ int main()
     for(int k=0; k<neta; k++)
        volume_element[k] = 2 * tau_local * dvolume[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
 
-    testphoton.calPhotonemission(frameptr, eta_ptr, tanheta_ptr, volume_element);
+    testphoton.calPhotonemission(frameptr, eta_ptr, volume_element);
 
     cout<<"frame "<< itime << " : ";
     cout<<" tau = " << setw(4) << setprecision(3) << tau_local 

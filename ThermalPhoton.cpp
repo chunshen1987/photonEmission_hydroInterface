@@ -45,9 +45,12 @@ ThermalPhoton::ThermalPhoton()
       dNd2pT_tot[i] = 0.0;
       for(int order=0; order<norder; order++)
       {
-        vnpT_eq[order][i] = 0.0;
-        vnpT_vis[order][i] = 0.0;
-        vnpT_tot[order][i] = 0.0;
+        vnpT_cos_eq[order][i] = 0.0;
+        vnpT_cos_vis[order][i] = 0.0;
+        vnpT_cos_tot[order][i] = 0.0;
+        vnpT_sin_eq[order][i] = 0.0;
+        vnpT_sin_vis[order][i] = 0.0;
+        vnpT_sin_tot[order][i] = 0.0;
       }
       for(int j=0;j<nphi;j++)
          for(int k=0;k<nrapidity;k++)
@@ -183,16 +186,22 @@ void ThermalPhoton::calPhoton_SpvnpT()
          dNd2pT_tot[i] += dNd2pTdphidy_tot[i][j][k]*phi_weight[j];
          for(int order=1; order<norder; order++)
          {
-            vnpT_eq[order][i] += dNd2pTdphidy_eq[i][j][k]*cos(order*phi[j])*phi_weight[j];
-            vnpT_vis[order][i] += dNd2pTdphidy_vis[i][j][k]*cos(order*phi[j])*phi_weight[j];
-            vnpT_tot[order][i] += dNd2pTdphidy_tot[i][j][k]*cos(order*phi[j])*phi_weight[j];
+            vnpT_cos_eq[order][i] += dNd2pTdphidy_eq[i][j][k]*cos(order*phi[j])*phi_weight[j];
+            vnpT_cos_vis[order][i] += dNd2pTdphidy_vis[i][j][k]*cos(order*phi[j])*phi_weight[j];
+            vnpT_cos_tot[order][i] += dNd2pTdphidy_tot[i][j][k]*cos(order*phi[j])*phi_weight[j];
+            vnpT_sin_eq[order][i] += dNd2pTdphidy_eq[i][j][k]*sin(order*phi[j])*phi_weight[j];
+            vnpT_sin_vis[order][i] += dNd2pTdphidy_vis[i][j][k]*sin(order*phi[j])*phi_weight[j];
+            vnpT_sin_tot[order][i] += dNd2pTdphidy_tot[i][j][k]*sin(order*phi[j])*phi_weight[j];
          }
        }
        for(int order=1; order<norder; order++)
        {
-          vnpT_eq[order][i] = vnpT_eq[order][i]/dNd2pT_eq[i];
-          vnpT_vis[order][i] = vnpT_vis[order][i]/dNd2pT_vis[i];
-          vnpT_tot[order][i] = vnpT_tot[order][i]/dNd2pT_tot[i];
+          vnpT_cos_eq[order][i] = vnpT_cos_eq[order][i]/dNd2pT_eq[i];
+          vnpT_cos_vis[order][i] = vnpT_cos_vis[order][i]/dNd2pT_vis[i];
+          vnpT_cos_tot[order][i] = vnpT_cos_tot[order][i]/dNd2pT_tot[i];
+          vnpT_sin_eq[order][i] = vnpT_sin_eq[order][i]/dNd2pT_eq[i];
+          vnpT_sin_vis[order][i] = vnpT_sin_vis[order][i]/dNd2pT_vis[i];
+          vnpT_sin_tot[order][i] = vnpT_sin_tot[order][i]/dNd2pT_tot[i];
        }
        dNd2pT_eq[i] = dNd2pT_eq[i]/(2*M_PI);
        dNd2pT_vis[i] = dNd2pT_vis[i]/(2*M_PI);
@@ -254,11 +263,14 @@ void ThermalPhoton::outputPhoton_SpvnpT()
       for(int order=1; order<norder; order++)
       {
          fphotonSpvn_eq << scientific << setprecision(6) << setw(16) 
-                        << vnpT_eq[order][i] << "  ";
+                        << vnpT_cos_eq[order][i] << "  " 
+                        << vnpT_sin_eq[order][i] << "  ";
          fphotonSpvn_vis << scientific << setprecision(6) << setw(16) 
-                         << vnpT_vis[order][i] << "  ";
+                         << vnpT_cos_vis[order][i] << "  "
+                         << vnpT_sin_vis[order][i] << "  ";
          fphotonSpvn_tot << scientific << setprecision(6) << setw(16) 
-                         << vnpT_tot[order][i] << "  ";
+                         << vnpT_cos_tot[order][i] << "  "
+                         << vnpT_sin_tot[order][i] << "  ";
       }
       fphotonSpvn_eq << endl;
       fphotonSpvn_vis << endl;

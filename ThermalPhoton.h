@@ -38,9 +38,12 @@ class ThermalPhoton
       double dNd2pTdphidy_eq[np][nphi][nrapidity];
       double dNd2pTdphidy_vis[np][nphi][nrapidity];
       double dNd2pTdphidy_tot[np][nphi][nrapidity];
-      double dNd2pT_eq[np], vnpT_eq[norder][np];
-      double dNd2pT_vis[np], vnpT_vis[norder][np];
-      double dNd2pT_tot[np], vnpT_tot[norder][np];
+      double dNd2pT_eq[np], vnpT_cos_eq[norder][np];
+      double dNd2pT_vis[np], vnpT_cos_vis[norder][np];
+      double dNd2pT_tot[np], vnpT_cos_tot[norder][np];
+      double vnpT_sin_eq[norder][np];
+      double vnpT_sin_vis[norder][np];
+      double vnpT_sin_tot[norder][np];
 
    public:
       ThermalPhoton();
