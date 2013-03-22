@@ -32,8 +32,7 @@ const double photon_y_f = 0.0;
 const double deltaf_alpha = 2.0;
 
 //transition and freeze out temperature
-const double T_dec = 0.150;
-//const double T_sw = 0.180;
+const double T_dec = 0.120;
 const double T_sw_high = 0.220;
 const double T_sw_low = 0.184;
 
@@ -44,6 +43,6 @@ const double PhotonemRatetableInfo_dE = 0.05e0;
 const double PhotonemRatetableInfo_dT = 0.002e0;
 
 //starting time, using Bjorken longitudinal 1D expansion from tau_start to tau_0 for hydro evolution
-const double tau_start = 0.2;
+const double tau_start = 0.6;
 
 #endif
