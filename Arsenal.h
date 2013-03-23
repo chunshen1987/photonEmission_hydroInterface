@@ -32,4 +32,6 @@ double invertTableDirect(vector<double>* x, vector<double>* y, double y0, double
 
 long binarySearch(vector<double>* A, double value);
 
+void outputFunctionerror(string function_name, string massage, double value, int level);
+
 #endif

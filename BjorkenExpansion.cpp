@@ -9,13 +9,12 @@ using namespace std;
 
 BjorkenExpansion::BjorkenExpansion()
 {
-   EOS_epsT = new Table("EOS_tables/EOS_PST.dat"); 
-   Tb_ed_min = EOS_epsT->getFirst(1)*10;
+   EOS_ptr = new EOS(); 
 }
 
 BjorkenExpansion::~BjorkenExpansion()
 {
-   delete EOS_epsT;
+   delete EOS_ptr;
 }
 
 void BjorkenExpansion::backtrace_Entropy_Bjorken_1Dlongitudinalexpansion(readindata* frameptr, double tau_1, double tau_2)
@@ -25,12 +24,9 @@ void BjorkenExpansion::backtrace_Entropy_Bjorken_1Dlongitudinalexpansion(readind
     {
        for(int j=0; j<ny; j++)
        {
-           if(frameptr->ed[i][j] > Tb_ed_min)
-           {
-              double sd1 = EOS_epsT->interp(4, 3, frameptr->temp[i][j], 2);
-              double sd2 = sd1*ratio;
-              frameptr->temp[i][j] = EOS_epsT->interp(3, 4, sd2, 2);
-           }
+          double sd1 = EOS_ptr->getOneFromtheOther(4, 3, frameptr->temp[i][j]);
+          double sd2 = sd1*ratio;
+          frameptr->temp[i][j] = EOS_ptr->getOneFromtheOther(3, 4, sd2);
        }
     }
     return;
