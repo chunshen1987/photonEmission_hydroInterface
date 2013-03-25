@@ -25,6 +25,12 @@ class EOS
       EOS();
       ~EOS();
       
+      double getEnergydensityFromtemperature(double T);
+      double getEnergydensityFromentropyDensity(double s);
+      double getEntropydensityFromtemperature(double T);
+      double getEntropydensityFromenergyDensity(double e);
+      double getTemperaturefromEntropydensity(double s);
+      double getTemperaturefromEnergydensity(double e);
       double getOneFromtheOther(int xColnum, int yColnum, double xVal);
 };
 

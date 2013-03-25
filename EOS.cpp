@@ -21,6 +21,60 @@ EOS::~EOS()
    delete EOS_coeffs;
 }
 
+double EOS::getEntropydensityFromtemperature(double T)
+{
+   double s;
+   int entropyColnum = 3;
+   int temperatureColnum = 4;
+   s = getOneFromtheOther(temperatureColnum, entropyColnum, T);
+   return(s);
+}
+
+double EOS::getEntropydensityFromenergyDensity(double e)
+{
+   double s;
+   int energyColnum = 1;
+   int entropyColnum = 3;
+   s = getOneFromtheOther(energyColnum, entropyColnum, e);
+   return(s);
+}
+
+double EOS::getEnergydensityFromtemperature(double T)
+{
+   double e;
+   int energyColnum = 1;
+   int temperatureColnum = 4;
+   e = getOneFromtheOther(temperatureColnum, energyColnum, T);
+   return(e);
+}
+
+double EOS::getEnergydensityFromentropyDensity(double s)
+{
+   double e;
+   int energyColnum = 1;
+   int entropyColnum = 3;
+   e = getOneFromtheOther(entropyColnum, energyColnum, s);
+   return(e);
+}
+
+double EOS::getTemperaturefromEntropydensity(double s)
+{
+   double T;
+   int entropyColnum = 3;
+   int temperatureColnum = 4;
+   T = getOneFromtheOther(entropyColnum, temperatureColnum, s);
+   return(T);
+}
+
+double EOS::getTemperaturefromEnergydensity(double e)
+{
+   double T;
+   int energyColnum = 1;
+   int temperatureColnum = 4;
+   T = getOneFromtheOther(energyColnum, temperatureColnum, e);
+   return(T);
+}
+
 double EOS::getOneFromtheOther(int xColnum, int yColnum, double xVal)
 {
    double yVal;

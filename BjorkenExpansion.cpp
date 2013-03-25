@@ -24,9 +24,9 @@ void BjorkenExpansion::backtrace_Entropy_Bjorken_1Dlongitudinalexpansion(readind
     {
        for(int j=0; j<ny; j++)
        {
-          double sd1 = EOS_ptr->getOneFromtheOther(4, 3, frameptr->temp[i][j]);
+          double sd1 = EOS_ptr->getEntropydensityFromtemperature(frameptr->temp[i][j]);
           double sd2 = sd1*ratio;
-          frameptr->temp[i][j] = EOS_ptr->getOneFromtheOther(3, 4, sd2);
+          frameptr->temp[i][j] = EOS_ptr->getTemperaturefromEntropydensity(sd2);
        }
     }
     return;
