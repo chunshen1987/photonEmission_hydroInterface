@@ -43,6 +43,6 @@ const double PhotonemRatetableInfo_dE = 0.05e0;
 const double PhotonemRatetableInfo_dT = 0.002e0;
 
 //starting time, using Bjorken longitudinal 1D expansion from tau_start to tau_0 for hydro evolution
-const double tau_start = 0.6;
+const double tau_start = 0.1;
 
 #endif

@@ -518,6 +518,8 @@ void outputFunctionerror(string function_name, string massage, double value, int
 {
    switch(level)
    {
+      case 0:
+         break;
       case 1:
          cout << ">>> Warning: " << function_name << endl; 
          cout << ">>> Message: " << massage << endl;

@@ -75,6 +75,24 @@ double EOS::getTemperaturefromEnergydensity(double e)
    return(T);
 }
 
+double EOS::getPressurefromEntropydensity(double s)
+{
+   double p;
+   int entropyColnum = 3;
+   int pressureColnum = 2;
+   p = getOneFromtheOther(entropyColnum, pressureColnum, s);
+   return(p);
+}
+
+double EOS::getPressurefromTemperature(double T)
+{
+   double p;
+   int temperatureColnum = 4;
+   int pressureColnum = 2;
+   p = getOneFromtheOther(temperatureColnum, pressureColnum, T);
+   return(p);
+}
+
 double EOS::getOneFromtheOther(int xColnum, int yColnum, double xVal)
 {
    double yVal;
@@ -82,14 +100,7 @@ double EOS::getOneFromtheOther(int xColnum, int yColnum, double xVal)
    double xMax = EOS_epsT->getLast(xColnum);
    double yMin = EOS_epsT->getFirst(yColnum);
   
-   double extrapCoeff1 = EOS_coeffs->get(1, yColnum-1);
-   double extrapCoeff2 = EOS_coeffs->get(2, yColnum-1);
    double e;
-   double eMin = EOS_epsT->getFirst(1);
-   if(xColnum == 1)
-      e = xVal;
-   else
-      e = EOS_epsT->interp(1, xColnum, xVal, 2);
 
    string function_name = "EOS::getOneFromtheOther";
    if(xVal < 0)
@@ -97,17 +108,32 @@ double EOS::getOneFromtheOther(int xColnum, int yColnum, double xVal)
       int errLevel = 3;
       outputFunctionerror(function_name, "xVal < 0!", xVal, errLevel);
    }
-   else if(xVal < xMin)
+   else if(xVal <= xMin)
    {
-      int errLevel = 1;
+      int errLevel = 0;
       outputFunctionerror(function_name, "xVal < xMin, using linear extrapolation instead.", xVal, errLevel);
-      yVal = e*yMin/eMin;
+      yVal = xVal*yMin/xMin;
    }
    else if(xVal > xMax)
    {
-      int errLevel = 1;
+      int errLevel = 0;
       outputFunctionerror(function_name, "xVal > xMax, using polynomial extrapolation instead.", xVal, errLevel);
-      yVal = extrapCoeff1*pow(e, extrapCoeff2);
+      if(xColnum == 1)
+         e = xVal;
+      else
+      {
+         double extrapCoeff1_x = EOS_coeffs->get(1, xColnum-1);
+         double extrapCoeff2_x = EOS_coeffs->get(2, xColnum-1);
+         e = pow(xVal/extrapCoeff1_x, 1./extrapCoeff2_x);
+      }
+      if(yColnum == 1)
+         yVal = e;
+      else
+      {
+         double extrapCoeff1 = EOS_coeffs->get(1, yColnum-1);
+         double extrapCoeff2 = EOS_coeffs->get(2, yColnum-1);
+         yVal = extrapCoeff1*pow(e, extrapCoeff2);
+      }
    }
    else
       yVal = EOS_epsT->interp(xColnum, yColnum, xVal, 2);
