@@ -7,7 +7,6 @@
 #include<cmath>
 #include<iomanip>
 #include<string>
-#include<fstream>
 
 #include "EOS.h"
 #include "parameter.h"
