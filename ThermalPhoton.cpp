@@ -11,7 +11,6 @@
 #include<string>
 #include<fstream>
 
-#include "OSCARreader.h"
 #include "Table2D.h"
 #include "ThermalPhoton.h"
 #include "parameter.h"

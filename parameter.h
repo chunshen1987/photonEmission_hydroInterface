@@ -8,8 +8,6 @@ using namespace std;
 const string rate_path = "ph_rates/";
 
 //hydro grid information
-const int nx = 261;
-const int ny = 261;
 const int neta = 10;
 const double eta_i = 0.0;
 const double eta_f = 3.0;
@@ -35,6 +33,9 @@ const double deltaf_alpha = 2.0;
 const double T_dec = 0.120;
 const double T_sw_high = 0.220;
 const double T_sw_low = 0.184;
+
+//Flag to decide whether to calculate individual HG channels
+const int calHGIdFlag = 0;
 
 //photon emission rate table information
 const double PhotonemRatetableInfo_Emin = 0.05e0;

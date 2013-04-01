@@ -34,8 +34,6 @@ int main()
   sw.tic();
   HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("JetData.h5") ; //hydro data file pointer
 
-  int ntime = hydroinfo_ptr->getNumberofFrames();
-
   double* eta_ptr = new double [neta];
   double* etaweight_ptr = new double [neta];
   double* dvolume = new double [neta];
@@ -45,22 +43,7 @@ int main()
 
   PhotonEmission thermalPhotons;
 
-  double tau_local;
-  double* volume_element = new double [neta];
-
-  for(int itime=0; itime<ntime; itime++) //loop over time evolution
-  {
-    tau_local = hydroinfo_ptr->getHydrogridTau0() + itime*hydroinfo_ptr->getHydrogridDTau();
-
-    for(int k=0; k<neta; k++)
-       volume_element[k] = 2 * tau_local * dvolume[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
-
-    thermalPhotons.calPhotonemission(hydroinfo_ptr, itime, eta_ptr, volume_element);
-
-    cout<<"frame "<< itime << " : ";
-    cout<<" tau = " << setw(4) << setprecision(3) << tau_local 
-        <<" fm/c done!" << endl;
-  }
+  thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, dvolume);
 
   thermalPhotons.calPhoton_SpvnpT_individualchannel();
   thermalPhotons.calPhoton_total_SpMatrix();

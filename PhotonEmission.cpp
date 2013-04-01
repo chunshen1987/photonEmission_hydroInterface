@@ -109,6 +109,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    double photonrate_tb_dT = PhotonemRatetableInfo_dT;
    
    photon_QGP.setupEmissionrate("QGP_2to2_total", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+   photon_HG.setupEmissionrate("HG_2to2_total", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
 
    photon_pirho.setupEmissionrate("pion_rho_to_pion_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
    photon_KstarK.setupEmissionrate("K_Kstar_to_pion_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
@@ -122,7 +123,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    return;
 }
 
-void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, int frameId, double* eta_ptr, double* volume)
+void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* dvolume)
 {
   //photon momentum in the lab frame
   double p_q[np], phi_q[nphi], y_q[nrapidity];
@@ -140,105 +141,130 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, int frameId, 
   }
 
   double e_local, p_local, temp_local, vx_local, vy_local;
+  double tau_local;
   double eta_local;
+  double* volume = new double [neta];
   double** pi_tensor_lab = new double* [4];
   for(int i=0; i<4; i++)
     pi_tensor_lab[i] = new double [4];
 
-  //loops over the transverse plane
-  for(int i=0; i<hydroinfo_ptr->getHydrogridNX() ; i++)
+  fluidCell* fluidCellptr = new fluidCell();
+
+  //main loop begins ...
+  //loop over time frame
+  for(int frameId = 0; frameId < hydroinfo_ptr->getNumberofFrames(); frameId++)
   {
-    for(int j=0; j<hydroinfo_ptr->getHydrogridNY() ;j++)
-    {
-      int idx_Tb = 0;
-      fluidCell* fluidCellptr = new fluidCell();
-      hydroinfo_ptr->getHydroinfoOnlattice(frameId, i, j, fluidCellptr);
-      temp_local = fluidCellptr->temperature;
-      if(temp_local > T_dec)
-      {
-        e_local = fluidCellptr->ed;
-        p_local = fluidCellptr->pressure;
-        vx_local = fluidCellptr->vx;
-        vy_local = fluidCellptr->vy;
-        for(int mu = 0; mu < 4; mu++)
-           for(int nu = 0; nu < 4; nu++)
-              pi_tensor_lab[mu][nu] = fluidCellptr->pi[mu][nu];
+     tau_local = hydroinfo_ptr->getHydrogridTau0() + frameId*hydroinfo_ptr->getHydrogridDTau();
+     for(int k=0; k<neta; k++)
+        volume[k] = 2 * tau_local * dvolume[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
+  //loops over the transverse plane
+     for(int i=0; i<hydroinfo_ptr->getHydrogridNX(); i++)
+     {
+       for(int j=0; j<hydroinfo_ptr->getHydrogridNY(); j++)
+       {
+         int idx_Tb = 0;
+         hydroinfo_ptr->getHydroinfoOnlattice(frameId, i, j, fluidCellptr);
+         temp_local = fluidCellptr->temperature;
+         if(temp_local > T_dec)
+         {
+           e_local = fluidCellptr->ed;
+           p_local = fluidCellptr->pressure;
+           vx_local = fluidCellptr->vx;
+           vy_local = fluidCellptr->vy;
+           for(int mu = 0; mu < 4; mu++)
+              for(int nu = 0; nu < 4; nu++)
+                 pi_tensor_lab[mu][nu] = fluidCellptr->pi[mu][nu];
 
-        getTransverseflow_u_mu_low(flow_u_mu_low, vx_local, vy_local);
-        double prefactor_pimunu = 1./(2.*(e_local + p_local));
-        for(int jj=0; jj<neta; jj++)
-        {
-          eta_local = eta_ptr[jj];
-          
-          //photon momentum loop
-          for(int k=0;k<nrapidity;k++) 
-          {
-             double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
-             double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
-          for(int m=0;m<nphi;m++)
-          {
-          for(int l=0;l<np;l++)
-          { 
-            p_lab_local[0] = p_q[l]*cosh_y_minus_eta;
-            p_lab_local[1] = p_q[l]*cos_phiq[m];
-            p_lab_local[2] = p_q[l]*sin_phiq[m];
-            p_lab_local[3] = p_q[l]*sinh_y_minus_eta;
-            p_lab_lowmu[0] = p_lab_local[0];
-            for(int local_i = 1; local_i < 4; local_i++)
-               p_lab_lowmu[local_i] = - p_lab_local[local_i];
+           getTransverseflow_u_mu_low(flow_u_mu_low, vx_local, vy_local);
+           double prefactor_pimunu = 1./(2.*(e_local + p_local));
+           for(int jj=0; jj<neta; jj++)
+           {
+             eta_local = eta_ptr[jj];
+             
+             //photon momentum loops
+             for(int k=0;k<nrapidity;k++) 
+             {
+                double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
+                double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
+             for(int m=0;m<nphi;m++)
+             {
+             for(int l=0;l<np;l++)
+             { 
+               p_lab_local[0] = p_q[l]*cosh_y_minus_eta;
+               p_lab_local[1] = p_q[l]*cos_phiq[m];
+               p_lab_local[2] = p_q[l]*sin_phiq[m];
+               p_lab_local[3] = p_q[l]*sinh_y_minus_eta;
+               p_lab_lowmu[0] = p_lab_local[0];
+               for(int local_i = 1; local_i < 4; local_i++)
+                  p_lab_lowmu[local_i] = - p_lab_local[local_i];
 
-            double Eq_localrest_temp = 0.0e0;
-            double pi_photon = 0.0e0;
-            for(int local_i = 0; local_i < 4; local_i++)
-               Eq_localrest_temp += flow_u_mu_low[local_i]*p_lab_local[local_i];
-           
-            for(int local_i = 0; local_i < 4; local_i++)
-               for(int local_j = 0; local_j < 4; local_j++)
-                  pi_photon += pi_tensor_lab[local_i][local_j]*p_lab_lowmu[local_i]*p_lab_lowmu[local_j];
+               double Eq_localrest_temp = 0.0e0;
+               double pi_photon = 0.0e0;
+               for(int local_i = 0; local_i < 4; local_i++)
+                  Eq_localrest_temp += flow_u_mu_low[local_i]*p_lab_local[local_i];
+              
+               for(int local_i = 0; local_i < 4; local_i++)
+                  for(int local_j = 0; local_j < 4; local_j++)
+                     pi_photon += pi_tensor_lab[local_i][local_j]*p_lab_lowmu[local_i]*p_lab_lowmu[local_j];
 
-            Eq_localrest_Tb[idx_Tb] = Eq_localrest_temp;
-            pi_photon_Tb[idx_Tb] = pi_photon*prefactor_pimunu;
-            idx_Tb++;
-          }
-          }
-          }
-        }
-        if(temp_local > T_sw_high)
-        {
-          double QGP_fraction = 1.0;
-          photon_QGP.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
-        }
-        else if(temp_local > T_sw_low)
-        {
-          double QGP_fraction = (temp_local - T_sw_low)/(T_sw_high - T_sw_low);
-          double HG_fraction = 1 - QGP_fraction;
-          photon_QGP.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
-
-          photon_pirho.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_KstarK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_piK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_piKstar.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_pipi.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_rhoK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_rho.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_pirho_omegat.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-        }
-        else
-        {
-          double HG_fraction = 1.0;
-          photon_pirho.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_KstarK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_piK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_piKstar.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_pipi.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_rhoK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_rho.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-          photon_pirho_omegat.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
-        }
-      }
-      delete fluidCellptr;
-    }
+               Eq_localrest_Tb[idx_Tb] = Eq_localrest_temp;
+               pi_photon_Tb[idx_Tb] = pi_photon*prefactor_pimunu;
+               idx_Tb++;
+             }
+             }
+             }
+           }
+           if(temp_local > T_sw_high)
+           {
+             double QGP_fraction = 1.0;
+             photon_QGP.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
+           }
+           else if(temp_local > T_sw_low)
+           {
+             double QGP_fraction = (temp_local - T_sw_low)/(T_sw_high - T_sw_low);
+             double HG_fraction = 1 - QGP_fraction;
+             photon_QGP.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
+             if(calHGIdFlag == 0)
+                photon_HG.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
+             else
+             {
+                photon_pirho.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_KstarK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_piK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_piKstar.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_pipi.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_rhoK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_rho.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_pirho_omegat.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+             }
+           }
+           else
+           {
+             double HG_fraction = 1.0;
+             if(calHGIdFlag == 0)
+                photon_HG.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
+             else
+             {
+                photon_pirho.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_KstarK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_piK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_piKstar.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_pipi.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_rhoK.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_rho.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+                photon_pirho_omegat.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
+             }
+           }
+         }
+       }
+     }
+     cout<<"frame "<< frameId << " : ";
+     cout<<" tau = " << setw(4) << setprecision(3) << tau_local 
+         <<" fm/c done!" << endl;
   }
+
+  delete [] volume;
+  delete fluidCellptr;
   for(int i=0; i<4; i++)
   {
      delete [] pi_tensor_lab[i];
@@ -250,7 +276,6 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, int frameId, 
 
 void PhotonEmission::calPhoton_total_SpMatrix()
 {
-     cout << " Mark" << endl;
      for(int k=0;k<nrapidity;k++) 
      {
        for(int l=0;l<np;l++)
@@ -288,15 +313,19 @@ void PhotonEmission::calPhoton_total_SpMatrix()
 void PhotonEmission::calPhoton_SpvnpT_individualchannel()
 {
     photon_QGP.calPhoton_SpvnpT();
-
-    photon_pirho.calPhoton_SpvnpT();
-    photon_KstarK.calPhoton_SpvnpT();
-    photon_piK.calPhoton_SpvnpT();
-    photon_piKstar.calPhoton_SpvnpT();
-    photon_pipi.calPhoton_SpvnpT();
-    photon_rhoK.calPhoton_SpvnpT();
-    photon_rho.calPhoton_SpvnpT();
-    photon_pirho_omegat.calPhoton_SpvnpT();
+    if(calHGIdFlag == 0)
+       photon_HG.calPhoton_SpvnpT();
+    else
+    {
+       photon_pirho.calPhoton_SpvnpT();
+       photon_KstarK.calPhoton_SpvnpT();
+       photon_piK.calPhoton_SpvnpT();
+       photon_piKstar.calPhoton_SpvnpT();
+       photon_pipi.calPhoton_SpvnpT();
+       photon_rhoK.calPhoton_SpvnpT();
+       photon_rho.calPhoton_SpvnpT();
+       photon_pirho_omegat.calPhoton_SpvnpT();
+    }
 
     return;
 }
@@ -304,15 +333,19 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel()
 void PhotonEmission::outputPhotonSpvn()
 {
     photon_QGP.outputPhoton_SpvnpT();
-
-    photon_pirho.outputPhoton_SpvnpT();
-    photon_KstarK.outputPhoton_SpvnpT();
-    photon_piK.outputPhoton_SpvnpT();
-    photon_piKstar.outputPhoton_SpvnpT();
-    photon_pipi.outputPhoton_SpvnpT();
-    photon_rhoK.outputPhoton_SpvnpT();
-    photon_rho.outputPhoton_SpvnpT();
-    photon_pirho_omegat.outputPhoton_SpvnpT();
+    if(calHGIdFlag == 0)
+       photon_HG.outputPhoton_SpvnpT();
+    else
+    {
+       photon_pirho.outputPhoton_SpvnpT();
+       photon_KstarK.outputPhoton_SpvnpT();
+       photon_piK.outputPhoton_SpvnpT();
+       photon_piKstar.outputPhoton_SpvnpT();
+       photon_pipi.outputPhoton_SpvnpT();
+       photon_rhoK.outputPhoton_SpvnpT();
+       photon_rho.outputPhoton_SpvnpT();
+       photon_pirho_omegat.outputPhoton_SpvnpT();
+    }
 
     outputPhoton_total_SpvnpT("photon_total");
     return;

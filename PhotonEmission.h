@@ -42,6 +42,7 @@ class PhotonEmission
 
       //photon production processes
       ThermalPhoton photon_QGP;
+      ThermalPhoton photon_HG;
 
       ThermalPhoton photon_pirho;
       ThermalPhoton photon_KstarK;
@@ -58,7 +59,7 @@ class PhotonEmission
 
       void print_info();
       void InitializePhotonEmissionRateTables();
-      void calPhotonemission(HydroinfoH5* hydroinfo_ptr, int frameId, double* eta_ptr, double* volume);
+      void calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* dvolume);
       void calPhoton_total_SpMatrix();
       void calPhoton_SpvnpT_individualchannel();
       void calPhoton_total_Spvn();

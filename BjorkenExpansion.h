@@ -9,8 +9,8 @@
 #include<string>
 
 #include "EOS.h"
+#include "Hydroinfo_h5.h"
 #include "parameter.h"
-#include "OSCARreader.h"
 
 using namespace std;
 
@@ -23,9 +23,9 @@ class BjorkenExpansion
       BjorkenExpansion();
       ~BjorkenExpansion();
 
-      void backtrace_Entropy_Bjorken_1Dlongitudinalexpansion(readindata* frameptr, double tau_1, double tau_2);
+      void backtrace_Entropy_Bjorken_1Dlongitudinalexpansion(HydroinfoH5* hydroinfo_ptr, double tau_1, double tau_2);
 
-      void backtrace_Temperature_Bjorken_1Dlongitudinalexpansion(readindata* frameptr, double tau_1, double tau_2);
+      void backtrace_Temperature_Bjorken_1Dlongitudinalexpansion(HydroinfoH5* hydroinfo_ptr, double tau_1, double tau_2);
 
 };
 

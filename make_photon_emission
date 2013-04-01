@@ -94,16 +94,16 @@ HDF5FLAGS= -I/usr/local/hdf5/include -L/usr/local/hdf5/lib /usr/local/hdf5/lib/l
 $(COMMAND): $(OBJS) $(HDRS) $(MAKEFILE) 
 	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS) $(HDF5FLAGS)
 
-main.o : main.cpp OSCARreader.h Arsenal.h Stopwatch.h PhotonEmission.h parameter.h $(MAKEFILE)
+main.o : main.cpp Arsenal.h Stopwatch.h PhotonEmission.h parameter.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5FLAGS)  -c main.cpp -o main.o
                  
 Hydroinfo_h5.o : Hydroinfo_h5.cpp Hydroinfo_h5.h Arsenal.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5FLAGS)  -c Hydroinfo_h5.cpp -o Hydroinfo_h5.o
 
-Arsenal.o : Arsenal.cpp Arsenal.h OSCARreader.h $(MAKEFILE)
+Arsenal.o : Arsenal.cpp Arsenal.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c Arsenal.cpp -o Arsenal.o
 
-ThermalPhoton.o : ThermalPhoton.cpp ThermalPhoton.h Arsenal.h OSCARreader.h parameter.h $(MAKEFILE)
+ThermalPhoton.o : ThermalPhoton.cpp ThermalPhoton.h Arsenal.h parameter.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c ThermalPhoton.cpp -o ThermalPhoton.o
 
 tensor_trans.o : tensor_trans.cpp tensor_trans.h $(MAKEFILE)
@@ -112,8 +112,8 @@ tensor_trans.o : tensor_trans.cpp tensor_trans.h $(MAKEFILE)
 PhotonEmission.o : PhotonEmission.cpp PhotonEmission.h ThermalPhoton.h tensor_trans.h parameter.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5FLAGS)  -c PhotonEmission.cpp -o PhotonEmission.o
 
-BjorkenExpansion.o : BjorkenExpansion.cpp BjorkenExpansion.h EOS.h OSCARreader.h parameter.h $(MAKEFILE)
-	$(CC) $(CFLAGS) $(WARNFLAGS)  -c BjorkenExpansion.cpp -o BjorkenExpansion.o
+BjorkenExpansion.o : BjorkenExpansion.cpp BjorkenExpansion.h EOS.h parameter.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5FLAGS) -c BjorkenExpansion.cpp -o BjorkenExpansion.o
 
 EOS.o : EOS.cpp Arsenal.h Table.h parameter.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c EOS.cpp -o EOS.o

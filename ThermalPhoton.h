@@ -4,7 +4,6 @@
 #include <string>
 #include<fstream>
 
-#include "OSCARreader.h"
 #include "Arsenal.h"
 #include "parameter.h"
 
