@@ -49,6 +49,7 @@ class ThermalPhoton
       ThermalPhoton();
       ~ThermalPhoton();
 
+      void setupEmissionrate(string emissionProcess, double Xmin, double dX,  double Ymin, double dY);
       void readEmissionrate(string);
 
       Table2D* get_eqRatetableptr() {return(Photonemission_eqrateTable_ptr);};
@@ -61,10 +62,6 @@ class ThermalPhoton
       double getPhotonSpMatrix_eq(int i, int j, int k) {return(dNd2pTdphidy_eq[i][j][k]);};
       double getPhotonSpMatrix_tot(int i, int j, int k) {return(dNd2pTdphidy_tot[i][j][k]);};
 
-      void setRateTableVarXmin(double Xmin) {EmissionrateTb_Xmin = Xmin;};
-      void setRateTableVarYmin(double Ymin) {EmissionrateTb_Ymin = Ymin;};
-      void setRateTabledvarX(double dX) {EmissionrateTb_dX = dX;};
-      void setRateTabledvarY(double dY) {EmissionrateTb_dY = dY;};
 
       void getPhotonemissionRate(double* Eq, double* pi_zz, int Eq_length, double T, double* eqrate_ptr, double* visrate_ptr);
 

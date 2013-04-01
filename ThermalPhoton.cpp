@@ -78,6 +78,15 @@ ThermalPhoton::~ThermalPhoton()
     delete Photonemission_viscous_rateTable_ptr;
 }
 
+void ThermalPhoton::setupEmissionrate(string emissionProcess, double Xmin, double dX,  double Ymin, double dY)
+{
+     EmissionrateTb_Xmin = Xmin;
+     EmissionrateTb_Ymin = Ymin;
+     EmissionrateTb_dX = dX;
+     EmissionrateTb_dY = dY;
+     readEmissionrate(emissionProcess);
+}
+
 void ThermalPhoton::readEmissionrate(string emissionProcess)
 {
     emissionProcess_name = emissionProcess;
