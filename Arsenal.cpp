@@ -514,3 +514,34 @@ long binarySearch(vector<double>* A, double value)
    return(idx_i);
 }
 
+void outputFunctionerror(string function_name, string massage, double value, int level)
+{
+   switch(level)
+   {
+      case 0:
+         break;
+      case 1:
+         cout << ">>> Warning: " << function_name << endl; 
+         cout << ">>> Message: " << massage << endl;
+         cout << ">>> Related value: " << value << endl;
+         break;
+      case 2:
+         cout << ">>> Error: " << function_name << endl; 
+         cout << ">>> Message: " << massage << endl;
+         cout << ">>> Related value: " << value << endl;
+         break;
+      case 3:
+         cout << ">>> Fatal Error: " << function_name << endl; 
+         cout << ">>> Message: " << massage << endl;
+         cout << ">>> Related value: " << value << endl;
+         exit(1);
+         break;
+      default:
+         cout << ">>> Error: outputFunctionerror:" << endl;
+         cout << ">>> Message: wrong errorLevel" << endl;
+         cout << ">>> Related value: " << level << endl;
+         exit(1);
+         break;
+   }
+}
+

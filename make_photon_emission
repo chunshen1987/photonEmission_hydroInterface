@@ -39,7 +39,8 @@ Table2D.cpp \
 tensor_trans.cpp \
 PhotonEmission.cpp \
 BjorkenExpansion.cpp \
-gauss.cpp
+gauss.cpp \
+EOS.cpp
   
 OBJS= \
 main.o \
@@ -50,7 +51,8 @@ Table.o \
 Table2D.o \
 tensor_trans.o \
 PhotonEmission.o \
-BjorkenExpansion.o
+BjorkenExpansion.o \
+EOS.o
 
 HDRS= \
 OSCARreader.h \
@@ -62,7 +64,8 @@ Stopwatch.h \
 tensor_trans.h \
 PhotonEmission.h \
 BjorkenExpansion.h \
-parameter.h
+parameter.h \
+EOS.h
 
 ###########################################################################
 # Commands and options for compiling
@@ -106,8 +109,11 @@ tensor_trans.o : tensor_trans.cpp tensor_trans.h $(MAKEFILE)
 PhotonEmission.o : PhotonEmission.cpp PhotonEmission.h ThermalPhoton.h tensor_trans.h parameter.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c PhotonEmission.cpp -o PhotonEmission.o
 
-BjorkenExpansion.o : BjorkenExpansion.cpp BjorkenExpansion.h Table.h OSCARreader.h parameter.h $(MAKEFILE)
+BjorkenExpansion.o : BjorkenExpansion.cpp BjorkenExpansion.h EOS.h OSCARreader.h parameter.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c BjorkenExpansion.cpp -o BjorkenExpansion.o
+
+EOS.o : EOS.cpp Arsenal.h Table.h parameter.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS)  -c EOS.cpp -o EOS.o
 
 ##########################################################################
 # Additional tasks 

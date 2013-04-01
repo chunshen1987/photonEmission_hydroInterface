@@ -7,9 +7,8 @@
 #include<cmath>
 #include<iomanip>
 #include<string>
-#include<fstream>
 
-#include "Table.h"
+#include "EOS.h"
 #include "parameter.h"
 #include "OSCARreader.h"
 
@@ -18,8 +17,7 @@ using namespace std;
 class BjorkenExpansion
 {
    private:
-      Table* EOS_epsT;
-      double Tb_ed_min;
+      EOS* EOS_ptr;
 
    public:
       BjorkenExpansion();
