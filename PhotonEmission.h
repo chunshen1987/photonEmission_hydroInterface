@@ -9,7 +9,7 @@
 #include<string>
 #include<fstream>
 
-#include "OSCARreader.h"
+#include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
 #include "parameter.h"
 
@@ -58,7 +58,7 @@ class PhotonEmission
 
       void print_info();
       void InitializePhotonEmissionRateTables();
-      void calPhotonemission(readindata* frameptr, double* eta_ptr, double* volume);
+      void calPhotonemission(HydroinfoH5* hydroinfo_ptr, int frameId, double* eta_ptr, double* volume);
       void calPhoton_total_SpMatrix();
       void calPhoton_SpvnpT_individualchannel();
       void calPhoton_total_Spvn();

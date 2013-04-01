@@ -19,7 +19,7 @@
 #include<iomanip>
 
 #include "PhotonEmission.h"
-#include "OSCARreader.h"
+#include "Hydroinfo_h5.h"
 #include "Stopwatch.h"
 #include "Arsenal.h"
 #include "parameter.h"
@@ -32,70 +32,41 @@ int main()
   Stopwatch sw;
 
   sw.tic();
-  readindata* frameptr = new readindata ; //hydro data file pionter
+  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("JetData.h5") ; //hydro data file pointer
 
-  OSCARreader OSCARinputfile("OSCAR2008H.dat");
-
-  //get grid information from OSCAR header
-  double grid_t0 = OSCARinputfile.getGridt0();
-  double grid_dt, grid_dx, grid_dy;
-  grid_dt = OSCARinputfile.getGriddt();
-  grid_dx = OSCARinputfile.getGriddx();
-  grid_dy = OSCARinputfile.getGriddy();
-
-  int ntime = OSCARinputfile.getTimestep() + (int)((grid_t0 - tau_start)/grid_dt);
+  int ntime = hydroinfo_ptr->getNumberofFrames();
 
   double* eta_ptr = new double [neta];
   double* etaweight_ptr = new double [neta];
   double* dvolume = new double [neta];
   gauss(neta, 0, eta_i, eta_f, eta_ptr, etaweight_ptr);
   for(int i=0; i<neta ; i++)
-     dvolume[i] = grid_dt*grid_dx*grid_dy*etaweight_ptr[i]; //dtau*dx*dy*deta
-  
-  OSCARinputfile.readframe_2Dboostinvariant(frameptr);
+     dvolume[i] = hydroinfo_ptr->getHydrogridDTau()*hydroinfo_ptr->getHydrogridDX()*hydroinfo_ptr->getHydrogridDY()*etaweight_ptr[i];  //dtau*dx*dy*deta
 
-  PhotonEmission testphoton;
+  PhotonEmission thermalPhotons;
 
   double tau_local;
   double* volume_element = new double [neta];
 
-  double tau_1, tau_2;
-  tau_1 = grid_t0;
-  BjorkenExpansion BjorkenExpan;
-
-  for(int itime=0;itime<ntime;itime++) //loop over time evolution
+  for(int itime=0; itime<ntime; itime++) //loop over time evolution
   {
-    //OSCARinputfile.readframe(frameptr);
-    //tau_local = grid_t0 + itime*grid_dt;
-    tau_local = tau_start + itime*grid_dt;
-    tau_2 = tau_local;
-
-    if(tau_local <= grid_t0)
-    {
-       //backtrace_Temperature_Bjorken_1Dlongitudinalexpansion(frameptr, tau_1, tau_2);
-       BjorkenExpan.backtrace_Entropy_Bjorken_1Dlongitudinalexpansion(frameptr, tau_1, tau_2);
-       tau_1 = tau_2;
-    }
+    tau_local = hydroinfo_ptr->getHydrogridTau0() + itime*hydroinfo_ptr->getHydrogridDTau();
 
     for(int k=0; k<neta; k++)
        volume_element[k] = 2 * tau_local * dvolume[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
 
-    testphoton.calPhotonemission(frameptr, eta_ptr, volume_element);
+    thermalPhotons.calPhotonemission(hydroinfo_ptr, itime, eta_ptr, volume_element);
 
     cout<<"frame "<< itime << " : ";
     cout<<" tau = " << setw(4) << setprecision(3) << tau_local 
         <<" fm/c done!" << endl;
-    
-    if(tau_local > grid_t0)
-       OSCARinputfile.readframe_2Dboostinvariant(frameptr);
-
   }
 
-  testphoton.calPhoton_SpvnpT_individualchannel();
-  testphoton.calPhoton_total_SpMatrix();
-  testphoton.calPhoton_total_Spvn();
+  thermalPhotons.calPhoton_SpvnpT_individualchannel();
+  thermalPhotons.calPhoton_total_SpMatrix();
+  thermalPhotons.calPhoton_total_Spvn();
 
-  testphoton.outputPhotonSpvn();
+  thermalPhotons.outputPhotonSpvn();
 
   sw.toc();
   cout << "totally takes : " << sw.takeTime() << " seconds." << endl;

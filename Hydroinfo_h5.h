@@ -48,6 +48,13 @@ class HydroinfoH5
       void readHydroinfoSingleframe(int frameIdx);
       void readH5Dataset_double(hid_t id, string datasetName, double** dset_data);
 
+      int getNumberofFrames() {return((int)grid_Framenum);};
+      double getHydrogridDX() {return(grid_dx);};
+      double getHydrogridDY() {return(grid_dy);};
+      double getHydrogridDTau() {return(grid_dTau);};
+      double getHydrogridTau0() {return(grid_Tau0);};
+      double getHydrogridNX() {return(grid_XH - grid_XL + 1);};
+      double getHydrogridNY() {return(grid_YH - grid_YL + 1);};
       void getHydroinfoOnlattice(int frameIdx, int xIdx, int yIdx, fluidCell* fluidCellptr);
       void getHydroinfo(double tau, double x, double y, fluidCell* fluidCellptr);
       void setZero_fluidCell(fluidCell* fluidCellptr);

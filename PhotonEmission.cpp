@@ -6,7 +6,7 @@
 #include<string>
 #include<fstream>
 
-#include "OSCARreader.h"
+#include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
 #include "tensor_trans.h"
 #include "PhotonEmission.h"
@@ -122,7 +122,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    return;
 }
 
-void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, double* volume)
+void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, int frameId, double* eta_ptr, double* volume)
 {
   //photon momentum in the lab frame
   double p_q[np], phi_q[nphi], y_q[nrapidity];
@@ -146,34 +146,23 @@ void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, do
     pi_tensor_lab[i] = new double [4];
 
   //loops over the transverse plane
-  for(int i=0;i<nx;i++)
+  for(int i=0; i<hydroinfo_ptr->getHydrogridNX() ; i++)
   {
-    for(int j=0;j<ny;j++)
+    for(int j=0; j<hydroinfo_ptr->getHydrogridNY() ;j++)
     {
       int idx_Tb = 0;
-      temp_local = frameptr->temp[i][j];
+      fluidCell* fluidCellptr = new fluidCell();
+      hydroinfo_ptr->getHydroinfoOnlattice(frameId, i, j, fluidCellptr);
+      temp_local = fluidCellptr->temperature;
       if(temp_local > T_dec)
       {
-        e_local = frameptr->ed[i][j];
-        p_local = frameptr->pl[i][j];
-        vx_local = frameptr->vx[i][j];
-        vy_local = frameptr->vy[i][j];
-        pi_tensor_lab[0][0] = frameptr->pi00[i][j];
-        pi_tensor_lab[0][1] = frameptr->pi01[i][j];
-        pi_tensor_lab[0][2] = frameptr->pi02[i][j];
-        pi_tensor_lab[0][3] = frameptr->pi03[i][j];
-        pi_tensor_lab[1][0] = pi_tensor_lab[0][1];
-        pi_tensor_lab[1][1] = frameptr->pi11[i][j];
-        pi_tensor_lab[1][2] = frameptr->pi12[i][j];
-        pi_tensor_lab[1][3] = frameptr->pi13[i][j];
-        pi_tensor_lab[2][0] = pi_tensor_lab[0][2];
-        pi_tensor_lab[2][1] = pi_tensor_lab[1][2];
-        pi_tensor_lab[2][2] = frameptr->pi22[i][j];
-        pi_tensor_lab[2][3] = frameptr->pi23[i][j];
-        pi_tensor_lab[3][0] = pi_tensor_lab[0][3];
-        pi_tensor_lab[3][1] = pi_tensor_lab[1][3];
-        pi_tensor_lab[3][2] = pi_tensor_lab[2][3];
-        pi_tensor_lab[3][3] = frameptr->pi33[i][j];
+        e_local = fluidCellptr->ed;
+        p_local = fluidCellptr->pressure;
+        vx_local = fluidCellptr->vx;
+        vy_local = fluidCellptr->vy;
+        for(int mu = 0; mu < 4; mu++)
+           for(int nu = 0; nu < 4; nu++)
+              pi_tensor_lab[mu][nu] = fluidCellptr->pi[mu][nu];
 
         getTransverseflow_u_mu_low(flow_u_mu_low, vx_local, vy_local);
         double prefactor_pimunu = 1./(2.*(e_local + p_local));
@@ -247,6 +236,7 @@ void PhotonEmission::calPhotonemission(readindata* frameptr, double* eta_ptr, do
           photon_pirho_omegat.calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
         }
       }
+      delete fluidCellptr;
     }
   }
   for(int i=0; i<4; i++)
