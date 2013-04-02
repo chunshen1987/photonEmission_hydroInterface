@@ -176,7 +176,9 @@ void HydroinfoH5::readHydrogridInfo()
    grid_Xmax = grid_XH * grid_dx;
    grid_Ymax = grid_YH * grid_dy;
    
-   status = H5Gget_num_objs(H5groupEventid, &grid_Framenum);
+   hsize_t tempFramenum;
+   status = H5Gget_num_objs(H5groupEventid, &tempFramenum);
+   grid_Framenum = (int) tempFramenum;
    grid_Taumax = grid_Tau0 + (grid_Framenum - 1)*grid_dTau;
 }
 

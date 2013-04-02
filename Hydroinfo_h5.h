@@ -24,7 +24,7 @@ class HydroinfoH5
       hid_t H5file_id, H5groupEventid;
 
       int grid_XL, grid_XH, grid_YL, grid_YH;
-      hsize_t grid_Framenum;
+      int grid_Framenum;
       double grid_X0, grid_Y0;
       double grid_Xmax, grid_Ymax;
       double grid_Tau0, grid_dTau, grid_dx, grid_dy;

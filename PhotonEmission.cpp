@@ -43,27 +43,19 @@ PhotonEmission::PhotonEmission()
 
    for(int i=0; i<np; i++)
    {
-      dNd2pT_hadrontot_eq[i] = 0.0e0;
-      dNd2pT_hadrontot[i] = 0.0e0;
       dNd2pT_eq[i] = 0.0e0;
       dNd2pT[i] = 0.0e0;
       for(int order=0; order<norder; order++)
       {
          vnpT_cos_eq[order][i] = 0.0e0;
-         vnpT_hadrontot_cos[order][i] = 0.0e0;
-         vnpT_hadrontot_cos_eq[order][i] = 0.0e0;
          vnpT_cos[order][i] = 0.0e0;
          vnpT_sin_eq[order][i] = 0.0e0;
-         vnpT_hadrontot_sin[order][i] = 0.0e0;
-         vnpT_hadrontot_sin_eq[order][i] = 0.0e0;
          vnpT_sin[order][i] = 0.0e0;
       }
       for(int j=0; j<nphi; j++)
          for(int k=0; k<nrapidity; k++)
          {
-            dNd2pTdphidy_hadrontot_eq[i][j][k] = 0.0e0;
             dNd2pTdphidy_eq[i][j][k] = 0.0e0;
-            dNd2pTdphidy_hadrontot[i][j][k] = 0.0e0;
             dNd2pTdphidy[i][j][k] = 0.0e0;
          }
    }
@@ -282,33 +274,13 @@ void PhotonEmission::calPhoton_total_SpMatrix()
        { 
          for(int m=0;m<nphi;m++)
          {
-           dNd2pTdphidy_hadrontot_eq[l][m][k] =  photon_pirho.getPhotonSpMatrix_eq(l, m, k) 
-                         + photon_KstarK.getPhotonSpMatrix_eq(l, m, k)
-                         + photon_piK.getPhotonSpMatrix_eq(l, m, k)
-                         + photon_piKstar.getPhotonSpMatrix_eq(l, m, k)
-                         + photon_pipi.getPhotonSpMatrix_eq(l, m, k)
-                         + photon_rhoK.getPhotonSpMatrix_eq(l, m, k)
-                         + photon_rho.getPhotonSpMatrix_eq(l, m, k);
-                         + photon_pirho_omegat.getPhotonSpMatrix_eq(l, m, k);
-           dNd2pTdphidy_hadrontot[l][m][k] =  photon_pirho.getPhotonSpMatrix_tot(l, m, k) 
-                         + photon_KstarK.getPhotonSpMatrix_tot(l, m, k)
-                         + photon_piK.getPhotonSpMatrix_tot(l, m, k)
-                         + photon_piKstar.getPhotonSpMatrix_tot(l, m, k)
-                         + photon_pipi.getPhotonSpMatrix_tot(l, m, k)
-                         + photon_rhoK.getPhotonSpMatrix_tot(l, m, k)
-                         + photon_rho.getPhotonSpMatrix_tot(l, m, k);
-                         + photon_pirho_omegat.getPhotonSpMatrix_tot(l, m, k);
-
-           dNd2pTdphidy_eq[l][m][k] =  photon_QGP.getPhotonSpMatrix_eq(l, m, k) + dNd2pTdphidy_hadrontot_eq[l][m][k];
-           dNd2pTdphidy[l][m][k] =  photon_QGP.getPhotonSpMatrix_tot(l, m, k) + dNd2pTdphidy_hadrontot[l][m][k];
-
+           dNd2pTdphidy_eq[l][m][k] =  photon_QGP.getPhotonSpMatrix_eq(l, m, k) + photon_HG.getPhotonSpMatrix_eq(l, m, k);
+           dNd2pTdphidy[l][m][k] =  photon_QGP.getPhotonSpMatrix_tot(l, m, k) + photon_HG.getPhotonSpMatrix_tot(l, m, k);
          }
        }
      }
      return;
 }
-
-
 
 void PhotonEmission::calPhoton_SpvnpT_individualchannel()
 {
@@ -360,36 +332,24 @@ void PhotonEmission::calPhoton_total_Spvn()
        {
          double phi = photon_pirho.getPhotonphi(j);
          double phiweight = photon_pirho.getPhoton_phiweight(j);
-         dNd2pT_hadrontot_eq[i] += dNd2pTdphidy_hadrontot_eq[i][j][k]*phiweight;
-         dNd2pT_hadrontot[i] += dNd2pTdphidy_hadrontot[i][j][k]*phiweight;
          dNd2pT_eq[i] += dNd2pTdphidy_eq[i][j][k]*phiweight;
          dNd2pT[i] += dNd2pTdphidy[i][j][k]*phiweight;
          for(int order=1; order<norder; order++)
          {
-            vnpT_hadrontot_cos_eq[order][i] += dNd2pTdphidy_hadrontot_eq[i][j][k]*cos(order*phi)*phiweight;
-            vnpT_hadrontot_cos[order][i] += dNd2pTdphidy_hadrontot[i][j][k]*cos(order*phi)*phiweight;
             vnpT_cos_eq[order][i] += dNd2pTdphidy_eq[i][j][k]*cos(order*phi)*phiweight;
             vnpT_cos[order][i] += dNd2pTdphidy[i][j][k]*cos(order*phi)*phiweight;
-            vnpT_hadrontot_sin_eq[order][i] += dNd2pTdphidy_hadrontot_eq[i][j][k]*sin(order*phi)*phiweight;
-            vnpT_hadrontot_sin[order][i] += dNd2pTdphidy_hadrontot[i][j][k]*sin(order*phi)*phiweight;
             vnpT_sin_eq[order][i] += dNd2pTdphidy_eq[i][j][k]*sin(order*phi)*phiweight;
             vnpT_sin[order][i] += dNd2pTdphidy[i][j][k]*sin(order*phi)*phiweight;
          }
        }
        for(int order=1; order<norder; order++)
        {
-          vnpT_hadrontot_cos_eq[order][i] = vnpT_hadrontot_cos_eq[order][i]/dNd2pT_hadrontot_eq[i];
-          vnpT_hadrontot_cos[order][i] = vnpT_hadrontot_cos[order][i]/dNd2pT_hadrontot[i];
           vnpT_cos_eq[order][i] = vnpT_cos_eq[order][i]/dNd2pT_eq[i];
           vnpT_cos[order][i] = vnpT_cos[order][i]/dNd2pT[i];
-          vnpT_hadrontot_sin_eq[order][i] = vnpT_hadrontot_sin_eq[order][i]/dNd2pT_hadrontot_eq[i];
-          vnpT_hadrontot_sin[order][i] = vnpT_hadrontot_sin[order][i]/dNd2pT_hadrontot[i];
           vnpT_sin_eq[order][i] = vnpT_sin_eq[order][i]/dNd2pT_eq[i];
           vnpT_sin[order][i] = vnpT_sin[order][i]/dNd2pT[i];
        }
        
-       dNd2pT_hadrontot_eq[i] = dNd2pT_hadrontot_eq[i]/(2*M_PI);
-       dNd2pT_hadrontot[i] = dNd2pT_hadrontot[i]/(2*M_PI);
        dNd2pT_eq[i] = dNd2pT_eq[i]/(2*M_PI);
        dNd2pT[i] = dNd2pT[i]/(2*M_PI);
    }
@@ -398,27 +358,15 @@ void PhotonEmission::calPhoton_total_Spvn()
 
 void PhotonEmission::outputPhoton_total_SpvnpT(string filename)
 {
-    ostringstream filename_stream_Hadrontot_eq_SpMatrix;
-    ostringstream filename_stream_Hadrontot_eq_Spvn;
-    ostringstream filename_stream_Hadrontot_SpMatrix;
-    ostringstream filename_stream_Hadrontot_Spvn;
     ostringstream filename_stream_eq_SpMatrix;
     ostringstream filename_stream_eq_Spvn;
     ostringstream filename_stream_SpMatrix;
     ostringstream filename_stream_Spvn;
-    filename_stream_Hadrontot_eq_SpMatrix << filename << "_Hadrontot_eq_SpMatrix.dat";
-    filename_stream_Hadrontot_eq_Spvn << filename << "_Hadrontot_eq_Spvn.dat";
-    filename_stream_Hadrontot_SpMatrix << filename << "_Hadrontot_SpMatrix.dat";
-    filename_stream_Hadrontot_Spvn << filename << "_Hadrontot_Spvn.dat";
     filename_stream_eq_SpMatrix << filename << "_eq_SpMatrix.dat";
     filename_stream_eq_Spvn << filename << "_eq_Spvn.dat";
     filename_stream_SpMatrix << filename << "_SpMatrix.dat";
     filename_stream_Spvn << filename << "_Spvn.dat";
 
-    ofstream fphoton_Hdtot_eq_SpMatrix(filename_stream_Hadrontot_eq_SpMatrix.str().c_str());
-    ofstream fphoton_Hdtot_eq_Spvn(filename_stream_Hadrontot_eq_Spvn.str().c_str());
-    ofstream fphoton_Hdtot_SpMatrix(filename_stream_Hadrontot_SpMatrix.str().c_str());
-    ofstream fphoton_Hdtot_Spvn(filename_stream_Hadrontot_Spvn.str().c_str());
     ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str());
     ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str());
     ofstream fphotonSpMatrix(filename_stream_SpMatrix.str().c_str());
@@ -428,45 +376,27 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename)
     {
       double phi = photon_pirho.getPhotonphi(i);
       fphoton_eq_SpMatrix << phi << "  ";
-      fphoton_Hdtot_eq_SpMatrix << phi << "  ";
       fphotonSpMatrix << phi << "  ";
-      fphoton_Hdtot_SpMatrix << phi << "  ";
       for(int j=0;j<np;j++)
         for(int k=0;k<nrapidity;k++)
         {
-           fphoton_Hdtot_eq_SpMatrix << scientific << setprecision(6) << setw(16) 
-                           << dNd2pTdphidy_hadrontot_eq[j][i][k] << "  ";
            fphoton_eq_SpMatrix << scientific << setprecision(6) << setw(16) 
                            << dNd2pTdphidy_eq[j][i][k] << "  ";
-           fphoton_Hdtot_SpMatrix << scientific << setprecision(6) << setw(16) 
-                           << dNd2pTdphidy_hadrontot[j][i][k] << "  ";
            fphotonSpMatrix << scientific << setprecision(6) << setw(16) 
                            << dNd2pTdphidy[j][i][k] << "  ";
         }
-      fphoton_Hdtot_eq_SpMatrix << endl;
       fphoton_eq_SpMatrix << endl;
-      fphoton_Hdtot_SpMatrix << endl;
       fphotonSpMatrix << endl;
     }
     for(int i=0;i<np;i++)
     {
       double pT = photon_pirho.getPhotonp(i);
-      fphoton_Hdtot_eq_Spvn << scientific << setprecision(6) << setw(16) 
-                  << pT << "  " << dNd2pT_hadrontot_eq[i] << "  " ;
-      fphoton_Hdtot_Spvn << scientific << setprecision(6) << setw(16) 
-                  << pT << "  " << dNd2pT_hadrontot[i] << "  " ;
       fphoton_eq_Spvn << scientific << setprecision(6) << setw(16) 
                   << pT << "  " << dNd2pT_eq[i] << "  " ;
       fphotonSpvn << scientific << setprecision(6) << setw(16) 
                   << pT << "  " << dNd2pT[i] << "  " ;
       for(int order=1; order<norder; order++)
       {
-         fphoton_Hdtot_eq_Spvn << scientific << setprecision(6) << setw(16) 
-                     << vnpT_hadrontot_cos_eq[order][i] << "  "
-                     << vnpT_hadrontot_sin_eq[order][i] << "  ";
-         fphoton_Hdtot_Spvn << scientific << setprecision(6) << setw(16) 
-                     << vnpT_hadrontot_cos[order][i] << "  "
-                     << vnpT_hadrontot_sin[order][i] << "  ";
          fphoton_eq_Spvn << scientific << setprecision(6) << setw(16) 
                      << vnpT_cos_eq[order][i] << "  "
                      << vnpT_sin_eq[order][i] << "  ";
@@ -474,11 +404,8 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename)
                      << vnpT_cos[order][i] << "  "
                      << vnpT_sin[order][i] << "  ";
       }
-      fphoton_Hdtot_eq_Spvn << endl;
-      fphoton_Hdtot_Spvn << endl;
       fphoton_eq_Spvn << endl;
       fphotonSpvn << endl;
     }
-    
     return;
 }

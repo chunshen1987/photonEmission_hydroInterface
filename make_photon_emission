@@ -78,7 +78,8 @@ WARNFLAGS= -Wall -W -Wshadow -fno-common
 MOREFLAGS= -ansi -pedantic -Wpointer-arith -Wcast-qual -Wcast-align \
            -Wwrite-strings -fshort-enums 
 LDFLAGS=
-HDF5FLAGS= -I/usr/local/hdf5/include -L/usr/local/hdf5/lib /usr/local/hdf5/lib/libhdf5_hl_cpp.a /usr/local/hdf5/lib/libhdf5_cpp.a /usr/local/hdf5/lib/libhdf5_hl.a /usr/local/hdf5/lib/libhdf5.a -lz -lm
+HDF5LD= -I/usr/local/hdf5/include
+HDF5FLAGS= -L/usr/local/hdf5/lib /usr/local/hdf5/lib/libhdf5_hl_cpp.a /usr/local/hdf5/lib/libhdf5_cpp.a /usr/local/hdf5/lib/libhdf5_hl.a /usr/local/hdf5/lib/libhdf5.a -lz -lm
 
 
 #LDFLAGS= -lgsl -lgslcblas 
@@ -95,10 +96,10 @@ $(COMMAND): $(OBJS) $(HDRS) $(MAKEFILE)
 	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS) $(HDF5FLAGS)
 
 main.o : main.cpp Arsenal.h Stopwatch.h PhotonEmission.h parameter.h $(MAKEFILE)
-	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5FLAGS)  -c main.cpp -o main.o
+	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD)  -c main.cpp -o main.o
                  
 Hydroinfo_h5.o : Hydroinfo_h5.cpp Hydroinfo_h5.h Arsenal.h $(MAKEFILE)
-	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5FLAGS)  -c Hydroinfo_h5.cpp -o Hydroinfo_h5.o
+	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD)  -c Hydroinfo_h5.cpp -o Hydroinfo_h5.o
 
 Arsenal.o : Arsenal.cpp Arsenal.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c Arsenal.cpp -o Arsenal.o
@@ -110,10 +111,10 @@ tensor_trans.o : tensor_trans.cpp tensor_trans.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c tensor_trans.cpp -o tensor_trans.o
 
 PhotonEmission.o : PhotonEmission.cpp PhotonEmission.h ThermalPhoton.h tensor_trans.h parameter.h $(MAKEFILE)
-	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5FLAGS)  -c PhotonEmission.cpp -o PhotonEmission.o
+	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD)  -c PhotonEmission.cpp -o PhotonEmission.o
 
 BjorkenExpansion.o : BjorkenExpansion.cpp BjorkenExpansion.h EOS.h parameter.h $(MAKEFILE)
-	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5FLAGS) -c BjorkenExpansion.cpp -o BjorkenExpansion.o
+	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD) -c BjorkenExpansion.cpp -o BjorkenExpansion.o
 
 EOS.o : EOS.cpp Arsenal.h Table.h parameter.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c EOS.cpp -o EOS.o
