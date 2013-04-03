@@ -558,3 +558,37 @@ double cubeInterp(double x, double y, double z, double A000, double A100, double
    return(Axyz);
 }
 
+//**********************************************************************
+string toLower(string str)
+// Convert all character in string to lower case
+{
+  string tmp = str;
+  for (string::iterator it=tmp.begin(); it<=tmp.end(); it++) *it = tolower(*it);
+  return tmp;
+}
+//**********************************************************************
+string trim(string str)
+// Convert all character in string to lower case
+{
+  string tmp = str;
+  long number_of_char = 0;
+  for (size_t ii=0; ii<str.size(); ii++)
+    if (str[ii]!=' ' && str[ii]!='\t')
+    {
+      tmp[number_of_char]=str[ii];
+      number_of_char++;
+    }
+  tmp.resize(number_of_char);
+  return tmp;
+}
+
+//**********************************************************************
+double stringToDouble(string str)
+// Return the 1st doubles number read from the string "str". "str" should be a string containing a line of data.
+{
+  stringstream sst(str+" "); // add a blank at the end so the last data will be read
+  double val;
+  sst >> val;
+  return val;
+}
+

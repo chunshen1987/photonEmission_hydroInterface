@@ -36,4 +36,8 @@ void outputFunctionerror(string function_name, string massage, double value, int
 
 double cubeInterp(double x, double y, double z, double A000, double A100, double A010, double A110, double A001, double A101, double A011, double A111);
 
+string toLower(string str);
+string trim(string str);
+double stringToDouble(string str);
+
 #endif

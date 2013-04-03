@@ -5,7 +5,7 @@
 #include<fstream>
 
 #include "Arsenal.h"
-#include "parameter.h"
+#include "ParameterReader.h"
 
 using namespace std;
 
@@ -13,6 +13,13 @@ using namespace std;
 class ThermalPhoton
 {
    private:
+      ParameterReader* paraRdr;
+
+      int np, nphi, nrapidity;
+      int norder;
+      int neta;
+      string rate_path;
+
       //photon emission rate
       Table2D* Photonemission_eqrateTable_ptr;
       Table2D* Photonemission_viscous_rateTable_ptr;
@@ -30,22 +37,18 @@ class ThermalPhoton
 
       //photon spectra parameters
       string emissionProcess_name;
-      double p[np], p_weight[np];
-      double phi[nphi], phi_weight[nphi];
-      double y[nrapidity];
-      double theta[nrapidity];
-      double dNd2pTdphidy_eq[np][nphi][nrapidity];
-      double dNd2pTdphidy_vis[np][nphi][nrapidity];
-      double dNd2pTdphidy_tot[np][nphi][nrapidity];
-      double dNd2pT_eq[np], vnpT_cos_eq[norder][np];
-      double dNd2pT_vis[np], vnpT_cos_vis[norder][np];
-      double dNd2pT_tot[np], vnpT_cos_tot[norder][np];
-      double vnpT_sin_eq[norder][np];
-      double vnpT_sin_vis[norder][np];
-      double vnpT_sin_tot[norder][np];
+      double *p, *p_weight;
+      double *phi, *phi_weight;
+      double *y;
+      double *theta;
+
+      double ***dNd2pTdphidy_eq, ***dNd2pTdphidy_vis, ***dNd2pTdphidy_tot;
+      double *dNd2pT_eq, **vnpT_cos_eq, **vnpT_sin_eq;
+      double *dNd2pT_vis, **vnpT_cos_vis, **vnpT_sin_vis;
+      double *dNd2pT_tot, **vnpT_cos_tot, **vnpT_sin_tot;
 
    public:
-      ThermalPhoton();
+      ThermalPhoton(ParameterReader* paraRdr_in);
       ~ThermalPhoton();
 
       void setupEmissionrate(string emissionProcess, double Xmin, double dX,  double Ymin, double dY);

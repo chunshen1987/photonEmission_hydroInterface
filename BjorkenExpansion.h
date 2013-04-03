@@ -10,7 +10,6 @@
 
 #include "EOS.h"
 #include "Hydroinfo_h5.h"
-#include "parameter.h"
 
 using namespace std;
 

@@ -11,43 +11,54 @@
 
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
-#include "parameter.h"
+#include "ParameterReader.h"
 
 using namespace std;
 
 class PhotonEmission
 {
    private:
+      ParameterReader *paraRdr;
+
+      int neta;
+      int np, nphi, nrapidity;
+      int norder;
+
+      int gridDx, gridDy, gridDtau;
+      int gridNx, gridNy, gridNtau;
+
+      double T_dec, T_sw_high, T_sw_low;
+
+      int calHGIdFlag;
+
       double** lambda; // Lorentz boost transverse only
       double* Eq_localrest_Tb;
       double* pi_photon_Tb;
 
-      double dNd2pTdphidy_eq[np][nphi][nrapidity];
-      double dNd2pT_eq[np];
-      double vnpT_cos_eq[norder][np];
-      double vnpT_sin_eq[norder][np];
-      double dNd2pTdphidy[np][nphi][nrapidity];
-      double dNd2pT[np];
-      double vnpT_cos[norder][np];
-      double vnpT_sin[norder][np];
+      double ***dNd2pTdphidy_eq, *dNd2pT_eq;
+      double **vnpT_cos_eq, **vnpT_sin_eq;
+      double ***dNd2pTdphidy;
+      double *dNd2pT;
+      double **vnpT_cos, **vnpT_sin;
 
       //photon production processes
-      ThermalPhoton photon_QGP;
-      ThermalPhoton photon_HG;
+      ThermalPhoton* photon_QGP;
+      ThermalPhoton* photon_HG;
 
-      ThermalPhoton photon_pirho;
-      ThermalPhoton photon_KstarK;
-      ThermalPhoton photon_piK;
-      ThermalPhoton photon_piKstar;
-      ThermalPhoton photon_pipi;
-      ThermalPhoton photon_rhoK;
-      ThermalPhoton photon_rho;
-      ThermalPhoton photon_pirho_omegat;
+      ThermalPhoton* photon_pirho;
+      ThermalPhoton* photon_KstarK;
+      ThermalPhoton* photon_piK;
+      ThermalPhoton* photon_piKstar;
+      ThermalPhoton* photon_pipi;
+      ThermalPhoton* photon_rhoK;
+      ThermalPhoton* photon_rho;
+      ThermalPhoton* photon_pirho_omegat;
 
    public:
-      PhotonEmission();
+      PhotonEmission(ParameterReader* paraRdr_in);
       ~PhotonEmission();
-
+      
+      void set_info();
       void print_info();
       void InitializePhotonEmissionRateTables();
       void calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* dvolume);

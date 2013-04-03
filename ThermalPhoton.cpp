@@ -13,51 +13,96 @@
 
 #include "Table2D.h"
 #include "ThermalPhoton.h"
-#include "parameter.h"
+#include "ParameterReader.h"
 
 using namespace std;
 
-ThermalPhoton::ThermalPhoton()
+ThermalPhoton::ThermalPhoton(ParameterReader* paraRdr_in)
 {
+    paraRdr = paraRdr_in;
+
+    neta = paraRdr->getVal("neta");
+    np = paraRdr->getVal("np");
+    nphi = paraRdr->getVal("nphi");
+    nrapidity = paraRdr->getVal("nrapidity");
+    norder = paraRdr->getVal("norder");
+    rate_path = "ph_rates/";
+
     //initial variables for photon spectra 
-    double p_i = photon_q_i; 
-    double p_f = photon_q_f;
-    double phi_i = photon_phi_q_i;
-    double phi_f = photon_phi_q_f;
-    double y_i = photon_y_i;
-    double y_f = photon_y_f;
+    double p_i = paraRdr->getVal("photon_q_i"); 
+    double p_f = paraRdr->getVal("photon_q_f");
+    double phi_i = paraRdr->getVal("photon_phi_q_i");
+    double phi_f = paraRdr->getVal("photon_phi_q_f");
+    double y_i = paraRdr->getVal("photon_y_i");
+    double y_f = paraRdr->getVal("photon_y_f");
     double dy = (y_f - y_i)/(nrapidity - 1 + 1e-100);
     
+    p = new double [np];
+    p_weight = new double [np];
+    phi = new double [nphi];
+    phi_weight = new double [nphi];
+
     gauss(np, 0, p_i, p_f, p, p_weight);
     gauss(nphi, 0, phi_i, phi_f, phi, phi_weight);
 
+    y = new double [nrapidity];
+    theta = new double [nrapidity];
     for(int i=0;i<nrapidity;i++) 
     {
         y[i] = y_i + i*dy;
         theta[i] = acos(tanh(y[i]));  //rapidity's corresponding polar angle
     }
-
+    
+    dNd2pT_eq = new double [np];
+    dNd2pT_vis = new double [np];
+    dNd2pT_tot = new double [np];
+    dNd2pTdphidy_eq = new double** [np];
+    dNd2pTdphidy_vis = new double** [np];
+    dNd2pTdphidy_tot = new double** [np];
     for(int i=0;i<np;i++)
     {
       dNd2pT_eq[i] = 0.0;
       dNd2pT_vis[i] = 0.0;
       dNd2pT_tot[i] = 0.0;
-      for(int order=0; order<norder; order++)
-      {
-        vnpT_cos_eq[order][i] = 0.0;
-        vnpT_cos_vis[order][i] = 0.0;
-        vnpT_cos_tot[order][i] = 0.0;
-        vnpT_sin_eq[order][i] = 0.0;
-        vnpT_sin_vis[order][i] = 0.0;
-        vnpT_sin_tot[order][i] = 0.0;
-      }
+      dNd2pTdphidy_eq[i] = new double* [nphi];
+      dNd2pTdphidy_vis[i] = new double* [nphi];
+      dNd2pTdphidy_tot[i] = new double* [nphi];
       for(int j=0;j<nphi;j++)
+      {
+         dNd2pTdphidy_eq[i][j] = new double [nrapidity];
+         dNd2pTdphidy_vis[i][j] = new double [nrapidity];
+         dNd2pTdphidy_tot[i][j] = new double [nrapidity];
          for(int k=0;k<nrapidity;k++)
          {
             dNd2pTdphidy_eq[i][j][k] = 0.0;
             dNd2pTdphidy_vis[i][j][k] = 0.0;
             dNd2pTdphidy_tot[i][j][k] = 0.0;
          }
+      }
+    }
+    vnpT_cos_eq = new double* [norder];
+    vnpT_sin_eq = new double* [norder];
+    vnpT_cos_vis = new double* [norder];
+    vnpT_sin_vis = new double* [norder];
+    vnpT_cos_tot = new double* [norder];
+    vnpT_sin_tot = new double* [norder];
+    for(int order=0; order<norder; order++)
+    {
+      vnpT_cos_eq[order] = new double [np];
+      vnpT_sin_eq[order] = new double [np];
+      vnpT_cos_vis[order] = new double [np];
+      vnpT_sin_vis[order] = new double [np];
+      vnpT_cos_tot[order] = new double [np];
+      vnpT_sin_tot[order] = new double [np];
+      for(int i =0; i < np; i++)
+      {
+         vnpT_cos_eq[order][i] = 0.0;
+         vnpT_cos_vis[order][i] = 0.0;
+         vnpT_cos_tot[order][i] = 0.0;
+         vnpT_sin_eq[order][i] = 0.0;
+         vnpT_sin_vis[order][i] = 0.0;
+         vnpT_sin_tot[order][i] = 0.0;
+      }
     }
     return;
 }
@@ -75,6 +120,49 @@ ThermalPhoton::~ThermalPhoton()
     delete [] EmissionrateTb_Yidxptr;
     delete Photonemission_eqrateTable_ptr;
     delete Photonemission_viscous_rateTable_ptr;
+
+    delete [] p;
+    delete [] p_weight;
+    delete [] phi;
+    delete [] phi_weight;
+    delete [] y;
+    delete [] theta;
+
+    delete [] dNd2pT_eq;
+    delete [] dNd2pT_vis;
+    delete [] dNd2pT_tot;
+
+    for(int i = 0; i < np; i++)
+    {
+       delete [] dNd2pTdphidy_eq[i];
+       delete [] dNd2pTdphidy_vis[i];
+       delete [] dNd2pTdphidy_tot[i];
+       for(int j = 0; j < nphi; j++)
+       {
+          delete [] dNd2pTdphidy_eq[i][j];
+          delete [] dNd2pTdphidy_vis[i][j];
+          delete [] dNd2pTdphidy_tot[i][j];
+       }
+    }
+    delete [] dNd2pTdphidy_eq;
+    delete [] dNd2pTdphidy_vis;
+    delete [] dNd2pTdphidy_tot;
+
+    for(int i = 0; i < norder; i++)
+    {
+       delete [] vnpT_cos_eq[i];
+       delete [] vnpT_sin_eq[i];
+       delete [] vnpT_cos_vis[i];
+       delete [] vnpT_sin_vis[i];
+       delete [] vnpT_cos_tot[i];
+       delete [] vnpT_sin_tot[i];
+    }
+    delete [] vnpT_cos_eq;
+    delete [] vnpT_sin_eq;
+    delete [] vnpT_cos_vis;
+    delete [] vnpT_sin_vis;
+    delete [] vnpT_cos_tot;
+    delete [] vnpT_sin_tot;
 }
 
 void ThermalPhoton::setupEmissionrate(string emissionProcess, double Xmin, double dX,  double Ymin, double dY)
@@ -154,7 +242,7 @@ void ThermalPhoton::calThermalPhotonemission(double* Eq, double* pi_zz, int Tb_l
         {
           temp_eq_sum = 0.0;
           temp_vis_sum = 0.0;
-          for(int i=0; i<neta; i++)
+          for(int i=0; i < neta; i++)
           {
              temp_eq_sum += em_eqrate[idx + i*n_pt_point]*volume[i]*fraction;
              temp_vis_sum += em_visrate[idx + i*n_pt_point]*volume[i]*fraction;

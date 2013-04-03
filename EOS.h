@@ -10,7 +10,6 @@
 
 #include "Arsenal.h"
 #include "Table.h"
-#include "parameter.h"
 
 using namespace std;
 

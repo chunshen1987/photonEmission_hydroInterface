@@ -40,7 +40,8 @@ tensor_trans.cpp \
 PhotonEmission.cpp \
 BjorkenExpansion.cpp \
 gauss.cpp \
-EOS.cpp
+EOS.cpp \
+ParameterReader.cpp
   
 OBJS= \
 main.o \
@@ -52,7 +53,8 @@ Table2D.o \
 tensor_trans.o \
 PhotonEmission.o \
 BjorkenExpansion.o \
-EOS.o
+EOS.o \
+ParameterReader.o
 
 HDRS= \
 Hydroinfo_h5.h \
@@ -64,8 +66,8 @@ Stopwatch.h \
 tensor_trans.h \
 PhotonEmission.h \
 BjorkenExpansion.h \
-parameter.h \
-EOS.h
+EOS.h \
+ParameterReader.h
 
 ###########################################################################
 # Commands and options for compiling
@@ -95,28 +97,31 @@ HDF5FLAGS= -L/usr/local/hdf5/lib /usr/local/hdf5/lib/libhdf5_hl_cpp.a /usr/local
 $(COMMAND): $(OBJS) $(HDRS) $(MAKEFILE) 
 	$(CC) -o $(COMMAND) $(OBJS) $(LDFLAGS) $(HDF5FLAGS)
 
-main.o : main.cpp Arsenal.h Stopwatch.h PhotonEmission.h parameter.h $(MAKEFILE)
+main.o : main.cpp Arsenal.h Stopwatch.h PhotonEmission.h ParameterReader.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD)  -c main.cpp -o main.o
                  
-Hydroinfo_h5.o : Hydroinfo_h5.cpp Hydroinfo_h5.h Arsenal.h $(MAKEFILE)
+Hydroinfo_h5.o : Hydroinfo_h5.cpp Hydroinfo_h5.h Arsenal.h ParameterReader.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD)  -c Hydroinfo_h5.cpp -o Hydroinfo_h5.o
+
+ParameterReader.o : ParameterReader.cpp ParameterReader.h $(MAKEFILE)
+	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD)  -c ParameterReader.cpp -o ParameterReader.o
 
 Arsenal.o : Arsenal.cpp Arsenal.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c Arsenal.cpp -o Arsenal.o
 
-ThermalPhoton.o : ThermalPhoton.cpp ThermalPhoton.h Arsenal.h parameter.h $(MAKEFILE)
+ThermalPhoton.o : ThermalPhoton.cpp ThermalPhoton.h Arsenal.h ParameterReader.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c ThermalPhoton.cpp -o ThermalPhoton.o
 
 tensor_trans.o : tensor_trans.cpp tensor_trans.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c tensor_trans.cpp -o tensor_trans.o
 
-PhotonEmission.o : PhotonEmission.cpp PhotonEmission.h ThermalPhoton.h tensor_trans.h parameter.h $(MAKEFILE)
+PhotonEmission.o : PhotonEmission.cpp PhotonEmission.h ThermalPhoton.h tensor_trans.h ParameterReader.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD)  -c PhotonEmission.cpp -o PhotonEmission.o
 
-BjorkenExpansion.o : BjorkenExpansion.cpp BjorkenExpansion.h EOS.h parameter.h $(MAKEFILE)
+BjorkenExpansion.o : BjorkenExpansion.cpp BjorkenExpansion.h EOS.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS) $(HDF5LD) -c BjorkenExpansion.cpp -o BjorkenExpansion.o
 
-EOS.o : EOS.cpp Arsenal.h Table.h parameter.h $(MAKEFILE)
+EOS.o : EOS.cpp Arsenal.h Table.h $(MAKEFILE)
 	$(CC) $(CFLAGS) $(WARNFLAGS)  -c EOS.cpp -o EOS.o
 
 ##########################################################################
