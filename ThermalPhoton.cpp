@@ -134,15 +134,15 @@ ThermalPhoton::~ThermalPhoton()
 
     for(int i = 0; i < np; i++)
     {
-       delete [] dNd2pTdphidy_eq[i];
-       delete [] dNd2pTdphidy_vis[i];
-       delete [] dNd2pTdphidy_tot[i];
        for(int j = 0; j < nphi; j++)
        {
           delete [] dNd2pTdphidy_eq[i][j];
           delete [] dNd2pTdphidy_vis[i][j];
           delete [] dNd2pTdphidy_tot[i][j];
        }
+       delete [] dNd2pTdphidy_eq[i];
+       delete [] dNd2pTdphidy_vis[i];
+       delete [] dNd2pTdphidy_tot[i];
     }
     delete [] dNd2pTdphidy_eq;
     delete [] dNd2pTdphidy_vis;
