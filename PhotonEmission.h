@@ -24,8 +24,9 @@ class PhotonEmission
       int np, nphi, nrapidity;
       int norder;
 
-      int gridDx, gridDy, gridDtau;
-      int gridNx, gridNy, gridNtau;
+      double gridDx, gridDy, gridDtau;
+      double gridX0, gridY0, gridTau0;
+      int gridNx, gridNy;
 
       double T_dec, T_sw_high, T_sw_low;
 
@@ -61,7 +62,7 @@ class PhotonEmission
       void set_info();
       void print_info();
       void InitializePhotonEmissionRateTables();
-      void calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* dvolume);
+      void calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* etaweight_ptr);
       void calPhoton_total_SpMatrix();
       void calPhoton_SpvnpT_individualchannel();
       void calPhoton_total_Spvn();

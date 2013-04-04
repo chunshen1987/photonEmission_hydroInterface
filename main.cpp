@@ -41,14 +41,11 @@ int main(int argc, char** argv)
   double eta_f = paraRdr->getVal("eta_f");
   double* eta_ptr = new double [neta];
   double* etaweight_ptr = new double [neta];
-  double* dvolume = new double [neta];
   gauss(neta, 0, eta_i, eta_f, eta_ptr, etaweight_ptr);
-  for(int i=0; i<neta ; i++)
-     dvolume[i] = hydroinfo_ptr->getHydrogridDTau()*hydroinfo_ptr->getHydrogridDX()*hydroinfo_ptr->getHydrogridDY()*etaweight_ptr[i];  //dtau*dx*dy*deta
 
   PhotonEmission thermalPhotons(paraRdr);
 
-  thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, dvolume);
+  thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, etaweight_ptr);
 
   thermalPhotons.calPhoton_SpvnpT_individualchannel();
   thermalPhotons.calPhoton_total_SpMatrix();

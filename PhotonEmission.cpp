@@ -140,6 +140,16 @@ PhotonEmission::~PhotonEmission()
 
 void PhotonEmission::set_info()
 {
+   gridX0 = paraRdr->getVal("Xmin");
+   gridY0 = paraRdr->getVal("Ymin");
+   gridDx = paraRdr->getVal("dx");
+   gridDy = paraRdr->getVal("dy");
+   gridTau0 = paraRdr->getVal("tau_start");
+   gridDtau = paraRdr->getVal("dTau");
+
+   gridNx = 2*fabs(gridX0)/gridDx + 1;
+   gridNy = 2*fabs(gridY0)/gridDy + 1;
+
    neta = paraRdr->getVal("neta");
    np = paraRdr->getVal("np");
    nphi = paraRdr->getVal("nphi");
@@ -159,10 +169,18 @@ void PhotonEmission::print_info()
    cout << "-- Parameters list for photon emission:" << endl;
    cout << "----------------------------------------" << endl;
    cout << "tau_start =" << paraRdr->getVal("tau_start") << " fm/c." << endl;
+   cout << "dTau = " << gridDtau << " fm/c" << endl;
+   cout << "X_min = " << gridX0 << " fm/c" << endl;
+   cout << "dx = " << gridDx << " fm/c" << endl;
+   cout << "Y_min = " << gridY0 << " fm/c" << endl;
+   cout << "dy = " << gridDy << " fm/c" << endl;
+   cout << endl;
+
    cout << "T_dec = " << T_dec << " GeV." << endl;
    cout << "T_sw = " << T_sw_low <<  " to " << T_sw_high << " GeV."<< endl;
    cout << "deltaf_alpha = " << paraRdr->getVal("deltaf_alpha") << endl;
    cout << endl;
+
    cout << "Photon momentum: " << paraRdr->getVal("photon_q_i") 
         << " to " << paraRdr->getVal("photon_q_f") << " GeV, " 
         << "n_q =" << np << endl;
@@ -215,7 +233,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    return;
 }
 
-void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* dvolume)
+void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* etaweight_ptr)
 {
   //photon momentum in the lab frame
   double p_q[np], phi_q[nphi], y_q[nrapidity];
@@ -244,18 +262,22 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
 
   //main loop begins ...
   //loop over time frame
-  for(int frameId = 0; frameId < hydroinfo_ptr->getNumberofFrames(); frameId++)
+  int nFrame = (int)((hydroinfo_ptr->getHydrogridTaumax() - gridTau0)/gridDtau) + 1;
+  for(int frameId = 0; frameId < nFrame; frameId++)
   {
-     tau_local = hydroinfo_ptr->getHydrogridTau0() + frameId*hydroinfo_ptr->getHydrogridDTau();
+     tau_local = gridTau0 + frameId*gridDtau;
      for(int k=0; k<neta; k++)
-        volume[k] = 2 * tau_local * dvolume[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
+        volume[k] = 2 * tau_local * gridDx * gridDy * gridDtau * etaweight_ptr[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
   //loops over the transverse plane
-     for(int i=0; i<hydroinfo_ptr->getHydrogridNX(); i++)
+     for(int i=0; i < gridNx; i++)
      {
-       for(int j=0; j<hydroinfo_ptr->getHydrogridNY(); j++)
+       double x_local = gridX0 + i*gridDx;
+       for(int j=0; j < gridNy; j++)
        {
+         double y_local = gridY0 + j*gridDy;
+
          int idx_Tb = 0;
-         hydroinfo_ptr->getHydroinfoOnlattice(frameId, i, j, fluidCellptr);
+         hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local, fluidCellptr);
          temp_local = fluidCellptr->temperature;
          if(temp_local > T_dec)
          {

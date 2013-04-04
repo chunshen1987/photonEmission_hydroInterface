@@ -55,6 +55,7 @@ class HydroinfoH5
       double getHydrogridDY() {return(grid_dy);};
       double getHydrogridDTau() {return(grid_dTau);};
       double getHydrogridTau0() {return(grid_Tau0);};
+      double getHydrogridTaumax() {return(grid_Taumax);};
       double getHydrogridNX() {return(grid_XH - grid_XL + 1);};
       double getHydrogridNY() {return(grid_YH - grid_YL + 1);};
       void getHydroinfoOnlattice(int frameIdx, int xIdx, int yIdx, fluidCell* fluidCellptr);
