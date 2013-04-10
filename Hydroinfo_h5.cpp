@@ -184,6 +184,9 @@ void HydroinfoH5::readHydrogridInfo()
    status = H5Gget_num_objs(H5groupEventid, &tempFramenum);
    grid_Framenum = (int) tempFramenum;
    grid_Taumax = grid_Tau0 + (grid_Framenum - 1)*grid_dTau;
+
+   int tempflag = readH5Attribute_int(H5groupEventid, "OutputViscousFlag");
+   Visflag = Visflag*tempflag;
 }
 
 void HydroinfoH5::printHydrogridInfo()
@@ -406,45 +409,55 @@ void HydroinfoH5::getHydroinfo(double tau, double x, double y, fluidCell* fluidC
    fluidCellptr->pressure = cubeInterp(tauInc, xInc, yInc, 
       Pressure[frameIdx][xIdx][yIdx], Pressure[frameIdx+1][xIdx][yIdx], Pressure[frameIdx][xIdx+1][yIdx], Pressure[frameIdx+1][xIdx+1][yIdx], 
       Pressure[frameIdx][xIdx][yIdx+1], Pressure[frameIdx+1][xIdx][yIdx+1], Pressure[frameIdx][xIdx+1][yIdx+1], Pressure[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[0][0] = cubeInterp(tauInc, xInc, yInc, 
-      pi00[frameIdx][xIdx][yIdx], pi00[frameIdx+1][xIdx][yIdx], pi00[frameIdx][xIdx+1][yIdx], pi00[frameIdx+1][xIdx+1][yIdx], 
-      pi00[frameIdx][xIdx][yIdx+1], pi00[frameIdx+1][xIdx][yIdx+1], pi00[frameIdx][xIdx+1][yIdx+1], pi00[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[0][1] = cubeInterp(tauInc, xInc, yInc, 
-      pi01[frameIdx][xIdx][yIdx], pi01[frameIdx+1][xIdx][yIdx], pi01[frameIdx][xIdx+1][yIdx], pi01[frameIdx+1][xIdx+1][yIdx], 
-      pi01[frameIdx][xIdx][yIdx+1], pi01[frameIdx+1][xIdx][yIdx+1], pi01[frameIdx][xIdx+1][yIdx+1], pi01[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[0][2] = cubeInterp(tauInc, xInc, yInc, 
-      pi02[frameIdx][xIdx][yIdx], pi02[frameIdx+1][xIdx][yIdx], pi02[frameIdx][xIdx+1][yIdx], pi02[frameIdx+1][xIdx+1][yIdx], 
-      pi02[frameIdx][xIdx][yIdx+1], pi02[frameIdx+1][xIdx][yIdx+1], pi02[frameIdx][xIdx+1][yIdx+1], pi02[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[0][3] = cubeInterp(tauInc, xInc, yInc, 
-      pi03[frameIdx][xIdx][yIdx], pi03[frameIdx+1][xIdx][yIdx], pi03[frameIdx][xIdx+1][yIdx], pi03[frameIdx+1][xIdx+1][yIdx], 
-      pi03[frameIdx][xIdx][yIdx+1], pi03[frameIdx+1][xIdx][yIdx+1], pi03[frameIdx][xIdx+1][yIdx+1], pi03[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[1][0] = fluidCellptr->pi[0][1];
-   fluidCellptr->pi[1][1] = cubeInterp(tauInc, xInc, yInc, 
-      pi11[frameIdx][xIdx][yIdx], pi11[frameIdx+1][xIdx][yIdx], pi11[frameIdx][xIdx+1][yIdx], pi11[frameIdx+1][xIdx+1][yIdx], 
-      pi11[frameIdx][xIdx][yIdx+1], pi11[frameIdx+1][xIdx][yIdx+1], pi11[frameIdx][xIdx+1][yIdx+1], pi11[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[1][2] = cubeInterp(tauInc, xInc, yInc, 
-      pi12[frameIdx][xIdx][yIdx], pi12[frameIdx+1][xIdx][yIdx], pi12[frameIdx][xIdx+1][yIdx], pi12[frameIdx+1][xIdx+1][yIdx], 
-      pi12[frameIdx][xIdx][yIdx+1], pi12[frameIdx+1][xIdx][yIdx+1], pi12[frameIdx][xIdx+1][yIdx+1], pi12[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[1][3] = cubeInterp(tauInc, xInc, yInc, 
-      pi13[frameIdx][xIdx][yIdx], pi13[frameIdx+1][xIdx][yIdx], pi13[frameIdx][xIdx+1][yIdx], pi13[frameIdx+1][xIdx+1][yIdx], 
-      pi13[frameIdx][xIdx][yIdx+1], pi13[frameIdx+1][xIdx][yIdx+1], pi13[frameIdx][xIdx+1][yIdx+1], pi13[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[2][0] = fluidCellptr->pi[0][2];
-   fluidCellptr->pi[2][1] = fluidCellptr->pi[1][2];
-   fluidCellptr->pi[2][2] = cubeInterp(tauInc, xInc, yInc, 
-      pi22[frameIdx][xIdx][yIdx], pi22[frameIdx+1][xIdx][yIdx], pi22[frameIdx][xIdx+1][yIdx], pi22[frameIdx+1][xIdx+1][yIdx], 
-      pi22[frameIdx][xIdx][yIdx+1], pi22[frameIdx+1][xIdx][yIdx+1], pi22[frameIdx][xIdx+1][yIdx+1], pi22[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[2][3] = cubeInterp(tauInc, xInc, yInc, 
-      pi23[frameIdx][xIdx][yIdx], pi23[frameIdx+1][xIdx][yIdx], pi23[frameIdx][xIdx+1][yIdx], pi23[frameIdx+1][xIdx+1][yIdx], 
-      pi23[frameIdx][xIdx][yIdx+1], pi23[frameIdx+1][xIdx][yIdx+1], pi23[frameIdx][xIdx+1][yIdx+1], pi23[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->pi[3][0] = fluidCellptr->pi[0][3];
-   fluidCellptr->pi[3][1] = fluidCellptr->pi[1][3];
-   fluidCellptr->pi[3][2] = fluidCellptr->pi[2][3];
-   fluidCellptr->pi[3][3] = cubeInterp(tauInc, xInc, yInc, 
-      pi33[frameIdx][xIdx][yIdx], pi33[frameIdx+1][xIdx][yIdx], pi33[frameIdx][xIdx+1][yIdx], pi33[frameIdx+1][xIdx+1][yIdx], 
-      pi33[frameIdx][xIdx][yIdx+1], pi33[frameIdx+1][xIdx][yIdx+1], pi33[frameIdx][xIdx+1][yIdx+1], pi33[frameIdx+1][xIdx+1][yIdx+1]);
-   fluidCellptr->bulkPi = cubeInterp(tauInc, xInc, yInc, 
-      BulkPi[frameIdx][xIdx][yIdx], BulkPi[frameIdx+1][xIdx][yIdx], BulkPi[frameIdx][xIdx+1][yIdx], BulkPi[frameIdx+1][xIdx+1][yIdx], 
-      BulkPi[frameIdx][xIdx][yIdx+1], BulkPi[frameIdx+1][xIdx][yIdx+1], BulkPi[frameIdx][xIdx+1][yIdx+1], BulkPi[frameIdx+1][xIdx+1][yIdx+1]);
+   if(Visflag == 1)
+   {
+      fluidCellptr->pi[0][0] = cubeInterp(tauInc, xInc, yInc, 
+         pi00[frameIdx][xIdx][yIdx], pi00[frameIdx+1][xIdx][yIdx], pi00[frameIdx][xIdx+1][yIdx], pi00[frameIdx+1][xIdx+1][yIdx], 
+         pi00[frameIdx][xIdx][yIdx+1], pi00[frameIdx+1][xIdx][yIdx+1], pi00[frameIdx][xIdx+1][yIdx+1], pi00[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[0][1] = cubeInterp(tauInc, xInc, yInc, 
+         pi01[frameIdx][xIdx][yIdx], pi01[frameIdx+1][xIdx][yIdx], pi01[frameIdx][xIdx+1][yIdx], pi01[frameIdx+1][xIdx+1][yIdx], 
+         pi01[frameIdx][xIdx][yIdx+1], pi01[frameIdx+1][xIdx][yIdx+1], pi01[frameIdx][xIdx+1][yIdx+1], pi01[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[0][2] = cubeInterp(tauInc, xInc, yInc, 
+         pi02[frameIdx][xIdx][yIdx], pi02[frameIdx+1][xIdx][yIdx], pi02[frameIdx][xIdx+1][yIdx], pi02[frameIdx+1][xIdx+1][yIdx], 
+         pi02[frameIdx][xIdx][yIdx+1], pi02[frameIdx+1][xIdx][yIdx+1], pi02[frameIdx][xIdx+1][yIdx+1], pi02[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[0][3] = cubeInterp(tauInc, xInc, yInc, 
+         pi03[frameIdx][xIdx][yIdx], pi03[frameIdx+1][xIdx][yIdx], pi03[frameIdx][xIdx+1][yIdx], pi03[frameIdx+1][xIdx+1][yIdx], 
+         pi03[frameIdx][xIdx][yIdx+1], pi03[frameIdx+1][xIdx][yIdx+1], pi03[frameIdx][xIdx+1][yIdx+1], pi03[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[1][0] = fluidCellptr->pi[0][1];
+      fluidCellptr->pi[1][1] = cubeInterp(tauInc, xInc, yInc, 
+         pi11[frameIdx][xIdx][yIdx], pi11[frameIdx+1][xIdx][yIdx], pi11[frameIdx][xIdx+1][yIdx], pi11[frameIdx+1][xIdx+1][yIdx], 
+         pi11[frameIdx][xIdx][yIdx+1], pi11[frameIdx+1][xIdx][yIdx+1], pi11[frameIdx][xIdx+1][yIdx+1], pi11[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[1][2] = cubeInterp(tauInc, xInc, yInc, 
+         pi12[frameIdx][xIdx][yIdx], pi12[frameIdx+1][xIdx][yIdx], pi12[frameIdx][xIdx+1][yIdx], pi12[frameIdx+1][xIdx+1][yIdx], 
+         pi12[frameIdx][xIdx][yIdx+1], pi12[frameIdx+1][xIdx][yIdx+1], pi12[frameIdx][xIdx+1][yIdx+1], pi12[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[1][3] = cubeInterp(tauInc, xInc, yInc, 
+         pi13[frameIdx][xIdx][yIdx], pi13[frameIdx+1][xIdx][yIdx], pi13[frameIdx][xIdx+1][yIdx], pi13[frameIdx+1][xIdx+1][yIdx], 
+         pi13[frameIdx][xIdx][yIdx+1], pi13[frameIdx+1][xIdx][yIdx+1], pi13[frameIdx][xIdx+1][yIdx+1], pi13[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[2][0] = fluidCellptr->pi[0][2];
+      fluidCellptr->pi[2][1] = fluidCellptr->pi[1][2];
+      fluidCellptr->pi[2][2] = cubeInterp(tauInc, xInc, yInc, 
+         pi22[frameIdx][xIdx][yIdx], pi22[frameIdx+1][xIdx][yIdx], pi22[frameIdx][xIdx+1][yIdx], pi22[frameIdx+1][xIdx+1][yIdx], 
+         pi22[frameIdx][xIdx][yIdx+1], pi22[frameIdx+1][xIdx][yIdx+1], pi22[frameIdx][xIdx+1][yIdx+1], pi22[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[2][3] = cubeInterp(tauInc, xInc, yInc, 
+         pi23[frameIdx][xIdx][yIdx], pi23[frameIdx+1][xIdx][yIdx], pi23[frameIdx][xIdx+1][yIdx], pi23[frameIdx+1][xIdx+1][yIdx], 
+         pi23[frameIdx][xIdx][yIdx+1], pi23[frameIdx+1][xIdx][yIdx+1], pi23[frameIdx][xIdx+1][yIdx+1], pi23[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->pi[3][0] = fluidCellptr->pi[0][3];
+      fluidCellptr->pi[3][1] = fluidCellptr->pi[1][3];
+      fluidCellptr->pi[3][2] = fluidCellptr->pi[2][3];
+      fluidCellptr->pi[3][3] = cubeInterp(tauInc, xInc, yInc, 
+         pi33[frameIdx][xIdx][yIdx], pi33[frameIdx+1][xIdx][yIdx], pi33[frameIdx][xIdx+1][yIdx], pi33[frameIdx+1][xIdx+1][yIdx], 
+         pi33[frameIdx][xIdx][yIdx+1], pi33[frameIdx+1][xIdx][yIdx+1], pi33[frameIdx][xIdx+1][yIdx+1], pi33[frameIdx+1][xIdx+1][yIdx+1]);
+      fluidCellptr->bulkPi = cubeInterp(tauInc, xInc, yInc, 
+         BulkPi[frameIdx][xIdx][yIdx], BulkPi[frameIdx+1][xIdx][yIdx], BulkPi[frameIdx][xIdx+1][yIdx], BulkPi[frameIdx+1][xIdx+1][yIdx], 
+         BulkPi[frameIdx][xIdx][yIdx+1], BulkPi[frameIdx+1][xIdx][yIdx+1], BulkPi[frameIdx][xIdx+1][yIdx+1], BulkPi[frameIdx+1][xIdx+1][yIdx+1]);
+   }
+   else
+   {
+      for(int i=0; i<4; i++)
+         for(int j=0; j<4; j++)
+            fluidCellptr->pi[i][j] = 0.0e0;
+      fluidCellptr->bulkPi = 0.0e0;
+   }
 }
 
 void HydroinfoH5::setZero_fluidCell(fluidCell* fluidCellptr)
