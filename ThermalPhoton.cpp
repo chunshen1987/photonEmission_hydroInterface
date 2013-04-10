@@ -360,13 +360,16 @@ void ThermalPhoton::outputPhoton_SpvnpT()
       {
          fphotonSpvn_eq << scientific << setprecision(6) << setw(16) 
                         << vnpT_cos_eq[order][i] << "  " 
-                        << vnpT_sin_eq[order][i] << "  ";
+                        << vnpT_sin_eq[order][i] << "  "
+                        << sqrt(pow(vnpT_cos_eq[order][i], 2) + pow(vnpT_sin_eq[order][i], 2)) << "  ";
          fphotonSpvn_vis << scientific << setprecision(6) << setw(16) 
                          << vnpT_cos_vis[order][i] << "  "
-                         << vnpT_sin_vis[order][i] << "  ";
+                         << vnpT_sin_vis[order][i] << "  "
+                         << sqrt(pow(vnpT_cos_vis[order][i], 2) + pow(vnpT_sin_vis[order][i], 2)) << "  ";
          fphotonSpvn_tot << scientific << setprecision(6) << setw(16) 
                          << vnpT_cos_tot[order][i] << "  "
-                         << vnpT_sin_tot[order][i] << "  ";
+                         << vnpT_sin_tot[order][i] << "  "
+                         << sqrt(pow(vnpT_cos_tot[order][i], 2) + pow(vnpT_sin_tot[order][i], 2)) << "  ";
       }
       fphotonSpvn_eq << endl;
       fphotonSpvn_vis << endl;

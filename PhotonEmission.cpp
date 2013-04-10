@@ -517,10 +517,12 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename)
       {
          fphoton_eq_Spvn << scientific << setprecision(6) << setw(16) 
                      << vnpT_cos_eq[order][i] << "  "
-                     << vnpT_sin_eq[order][i] << "  ";
+                     << vnpT_sin_eq[order][i] << "  "
+                     << sqrt(pow(vnpT_cos_eq[order][i], 2) + pow(vnpT_sin_eq[order][i], 2)) << "  ";
          fphotonSpvn << scientific << setprecision(6) << setw(16) 
                      << vnpT_cos[order][i] << "  "
-                     << vnpT_sin[order][i] << "  ";
+                     << vnpT_sin[order][i] << "  "
+                     << sqrt(pow(vnpT_cos[order][i], 2) + pow(vnpT_sin[order][i], 2)) << "  ";
       }
       fphoton_eq_Spvn << endl;
       fphotonSpvn << endl;
