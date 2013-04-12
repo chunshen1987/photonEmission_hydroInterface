@@ -8,16 +8,13 @@
 #include "hdf5.h"
 #include "Arsenal.h"
 #include "Hydroinfo_h5.h"
-#include "ParameterReader.h"
 
 using namespace std;
 
-HydroinfoH5::HydroinfoH5(string filename, ParameterReader* paraRdr_in)
+HydroinfoH5::HydroinfoH5(string filename, int bufferSize_in, int Visflag_in)
 {
-   paraRdr = paraRdr_in;
-
    // flag to determine whether to read evolutions for viscous variables
-   Visflag = paraRdr->getVal("HydroinfoVisflag");
+   Visflag = Visflag_in;
 
    herr_t status;
    const char *fileptr = (char*) filename.c_str();
@@ -27,7 +24,7 @@ HydroinfoH5::HydroinfoH5(string filename, ParameterReader* paraRdr_in)
    readHydrogridInfo();
    printHydrogridInfo();
 
-   Buffersize = paraRdr->getVal("HydroinfoBuffersize");
+   Buffersize = bufferSize_in;
    dimensionX = grid_XH - grid_XL + 1;
    dimensionY = grid_YH - grid_YL + 1;
 

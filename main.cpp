@@ -35,7 +35,7 @@ int main(int argc, char** argv)
   ParameterReader* paraRdr = new ParameterReader();
   paraRdr->readFromFile("parameters.dat");
   paraRdr->readFromArguments(argc, argv);
-  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("JetData.h5", paraRdr) ; //hydro data file pointer
+  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("JetData.h5", 550, 1) ; //hydro data file pointer
   int neta = paraRdr->getVal("neta");
   double eta_i = paraRdr->getVal("eta_i");
   double eta_f = paraRdr->getVal("eta_f");
