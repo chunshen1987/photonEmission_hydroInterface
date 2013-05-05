@@ -59,8 +59,8 @@ class PhotonEmission
       PhotonEmission(ParameterReader* paraRdr_in);
       ~PhotonEmission();
       
-      void set_info();
-      void print_info();
+      void set_hydroGridinfo();
+      void print_hydroGridinfo();
       void InitializePhotonEmissionRateTables();
       void calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* etaweight_ptr);
       void calPhoton_total_SpMatrix();

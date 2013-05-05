@@ -5,6 +5,7 @@
 #include<fstream>
 
 #include "Arsenal.h"
+#include "Table2D.h"
 #include "ParameterReader.h"
 
 using namespace std;

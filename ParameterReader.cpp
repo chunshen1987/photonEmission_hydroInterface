@@ -8,7 +8,7 @@ Ver 1.02
 #include <fstream>
 #include "stdlib.h"
 
-#include "arsenal.h"
+#include "Arsenal.h"
 #include "ParameterReader.h"
 
 using namespace std;

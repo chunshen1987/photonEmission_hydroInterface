@@ -4,55 +4,6 @@
 #include<cmath>
 #include<iomanip>
 #include "Arsenal.h"
-/*
-double interpolation2D_bilinear(Table2D* tb_ptr, double varX, double varY, int Iwarning)
-{
-     double varX_min = tb_ptr->getVarXmin();
-     double varY_min = tb_ptr->getVarYmin();
-     double dX = tb_ptr->getdvarX();
-     double dY = tb_ptr->getdvarY();
-     int tb_sizeX = tb_ptr->getTbsizeX();
-     int tb_sizeY = tb_ptr->getTbsizeY();
-
-     int idx_X = (int)floor((varX-varX_min)/dX);
-     int idx_Y = (int)floor((varY-varY_min)/dY);
-
-     //if it is out the table, doing linear extrapolation
-     if (idx_X<0 || idx_X>=tb_sizeX-1)
-     {
-        if(Iwarning == 1)
-        {
-           cout<<"interpolation2D_bilinear: varX out of bounds!"<<endl;
-           cout<<"varX= " << varX<<"idx_X= "<<idx_X<<endl;
-        }
-        if(idx_X < 0) idx_X = 0;
-        if(idx_X >= tb_sizeX-1) idx_X = tb_sizeX - 1;
-     }
-     
-     if (idx_Y<0 || idx_Y>=tb_sizeY-1)
-     {
-        if(Iwarning == 1)
-        {
-           cout<<"interpolation2D_bilinear: varY out of bounds!"<<endl;
-           cout<<"varY= " << varY<<"idx_Y= "<<idx_Y<<endl;
-        }
-        if(idx_Y < 0) idx_Y = 0;
-        if(idx_Y >= tb_sizeY-1) idx_Y = tb_sizeY - 2;
-     }
-
-     double f00 = tb_ptr->getTbdata(idx_X, idx_Y);
-     double f10 = tb_ptr->getTbdata(idx_X+1, idx_Y);
-     double f01 = tb_ptr->getTbdata(idx_X, idx_Y+1);
-     double f11 = tb_ptr->getTbdata(idx_X+1, idx_Y+1);
-     double ddx = varX - (varX_min + idx_X*dX);
-     double ddy = varY - (varY_min + idx_Y*dY);
- 
-     double result;
-     result = (f00*(dX-ddx)*(dY-ddy) + f01*(dX-ddx)*ddy 
-              + f10*ddx*(dY-ddy) + f11*ddx*ddy)/dX/dY;
-     return(result);
-}*/
-
 
 double Simpson_sum(double* array, int num, double h_step)
 {

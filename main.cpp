@@ -23,7 +23,7 @@
 #include "Stopwatch.h"
 #include "Arsenal.h"
 #include "ParameterReader.h"
-#include "BjorkenExpansion.h"
+#include "gauss_quadrature.h"
 
 using namespace std;
 
@@ -35,13 +35,17 @@ int main(int argc, char** argv)
   ParameterReader* paraRdr = new ParameterReader();
   paraRdr->readFromFile("parameters.dat");
   paraRdr->readFromArguments(argc, argv);
-  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5("JetData.h5", 550, 1) ; //hydro data file pointer
+
+  int bufferSize = paraRdr->getVal("HydroinfoBuffersize");
+  int hydroInfoVisflag = paraRdr->getVal("HydroinfoVisflag");
+  HydroinfoH5* hydroinfo_ptr = new HydroinfoH5();
+  hydroinfo_ptr->readHydroinfoH5("JetData.h5", bufferSize, hydroInfoVisflag); //hydro data file pointer
   int neta = paraRdr->getVal("neta");
   double eta_i = paraRdr->getVal("eta_i");
   double eta_f = paraRdr->getVal("eta_f");
   double* eta_ptr = new double [neta];
   double* etaweight_ptr = new double [neta];
-  gauss(neta, 0, eta_i, eta_f, eta_ptr, etaweight_ptr);
+  gauss_quadrature(neta, 1, 0.0, 0.0, eta_i, eta_f, eta_ptr, etaweight_ptr);
 
   PhotonEmission thermalPhotons(paraRdr);
 

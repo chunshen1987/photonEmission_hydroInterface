@@ -18,8 +18,8 @@ PhotonEmission::PhotonEmission(ParameterReader* paraRdr_in)
 {  
    paraRdr = paraRdr_in;
    
-   set_info();
-   print_info();
+   set_hydroGridinfo();
+   print_hydroGridinfo();
 
    // read the photon emission rate tables
    InitializePhotonEmissionRateTables();
@@ -138,7 +138,7 @@ PhotonEmission::~PhotonEmission()
    return;
 }
 
-void PhotonEmission::set_info()
+void PhotonEmission::set_hydroGridinfo()
 {
    gridX0 = paraRdr->getVal("Xmin");
    gridY0 = paraRdr->getVal("Ymin");
@@ -163,7 +163,7 @@ void PhotonEmission::set_info()
    calHGIdFlag = paraRdr->getVal("CalHGIdFlag");
 }
 
-void PhotonEmission::print_info()
+void PhotonEmission::print_hydroGridinfo()
 {
    cout << "----------------------------------------" << endl;
    cout << "-- Parameters list for photon emission:" << endl;

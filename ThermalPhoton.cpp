@@ -14,6 +14,7 @@
 #include "Table2D.h"
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
+#include "gauss_quadrature.h"
 
 using namespace std;
 
@@ -42,8 +43,8 @@ ThermalPhoton::ThermalPhoton(ParameterReader* paraRdr_in)
     phi = new double [nphi];
     phi_weight = new double [nphi];
 
-    gauss(np, 0, p_i, p_f, p, p_weight);
-    gauss(nphi, 0, phi_i, phi_f, phi, phi_weight);
+    gauss_quadrature(np, 1, 0.0, 0.0, p_i, p_f, p, p_weight);
+    gauss_quadrature(nphi, 1, 0.0, 0.0, phi_i, phi_f, phi, phi_weight);
 
     y = new double [nrapidity];
     theta = new double [nrapidity];
