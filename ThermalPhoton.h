@@ -72,7 +72,7 @@ class ThermalPhoton
       
       void calThermalPhotonemission(double* Eq, double* pi_zz, int Tb_length, double T, double* volume, double fraction);
       void calPhoton_SpvnpT();
-      void outputPhoton_SpvnpT();
+      void outputPhoton_SpvnpT(string path);
       void interpolation2D_bilinear(double varX, double* varY, int Y_length, double** Table2D_ptr, double* results);
 
 };

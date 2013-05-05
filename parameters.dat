@@ -2,7 +2,7 @@ Xmin = -13.0                  # minimum points along x direction
 dx = 0.5                      # lattice spacing along x direction
 Ymin = -13.0                  # minimum points along y direction
 dy = 0.5                      # lattice spacing along y direction
-dTau = 0.02                   # lattice spacing along tau direction
+dTau = 5.0                   # lattice spacing along tau direction
 
 neta = 10                     # number of points in eta direction
 eta_i = 0.0                   # beginning value of eta slice

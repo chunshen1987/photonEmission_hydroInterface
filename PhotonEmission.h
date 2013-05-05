@@ -19,6 +19,7 @@ class PhotonEmission
 {
    private:
       ParameterReader *paraRdr;
+      string output_path;
 
       int neta;
       int np, nphi, nrapidity;

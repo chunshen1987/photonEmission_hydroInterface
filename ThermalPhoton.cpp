@@ -307,7 +307,7 @@ void ThermalPhoton::calPhoton_SpvnpT()
    return;
 }
 
-void ThermalPhoton::outputPhoton_SpvnpT()
+void ThermalPhoton::outputPhoton_SpvnpT(string path)
 {
     ostringstream filename_stream_SpMatrix_eq;
     ostringstream filename_stream_SpMatrix_vis;
@@ -316,12 +316,12 @@ void ThermalPhoton::outputPhoton_SpvnpT()
     ostringstream filename_stream_Spvn_vis;
     ostringstream filename_stream_Spvn_tot;
 
-    filename_stream_SpMatrix_eq << emissionProcess_name << "_SpMatrix_eq.dat";
-    filename_stream_SpMatrix_vis << emissionProcess_name << "_SpMatrix_vis.dat";
-    filename_stream_SpMatrix_tot << emissionProcess_name << "_SpMatrix_tot.dat";
-    filename_stream_Spvn_eq << emissionProcess_name << "_Spvn_eq.dat";
-    filename_stream_Spvn_vis << emissionProcess_name << "_Spvn_vis.dat";
-    filename_stream_Spvn_tot << emissionProcess_name << "_Spvn_tot.dat";
+    filename_stream_SpMatrix_eq << path << emissionProcess_name << "_SpMatrix_eq.dat";
+    filename_stream_SpMatrix_vis << path << emissionProcess_name << "_SpMatrix_vis.dat";
+    filename_stream_SpMatrix_tot << path << emissionProcess_name << "_SpMatrix_tot.dat";
+    filename_stream_Spvn_eq << path << emissionProcess_name << "_Spvn_eq.dat";
+    filename_stream_Spvn_vis << path << emissionProcess_name << "_Spvn_vis.dat";
+    filename_stream_Spvn_tot << path << emissionProcess_name << "_Spvn_tot.dat";
 
     ofstream fphotonSpMatrix_eq(filename_stream_SpMatrix_eq.str().c_str());
     ofstream fphotonSpMatrix_vis(filename_stream_SpMatrix_vis.str().c_str());

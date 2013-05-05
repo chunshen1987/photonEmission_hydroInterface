@@ -17,6 +17,7 @@ using namespace std;
 PhotonEmission::PhotonEmission(ParameterReader* paraRdr_in)
 {  
    paraRdr = paraRdr_in;
+   output_path = "results/";
    
    set_hydroGridinfo();
    print_hydroGridinfo();
@@ -423,18 +424,18 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel()
 
 void PhotonEmission::outputPhotonSpvn()
 {
-    photon_QGP->outputPhoton_SpvnpT();
-    photon_HG->outputPhoton_SpvnpT();
+    photon_QGP->outputPhoton_SpvnpT(output_path);
+    photon_HG->outputPhoton_SpvnpT(output_path);
     if(calHGIdFlag == 1)
     {
-       photon_pirho->outputPhoton_SpvnpT();
-       photon_KstarK->outputPhoton_SpvnpT();
-       photon_piK->outputPhoton_SpvnpT();
-       photon_piKstar->outputPhoton_SpvnpT();
-       photon_pipi->outputPhoton_SpvnpT();
-       photon_rhoK->outputPhoton_SpvnpT();
-       photon_rho->outputPhoton_SpvnpT();
-       photon_pirho_omegat->outputPhoton_SpvnpT();
+       photon_pirho->outputPhoton_SpvnpT(output_path);
+       photon_KstarK->outputPhoton_SpvnpT(output_path);
+       photon_piK->outputPhoton_SpvnpT(output_path);
+       photon_piKstar->outputPhoton_SpvnpT(output_path);
+       photon_pipi->outputPhoton_SpvnpT(output_path);
+       photon_rhoK->outputPhoton_SpvnpT(output_path);
+       photon_rho->outputPhoton_SpvnpT(output_path);
+       photon_pirho_omegat->outputPhoton_SpvnpT(output_path);
     }
 
     outputPhoton_total_SpvnpT("photon_total");
@@ -480,10 +481,10 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename)
     ostringstream filename_stream_eq_Spvn;
     ostringstream filename_stream_SpMatrix;
     ostringstream filename_stream_Spvn;
-    filename_stream_eq_SpMatrix << filename << "_eq_SpMatrix.dat";
-    filename_stream_eq_Spvn << filename << "_eq_Spvn.dat";
-    filename_stream_SpMatrix << filename << "_SpMatrix.dat";
-    filename_stream_Spvn << filename << "_Spvn.dat";
+    filename_stream_eq_SpMatrix << output_path << filename << "_eq_SpMatrix.dat";
+    filename_stream_eq_Spvn << output_path << filename << "_eq_Spvn.dat";
+    filename_stream_SpMatrix << output_path << filename << "_SpMatrix.dat";
+    filename_stream_Spvn << output_path << filename << "_Spvn.dat";
 
     ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str());
     ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str());
