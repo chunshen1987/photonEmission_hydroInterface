@@ -372,9 +372,9 @@ void ThermalPhoton::outputPhoton_SpvnpT(string path)
     filename_stream_Spvn_eq << path << emissionProcess_name << "_Spvn_eq.dat";
     filename_stream_Spvn_vis << path << emissionProcess_name << "_Spvn_vis.dat";
     filename_stream_Spvn_tot << path << emissionProcess_name << "_Spvn_tot.dat";
-    filename_stream_inte_Spvn_eq << path << emissionProcess_name << "_inte_Spvn_eq.dat";
-    filename_stream_inte_Spvn_vis << path << emissionProcess_name << "_inte_Spvn_vis.dat";
-    filename_stream_inte_Spvn_tot << path << emissionProcess_name << "_inte_Spvn_tot.dat";
+    filename_stream_inte_Spvn_eq << path << emissionProcess_name << "_Spvn_eq_inte.dat";
+    filename_stream_inte_Spvn_vis << path << emissionProcess_name << "_Spvn_vis_inte.dat";
+    filename_stream_inte_Spvn_tot << path << emissionProcess_name << "_Spvn_tot_inte.dat";
 
     ofstream fphotonSpMatrix_eq(filename_stream_SpMatrix_eq.str().c_str());
     ofstream fphotonSpMatrix_vis(filename_stream_SpMatrix_vis.str().c_str());

@@ -523,8 +523,8 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename)
     filename_stream_eq_Spvn << output_path << filename << "_eq_Spvn.dat";
     filename_stream_SpMatrix << output_path << filename << "_SpMatrix.dat";
     filename_stream_Spvn << output_path << filename << "_Spvn.dat";
-    filename_stream_inte_eq_Spvn << output_path << filename << "_inte_eq_Spvn.dat";
-    filename_stream_inte_Spvn << output_path << filename << "_inte_Spvn.dat";
+    filename_stream_inte_eq_Spvn << output_path << filename << "_eq_Spvn_inte.dat";
+    filename_stream_inte_Spvn << output_path << filename << "_Spvn_inte.dat";
 
     ofstream fphoton_eq_SpMatrix(filename_stream_eq_SpMatrix.str().c_str());
     ofstream fphoton_eq_Spvn(filename_stream_eq_Spvn.str().c_str());
