@@ -572,7 +572,8 @@ void HydroinfoH5::getHydroinfoOnlattice(int frameIdx, int xIdx, int yIdx, fluidC
 
 void HydroinfoH5::getHydroinfo(double tau, double x, double y, fluidCell* fluidCellptr)
 {
-   if(tau < grid_Tau0 || tau >= grid_Taumax || x < grid_X0 || x >= grid_Xmax || y < grid_Y0 || y >= grid_Ymax)
+   double eps = 1e-10;
+   if(tau < grid_Tau0 || tau > grid_Taumax-eps || x < grid_X0 || x > grid_Xmax-eps || y < grid_Y0 || y > grid_Ymax-eps)
    {
       setZero_fluidCell(fluidCellptr);
       return;
