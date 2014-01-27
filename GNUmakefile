@@ -11,7 +11,7 @@
 ##  
 
 CC := h5c++
-CFLAGS = -O3
+CFLAGS = -g -std=c++11
 
 RM		=	rm -f
 O               =       .o

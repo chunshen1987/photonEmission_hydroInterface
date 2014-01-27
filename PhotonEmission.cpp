@@ -5,6 +5,8 @@
 #include<iomanip>
 #include<string>
 #include<fstream>
+#include<vector>
+#include<random>
 
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
@@ -412,6 +414,192 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
 
   return;
 }
+
+void PhotonEmission::calphotonemissionFunction(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* etaweight_ptr)
+{
+  int Tblength = np*nrapidity*neta;
+  double* Eq_localrest_table = new double [Tblength];
+  double* pi_photon_table = new double [Tblength];
+  vector<emissionFunctionmovie> emissionArray;
+
+  //photon momentum in the lab frame
+  double p_q[np], phi_q[nphi], y_q[nrapidity];
+  double phi_q_weight[nphi];
+  double sin_phiq[nphi], cos_phiq[nphi];
+  double p_lab_local[4], p_lab_lowmu[4];
+  double flow_u_mu_low[4];
+  for(int k=0;k<nrapidity;k++)
+     y_q[k] = photon_QGP->getPhotonrapidity(k);
+  for(int l=0;l<np;l++) p_q[l] = photon_QGP->getPhotonp(l);
+  for(int m=0;m<nphi;m++)
+  {
+     phi_q[m] = photon_QGP->getPhotonphi(m);
+     phi_q_weight[m] = photon_QGP->getPhoton_phiweight(m);
+     sin_phiq[m] = sin(phi_q[m]);
+     cos_phiq[m] = cos(phi_q[m]);
+  }
+
+  double e_local, p_local, temp_local, vx_local, vy_local;
+  double tau_local;
+  double eta_local;
+  double* volume = new double [neta];
+  double** pi_tensor_lab = new double* [4];
+  for(int i=0; i<4; i++)
+    pi_tensor_lab[i] = new double [4];
+
+  fluidCell* fluidCellptr = new fluidCell();
+
+  //main loop begins ...
+  //loop over time frame
+  if(gridTauf > hydroinfo_ptr->getHydrogridTaumax()) 
+     gridTauf = hydroinfo_ptr->getHydrogridTaumax();
+  int nFrame = (int)((gridTauf - gridTau0)/gridDtau) + 1;
+  for(int frameId = 0; frameId < nFrame; frameId++)
+  {
+     tau_local = gridTau0 + frameId*gridDtau;
+     for(int k=0; k<neta; k++)
+        volume[k] = 2 * tau_local * gridDx * gridDy * gridDtau * etaweight_ptr[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
+  //loops over the transverse plane
+     for(int i=0; i < gridNx; i++)
+     {
+       double x_local = gridX0 + i*gridDx;
+       for(int j=0; j < gridNy; j++)
+       {
+         double y_local = gridY0 + j*gridDy;
+
+         hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local, fluidCellptr);
+         temp_local = fluidCellptr->temperature;
+         if(temp_local > T_dec && temp_local < T_cuthigh && temp_local > T_cutlow)
+         {
+           e_local = fluidCellptr->ed;
+           p_local = fluidCellptr->pressure;
+           vx_local = fluidCellptr->vx;
+           vy_local = fluidCellptr->vy;
+           for(int mu = 0; mu < 4; mu++)
+              for(int nu = 0; nu < 4; nu++)
+                 pi_tensor_lab[mu][nu] = fluidCellptr->pi[mu][nu];
+
+           getTransverseflow_u_mu_low(flow_u_mu_low, vx_local, vy_local);
+           double prefactor_pimunu = 1./(2.*(e_local + p_local));
+           for(int m=0;m<nphi;m++)
+           {
+              int idx_Tb = 0;
+              for(int jj=0; jj<neta; jj++)
+              {
+                eta_local = eta_ptr[jj];
+                //photon momentum loops
+                for(int k=0;k<nrapidity;k++) 
+                {
+                   double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
+                   double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
+                   for(int l=0;l<np;l++)
+                   { 
+                     p_lab_local[0] = p_q[l]*cosh_y_minus_eta;
+                     p_lab_local[1] = p_q[l]*cos_phiq[m];
+                     p_lab_local[2] = p_q[l]*sin_phiq[m];
+                     p_lab_local[3] = p_q[l]*sinh_y_minus_eta;
+                     p_lab_lowmu[0] = p_lab_local[0];
+                     for(int local_i = 1; local_i < 4; local_i++)
+                        p_lab_lowmu[local_i] = - p_lab_local[local_i];
+
+                     double Eq_localrest_temp = 0.0e0;
+                     double pi_photon = 0.0e0;
+                     for(int local_i = 0; local_i < 4; local_i++)
+                        Eq_localrest_temp += flow_u_mu_low[local_i]*p_lab_local[local_i];
+                    
+                     for(int local_i = 0; local_i < 4; local_i++)
+                        for(int local_j = 0; local_j < 4; local_j++)
+                           pi_photon += pi_tensor_lab[local_i][local_j]*p_lab_lowmu[local_i]*p_lab_lowmu[local_j];
+
+                     Eq_localrest_table[idx_Tb] = Eq_localrest_temp;
+                     pi_photon_table[idx_Tb] = pi_photon*prefactor_pimunu;
+                     idx_Tb++;
+                   }
+                }
+              }
+              double result = 0.0;
+              if(temp_local > T_sw_high)
+              {
+                double QGP_fraction = 1.0;
+                result = photon_QGP->getThermalPhotonemissionFunctioninte(Eq_localrest_table, pi_photon_table, idx_Tb, temp_local, volume, QGP_fraction);
+              }
+              else if(temp_local > T_sw_low)
+              {
+                double QGP_fraction = (temp_local - T_sw_low)/(T_sw_high - T_sw_low);
+                double HG_fraction = 1 - QGP_fraction;
+                result = photon_QGP->getThermalPhotonemissionFunctioninte(Eq_localrest_table, pi_photon_table, idx_Tb, temp_local, volume, QGP_fraction);
+                result += photon_HG->getThermalPhotonemissionFunctioninte(Eq_localrest_table, pi_photon_table, idx_Tb, temp_local, volume, HG_fraction);
+              }
+              else
+              {
+                double HG_fraction = 1.0;
+                result = photon_HG->getThermalPhotonemissionFunctioninte(Eq_localrest_table, pi_photon_table, idx_Tb, temp_local, volume, HG_fraction);
+              }
+              emissionFunctionmovie emissionFunctiontemp;
+              emissionFunctiontemp.tau = tau_local;
+              emissionFunctiontemp.x = x_local;
+              emissionFunctiontemp.y = y_local;
+              emissionFunctiontemp.phi_q = phi_q[m];
+              emissionFunctiontemp.S_q = result*phi_q_weight[m];
+              emissionArray.push_back(emissionFunctiontemp);
+            }
+         }
+       }
+     }
+     cout<<"frame "<< frameId << " : ";
+     cout<<" tau = " << setw(4) << setprecision(3) << tau_local 
+         <<" fm/c done!" << endl;
+  }
+
+  cout << "start Monte-Carlo sampling photons ..." << endl;
+  int oversample = 100;
+  double dNgamma = 0.0;
+  int emissionArrayLength = emissionArray.size();
+  //building inverse CDF for the emission function
+  vector<double> invCDF(emissionArrayLength);
+  for(int i = 0; i < emissionArrayLength; i++)
+  {
+     dNgamma += emissionArray[i].S_q;
+     invCDF[i] = dNgamma;
+  }
+  for(int i = 0; i < emissionArrayLength; i++)
+     invCDF[i] = invCDF[i]/dNgamma;
+  cout << "total number of photon is: " << dNgamma << " oversample = " << oversample << endl;
+
+  int dNsample = (int)(dNgamma*oversample);
+
+  //generate uniform distributed random numbers
+  default_random_engine generator;
+  uniform_real_distribution<double> randomDistribution(0.0,1.0);
+ 
+  ofstream outputSample("results/Samples.dat");
+
+  //start Monte-Carlo sampling
+  double Eq = 1.0;
+  for(int i = 0; i < dNsample; i++)
+  {
+     double randNumber = randomDistribution(generator);
+     int idx = binarySearch(&invCDF, randNumber);
+     outputSample << scientific << setw(18) << setprecision(8) 
+        << emissionArray[idx].tau << "   " << emissionArray[idx].x << "   " 
+        << emissionArray[idx].y << "   " << Eq << "   " << Eq << "   "
+        << emissionArray[idx].phi_q << endl;
+  }
+  outputSample.close();
+
+  delete [] volume;
+  delete [] Eq_localrest_table;
+  delete [] pi_photon_table;
+  delete fluidCellptr;
+  for(int i=0; i<4; i++)
+  {
+     delete [] pi_tensor_lab[i];
+  }
+  delete [] pi_tensor_lab;
+
+  return;
+}
+
 
 void PhotonEmission::calPhoton_total_SpMatrix()
 {

@@ -48,13 +48,13 @@ int main(int argc, char** argv)
 
   PhotonEmission thermalPhotons(paraRdr);
 
-  thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, etaweight_ptr);
+  thermalPhotons.calphotonemissionFunction(hydroinfo_ptr, eta_ptr, etaweight_ptr);
 
-  thermalPhotons.calPhoton_SpvnpT_individualchannel();
-  thermalPhotons.calPhoton_total_SpMatrix();
-  thermalPhotons.calPhoton_total_Spvn();
+  //thermalPhotons.calPhoton_SpvnpT_individualchannel();
+  //thermalPhotons.calPhoton_total_SpMatrix();
+  //thermalPhotons.calPhoton_total_Spvn();
 
-  thermalPhotons.outputPhotonSpvn();
+  //thermalPhotons.outputPhotonSpvn();
 
   sw.toc();
   cout << "totally takes : " << sw.takeTime() << " seconds." << endl;

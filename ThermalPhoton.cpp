@@ -290,6 +290,40 @@ void ThermalPhoton::calThermalPhotonemission(double* Eq, double* pi_zz, int Tb_l
     return;
 }
 
+double ThermalPhoton::getThermalPhotonemissionFunctioninte(double* Eq, double* pi_zz, int Tb_length, double T, double* volume, double fraction)
+{
+    double* em_eqrate = new double [Tb_length];   //photon emission equilibrium rate at local rest cell
+    double* em_visrate = new double [Tb_length];   //photon emission viscous correction at local rest cell
+    getPhotonemissionRate(Eq, pi_zz, Tb_length, T, em_eqrate, em_visrate);
+
+    double temp_eq_sum, temp_vis_sum;
+    int idx=0;
+    temp_eq_sum = 0.0; temp_vis_sum = 0.0;
+    for(int i=0; i < neta; i++)
+    {
+       double volume_local = volume[i];
+       for(int k=0; k<nrapidity; k++)
+       {
+          for(int l=0; l<np; l++)
+          {
+             temp_eq_sum += em_eqrate[idx]*volume_local*fraction*p_weight[l]*p[l];
+             temp_vis_sum += em_visrate[idx]*volume_local*fraction*p_weight[l]*p[l];
+             idx++;
+          }
+       }
+    }
+    double result = temp_eq_sum + temp_vis_sum;
+
+    delete[] em_eqrate;
+    delete[] em_visrate;
+
+    /*if(isnan(em_rate))
+    {
+        cout<<" em_rate is nan" << endl;
+        exit(1);
+    }*/
+    return(result);
+}
 
 void ThermalPhoton::calPhoton_SpvnpT()
 //calculate the photon spectra and differential vn at mid-rapidity

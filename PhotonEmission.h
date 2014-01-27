@@ -15,6 +15,14 @@
 
 using namespace std;
 
+struct emissionFunctionmovie {
+   double tau;
+   double x;
+   double y;
+   double phi_q;
+   double S_q;
+};
+
 class PhotonEmission
 {
    private:
@@ -69,6 +77,7 @@ class PhotonEmission
       void print_hydroGridinfo();
       void InitializePhotonEmissionRateTables();
       void calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* etaweight_ptr);
+      void calphotonemissionFunction(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* etaweight_ptr);
       void calPhoton_total_SpMatrix();
       void calPhoton_SpvnpT_individualchannel();
       void calPhoton_total_Spvn();
