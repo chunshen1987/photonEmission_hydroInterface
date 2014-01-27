@@ -2,6 +2,7 @@
 #include<sstream>
 #include<fstream>
 #include<cmath>
+#include<cstdlib>
 #include<iomanip>
 #include "Arsenal.h"
 
