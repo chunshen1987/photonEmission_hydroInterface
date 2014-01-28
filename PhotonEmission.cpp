@@ -552,7 +552,7 @@ void PhotonEmission::calphotonemissionFunction(HydroinfoH5* hydroinfo_ptr, doubl
   }
 
   cout << "start Monte-Carlo sampling photons ..." << endl;
-  int oversample = 100;
+  int oversample = 10;
   double dNgamma = 0.0;
   int emissionArrayLength = emissionArray.size();
   //building inverse CDF for the emission function
