@@ -165,6 +165,7 @@ void PhotonEmission::set_hydroGridinfo()
    gridDx = paraRdr->getVal("dx");
    gridDy = paraRdr->getVal("dy");
    gridTau0 = paraRdr->getVal("tau_start");
+   gridTauf = paraRdr->getVal("tau_end");
    gridDtau = paraRdr->getVal("dTau");
 
    gridNx = 2*fabs(gridX0)/gridDx + 1;
@@ -179,6 +180,9 @@ void PhotonEmission::set_hydroGridinfo()
    T_dec = paraRdr->getVal("T_dec");
    T_sw_high = paraRdr->getVal("T_sw_high");
    T_sw_low = paraRdr->getVal("T_sw_low");
+
+   T_cuthigh = paraRdr->getVal("T_cuthigh");
+   T_cutlow = paraRdr->getVal("T_cutlow");
    
    calHGIdFlag = paraRdr->getVal("CalHGIdFlag");
 }
@@ -189,6 +193,7 @@ void PhotonEmission::print_hydroGridinfo()
    cout << "-- Parameters list for photon emission:" << endl;
    cout << "----------------------------------------" << endl;
    cout << "tau_start =" << paraRdr->getVal("tau_start") << " fm/c." << endl;
+   cout << "tau_end =" << paraRdr->getVal("tau_end") << " fm/c." << endl;
    cout << "dTau = " << gridDtau << " fm/c" << endl;
    cout << "X_min = " << gridX0 << " fm/c" << endl;
    cout << "dx = " << gridDx << " fm/c" << endl;
@@ -282,7 +287,9 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
 
   //main loop begins ...
   //loop over time frame
-  int nFrame = (int)((hydroinfo_ptr->getHydrogridTaumax() - gridTau0)/gridDtau) + 1;
+  if(gridTauf > hydroinfo_ptr->getHydrogridTaumax()) 
+     gridTauf = hydroinfo_ptr->getHydrogridTaumax();
+  int nFrame = (int)((gridTauf - gridTau0)/gridDtau) + 1;
   for(int frameId = 0; frameId < nFrame; frameId++)
   {
      tau_local = gridTau0 + frameId*gridDtau;
@@ -299,7 +306,7 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
          int idx_Tb = 0;
          hydroinfo_ptr->getHydroinfo(tau_local, x_local, y_local, fluidCellptr);
          temp_local = fluidCellptr->temperature;
-         if(temp_local > T_dec)
+         if(temp_local > T_dec && temp_local < T_cuthigh && temp_local > T_cutlow)
          {
            e_local = fluidCellptr->ed;
            p_local = fluidCellptr->pressure;
