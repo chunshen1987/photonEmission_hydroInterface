@@ -19,6 +19,8 @@ PhotonEmission::PhotonEmission(ParameterReader* paraRdr_in)
    paraRdr = paraRdr_in;
    output_path = "results/";
    
+   differential_flag = paraRdr->getVal("differential_flag");
+   
    set_hydroGridinfo();
    print_hydroGridinfo();
 
@@ -359,6 +361,8 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
            {
              double QGP_fraction = 1.0;
              photon_QGP->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
+             if(differential_flag == 1)
+                photon_QGP->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, tau_local, volume, QGP_fraction);
            }
            else if(temp_local > T_sw_low)
            {
@@ -366,6 +370,11 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
              double HG_fraction = 1 - QGP_fraction;
              photon_QGP->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
              photon_HG->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
+             if(differential_flag == 1)
+             {
+                photon_QGP->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, tau_local, volume, QGP_fraction);
+                photon_HG->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
+             }
              if(calHGIdFlag == 1)
              {
                 photon_pirho->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
@@ -382,6 +391,8 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
            {
              double HG_fraction = 1.0;
              photon_HG->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
+             if(differential_flag == 1)
+                photon_HG->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
              if(calHGIdFlag == 1)
              {
                 photon_pirho->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local,  volume, HG_fraction);
@@ -433,6 +444,11 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel()
 {
     photon_QGP->calPhoton_SpvnpT();
     photon_HG->calPhoton_SpvnpT();
+    if(differential_flag == 1)
+    {
+       photon_QGP->calPhoton_SpvnpT_dTdtau();
+       photon_HG->calPhoton_SpvnpT_dTdtau();
+    }
     if(calHGIdFlag == 1)
     {
        photon_pirho->calPhoton_SpvnpT();
@@ -452,6 +468,11 @@ void PhotonEmission::outputPhotonSpvn()
 {
     photon_QGP->outputPhoton_SpvnpT(output_path);
     photon_HG->outputPhoton_SpvnpT(output_path);
+    if(differential_flag == 1)
+    {
+       photon_QGP->outputPhoton_SpvnpTdTdtau(output_path);
+       photon_HG->outputPhoton_SpvnpTdTdtau(output_path);
+    }
     if(calHGIdFlag == 1)
     {
        photon_pirho->outputPhoton_SpvnpT(output_path);

@@ -124,6 +124,69 @@ ThermalPhoton::ThermalPhoton(ParameterReader* paraRdr_in)
        vn_cos_tot[i] = 0.0;
        vn_sin_tot[i] = 0.0;
     }
+
+    if(paraRdr->getVal("differential_flag") == 1)
+    {
+       nTcut = paraRdr->getVal("nTcut");
+       nTaucut = paraRdr->getVal("nTaucut");
+       Tcut_high = paraRdr->getVal("T_cuthigh");
+       Tcut_low = paraRdr->getVal("T_cutlow");
+       Taucut_high = paraRdr->getVal("tau_end");
+       Taucut_low = paraRdr->getVal("tau_start");
+       dNd2pTdphidydTdtau_eq = new double**** [nTcut];
+       dNd2pTdphidydTdtau_tot = new double**** [nTcut];
+       dNdydTdtau_eq = new double* [nTcut];
+       dNdydTdtau_tot = new double* [nTcut];
+       vndTdtau_cos_eq = new double** [nTcut];
+       vndTdtau_sin_eq = new double** [nTcut];
+       vndTdtau_cos_tot = new double** [nTcut];
+       vndTdtau_sin_tot = new double** [nTcut];
+       for(int i = 0; i < nTcut; i++)
+       {
+          dNd2pTdphidydTdtau_eq[i] = new double*** [nTaucut];
+          dNd2pTdphidydTdtau_tot[i] = new double*** [nTaucut];
+          dNdydTdtau_eq[i] = new double [nTaucut];
+          dNdydTdtau_tot[i] = new double [nTaucut];
+          vndTdtau_cos_eq[i] = new double* [nTaucut];
+          vndTdtau_sin_eq[i] = new double* [nTaucut];
+          vndTdtau_cos_tot[i] = new double* [nTaucut];
+          vndTdtau_sin_tot[i] = new double* [nTaucut];
+          for(int j = 0; j < nTaucut; j++)
+          {
+             dNd2pTdphidydTdtau_eq[i][j] = new double** [np];
+             dNd2pTdphidydTdtau_tot[i][j] = new double** [np];
+             vndTdtau_cos_eq[i][j] = new double [norder];
+             vndTdtau_sin_eq[i][j] = new double [norder];
+             vndTdtau_cos_tot[i][j] = new double [norder];
+             vndTdtau_sin_tot[i][j] = new double [norder];
+             dNdydTdtau_eq[i][j] = 0.0;
+             dNdydTdtau_tot[i][j] = 0.0;
+             for(int jj = 0; jj < norder; jj++)
+             {
+                vndTdtau_cos_eq[i][j][jj] = 0.0;
+                vndTdtau_sin_eq[i][j][jj] = 0.0;
+                vndTdtau_cos_tot[i][j][jj] = 0.0;
+                vndTdtau_sin_tot[i][j][jj] = 0.0;
+             }
+             for(int k = 0; k < np; k++)
+             {
+                dNd2pTdphidydTdtau_eq[i][j][k] = new double* [nphi];
+                dNd2pTdphidydTdtau_tot[i][j][k] = new double* [nphi];
+                for(int l = 0; l < nphi; l++)
+                {
+                   dNd2pTdphidydTdtau_eq[i][j][k][l] = new double [nrapidity];
+                   dNd2pTdphidydTdtau_tot[i][j][k][l] = new double [nrapidity];
+                   for(int m = 0; m < nrapidity; m++)
+                   {
+                      dNd2pTdphidydTdtau_eq[i][j][k][l][m] = 0.0;
+                      dNd2pTdphidydTdtau_tot[i][j][k][l][m] = 0.0;
+                   }
+                }
+             }
+          }
+       }
+
+    }
     return;
 }
 
@@ -190,6 +253,48 @@ ThermalPhoton::~ThermalPhoton()
     delete [] vn_sin_vis;
     delete [] vn_cos_tot;
     delete [] vn_sin_tot;
+       
+    if(paraRdr->getVal("differential_flag") == 1)
+    {
+       for(int i = 0; i < nTcut; i++)
+       {
+          for(int j = 0; j < nTaucut; j++)
+          {
+             for(int k = 0; k < np; k++)
+             {
+                for(int l = 0; l < nphi; l++)
+                {
+                   delete[] dNd2pTdphidydTdtau_eq[i][j][k][l];
+                   delete[] dNd2pTdphidydTdtau_tot[i][j][k][l];
+                }
+                delete[] dNd2pTdphidydTdtau_eq[i][j][k];
+                delete[] dNd2pTdphidydTdtau_tot[i][j][k];
+             }
+             delete[] dNd2pTdphidydTdtau_eq[i][j];
+             delete[] dNd2pTdphidydTdtau_tot[i][j];
+             delete[] vndTdtau_cos_eq[i][j];
+             delete[] vndTdtau_sin_eq[i][j];
+             delete[] vndTdtau_cos_tot[i][j];
+             delete[] vndTdtau_sin_tot[i][j];
+          }
+          delete[] dNd2pTdphidydTdtau_eq[i];
+          delete[] dNd2pTdphidydTdtau_tot[i];
+          delete[] dNdydTdtau_eq[i];
+          delete[] dNdydTdtau_tot[i];
+          delete[] vndTdtau_cos_eq[i];
+          delete[] vndTdtau_sin_eq[i];
+          delete[] vndTdtau_cos_tot[i];
+          delete[] vndTdtau_sin_tot[i];
+       }
+       delete[] dNd2pTdphidydTdtau_eq;
+       delete[] dNd2pTdphidydTdtau_tot;
+       delete[] dNdydTdtau_eq;
+       delete[] dNdydTdtau_tot;
+       delete[] vndTdtau_cos_eq;
+       delete[] vndTdtau_sin_eq;
+       delete[] vndTdtau_cos_tot;
+       delete[] vndTdtau_sin_tot;
+    }
 }
 
 void ThermalPhoton::setupEmissionrate(string emissionProcess, double Xmin, double dX,  double Ymin, double dY)
@@ -290,6 +395,46 @@ void ThermalPhoton::calThermalPhotonemission(double* Eq, double* pi_zz, int Tb_l
     return;
 }
 
+void ThermalPhoton::calThermalPhotonemissiondTdtau(double* Eq, double* pi_zz, int Tb_length, double T, double tau, double* volume, double fraction)
+{
+    double* em_eqrate = new double [Tb_length];   //photon emission equilibrium rate at local rest cell
+    double* em_visrate = new double [Tb_length];   //photon emission viscous correction at local rest cell
+    getPhotonemissionRate(Eq, pi_zz, Tb_length, T, em_eqrate, em_visrate);
+
+    int n_pt_point = nrapidity*np*nphi;
+
+    double eps = 1e-15;
+    double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
+    double dtau = (Taucut_high - Taucut_low)/(nTaucut - 1);
+    int idx_T = (int)((T - Tcut_low)/(dT + eps));
+    int idx_tau = (int)((tau - Taucut_low)/(dtau + eps));
+    
+    double temp_eq_sum, temp_vis_sum;
+    int idx=0;
+    for(int k=0; k<nrapidity; k++)
+    {
+      for(int m=0; m<nphi; m++)
+      {
+        for(int l=0; l<np; l++)
+        {
+          temp_eq_sum = 0.0;
+          temp_vis_sum = 0.0;
+          for(int i=0; i < neta; i++)
+          {
+             temp_eq_sum += em_eqrate[idx + i*n_pt_point]*volume[i]*fraction;
+             temp_vis_sum += em_visrate[idx + i*n_pt_point]*volume[i]*fraction;
+          }
+          dNd2pTdphidydTdtau_eq[idx_T][idx_tau][l][m][k] += temp_eq_sum;
+          dNd2pTdphidydTdtau_tot[idx_T][idx_tau][l][m][k] += (temp_eq_sum + temp_vis_sum);
+          idx++;
+        }
+      }
+    }
+    delete[] em_eqrate;
+    delete[] em_visrate;
+    return;
+}
+
 
 void ThermalPhoton::calPhoton_SpvnpT()
 //calculate the photon spectra and differential vn at mid-rapidity
@@ -350,6 +495,42 @@ void ThermalPhoton::calPhoton_SpvnpT()
        vn_sin_vis[order] = vn_sin_vis[order]/dNdy_vis;
        vn_cos_tot[order] = vn_cos_tot[order]/dNdy_tot;
        vn_sin_tot[order] = vn_sin_tot[order]/dNdy_tot;
+   }
+   return;
+}
+
+void ThermalPhoton::calPhoton_SpvnpT_dTdtau()
+//calculate the photon spectra and differential vn at mid-rapidity
+{
+   int irap = 0;  //calculate at y = 0
+   double eps = 1e-15;
+   for(int i = 0; i < nTcut; i++)
+   {
+       for(int j = 0; j < nTaucut; j++)
+       {
+          for(int k = 0; k < np; k++)
+          {
+             for(int l = 0; l < nphi; l++)
+             {
+                dNdydTdtau_eq[i][j] += dNd2pTdphidydTdtau_eq[i][j][k][l][irap]*p[k]*p_weight[k]*phi_weight[l];
+                dNdydTdtau_tot[i][j] += dNd2pTdphidydTdtau_tot[i][j][k][l][irap]*p[k]*p_weight[k]*phi_weight[l];
+                for(int order=0; order<norder; order++)
+                {
+                   vndTdtau_cos_eq[i][j][order] += dNd2pTdphidydTdtau_eq[i][j][k][l][irap]*p[k]*p_weight[k]*cos(order*phi[l])*phi_weight[l];
+                   vndTdtau_sin_eq[i][j][order] += dNd2pTdphidydTdtau_eq[i][j][k][l][irap]*p[k]*p_weight[k]*sin(order*phi[l])*phi_weight[l];
+                   vndTdtau_cos_tot[i][j][order] += dNd2pTdphidydTdtau_tot[i][j][k][l][irap]*p[k]*p_weight[k]*cos(order*phi[l])*phi_weight[l];
+                   vndTdtau_sin_tot[i][j][order] += dNd2pTdphidydTdtau_tot[i][j][k][l][irap]*p[k]*p_weight[k]*sin(order*phi[l])*phi_weight[l];
+                }
+             }
+          }
+          for(int order = 1; order < norder ; order++)
+          {
+              vndTdtau_cos_eq[i][j][order] = vndTdtau_cos_eq[i][j][order]/(dNdydTdtau_eq[i][j] + eps);
+              vndTdtau_sin_eq[i][j][order] = vndTdtau_sin_eq[i][j][order]/(dNdydTdtau_eq[i][j] + eps);
+              vndTdtau_cos_tot[i][j][order] = vndTdtau_cos_tot[i][j][order]/(dNdydTdtau_tot[i][j] + eps);
+              vndTdtau_sin_tot[i][j][order] = vndTdtau_sin_tot[i][j][order]/(dNdydTdtau_tot[i][j] + eps);
+          }
+       }
    }
    return;
 }
@@ -461,6 +642,70 @@ void ThermalPhoton::outputPhoton_SpvnpT(string path)
     fphotoninteSpvn_eq.close();
     fphotoninteSpvn_vis.close();
     fphotoninteSpvn_tot.close();
+
+    return;
+}
+
+void ThermalPhoton::outputPhoton_SpvnpTdTdtau(string path)
+{
+    double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
+    double dtau = (Taucut_high - Taucut_low)/(nTaucut - 1);
+    ostringstream filename_stream_dNdydTdtau_eq;
+    ostringstream filename_stream_dNdydTdtau_tot;
+
+    filename_stream_dNdydTdtau_eq << path << emissionProcess_name << "_dNdydTdtau_eq.dat";
+    filename_stream_dNdydTdtau_tot << path << emissionProcess_name << "_dNdydTdtau_tot.dat";
+
+    ofstream fphotondNdy_eq(filename_stream_dNdydTdtau_eq.str().c_str());
+    ofstream fphotondNdy_tot(filename_stream_dNdydTdtau_tot.str().c_str());
+
+    for(int i = 0; i < nTcut; i++)
+    {
+       for(int j = 0; j < nTaucut; j++)
+       {
+          fphotondNdy_eq << dNdydTdtau_eq[i][j]/dT/dtau << "    ";
+          fphotondNdy_tot << dNdydTdtau_tot[i][j]/dT/dtau << "    ";
+       }
+       fphotondNdy_eq << endl;
+       fphotondNdy_tot << endl;
+    }
+    fphotondNdy_eq.close();
+    fphotondNdy_tot.close();
+
+    for(int order = 1; order < norder; order++)
+    {
+       ostringstream filename_stream_vncosdTdtau_eq;
+       ostringstream filename_stream_vncosdTdtau_tot;
+       ostringstream filename_stream_vnsindTdtau_eq;
+       ostringstream filename_stream_vnsindTdtau_tot;
+       filename_stream_vncosdTdtau_eq << path << emissionProcess_name << "_v_" << order << "_cos_dTdtau_eq.dat";
+       filename_stream_vncosdTdtau_tot << path << emissionProcess_name << "_v_" << order << "_cos_dTdtau_tot.dat";
+       filename_stream_vnsindTdtau_eq << path << emissionProcess_name << "_v_" << order << "_sin_dTdtau_eq.dat";
+       filename_stream_vnsindTdtau_tot << path << emissionProcess_name << "_v_" << order << "_sin_dTdtau_tot.dat";
+
+       ofstream fphotonvncos_eq(filename_stream_vncosdTdtau_eq.str().c_str());
+       ofstream fphotonvncos_tot(filename_stream_vncosdTdtau_tot.str().c_str());
+       ofstream fphotonvnsin_eq(filename_stream_vnsindTdtau_eq.str().c_str());
+       ofstream fphotonvnsin_tot(filename_stream_vnsindTdtau_tot.str().c_str());
+       for(int i = 0; i < nTcut; i++)
+       {
+          for(int j = 0; j < nTaucut; j++)
+          {
+             fphotonvncos_eq << vndTdtau_cos_eq[i][j][order]/dT/dtau << "    ";
+             fphotonvncos_tot << vndTdtau_cos_tot[i][j][order]/dT/dtau << "    ";
+             fphotonvnsin_eq << vndTdtau_sin_eq[i][j][order]/dT/dtau << "    ";
+             fphotonvnsin_tot << vndTdtau_sin_tot[i][j][order]/dT/dtau << "    ";
+          }
+          fphotonvncos_eq << endl;
+          fphotonvncos_tot << endl;
+          fphotonvnsin_eq << endl;
+          fphotonvnsin_tot << endl;
+       }
+       fphotonvncos_eq.close();
+       fphotonvnsin_eq.close();
+       fphotonvncos_tot.close();
+       fphotonvnsin_tot.close();
+    }
 
     return;
 }
