@@ -29,14 +29,14 @@ class PhotonEmission
       double gridX0, gridY0, gridTau0, gridTauf;
       int gridNx, gridNy;
 
-      double T_dec, T_sw_high, T_sw_low;
-      double T_cuthigh, T_cutlow;
+      double T_dec, T_sw_high, T_sw_low, T_cuthigh, T_cutlow;
 
       int calHGIdFlag;
 
       double** lambda; // Lorentz boost transverse only
       double* Eq_localrest_Tb;
       double* pi_photon_Tb;
+      double* bulkPi_Tb;
 
       double ***dNd2pTdphidy_eq, *dNd2pT_eq;
       double **vnpT_cos_eq, **vnpT_sin_eq;
