@@ -291,7 +291,7 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
   //loop over time frame
   if(gridTauf > hydroinfo_ptr->getHydrogridTaumax()) 
      gridTauf = hydroinfo_ptr->getHydrogridTaumax();
-  int nFrame = (int)((gridTauf - gridTau0)/gridDtau) + 1;
+  int nFrame = (int)((gridTauf - gridTau0)/gridDtau + 1e-15) + 1;
   for(int frameId = 0; frameId < nFrame; frameId++)
   {
      tau_local = gridTau0 + frameId*gridDtau;

@@ -406,9 +406,10 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau(double* Eq, double* pi_zz, in
     double eps = 1e-15;
     double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
     double dtau = (Taucut_high - Taucut_low)/(nTaucut - 1);
-    int idx_T = (int)((T - Tcut_low)/(dT + eps));
-    int idx_tau = (int)((tau - Taucut_low)/(dtau + eps));
+    int idx_T = (int)((T - Tcut_low)/dT + eps);
+    int idx_tau = (int)((tau - Taucut_low)/dtau + eps);
     
+
     double temp_eq_sum, temp_vis_sum;
     int idx=0;
     for(int k=0; k<nrapidity; k++)
