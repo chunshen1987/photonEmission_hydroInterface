@@ -149,14 +149,17 @@ PhotonEmission::~PhotonEmission()
 
    delete photon_QGP;
    delete photon_HG;
-   delete photon_pirho;
-   delete photon_pirho_omegat;
-   delete photon_rho;
-   delete photon_rhoK;
-   delete photon_pipi;
-   delete photon_piKstar;
-   delete photon_piK;
-   delete photon_KstarK;
+   if(calHGIdFlag == 1)
+   {
+      delete photon_pirho;
+      delete photon_pirho_omegat;
+      delete photon_rho;
+      delete photon_rhoK;
+      delete photon_pipi;
+      delete photon_piKstar;
+      delete photon_piK;
+      delete photon_KstarK;
+   }
    return;
 }
 
@@ -240,22 +243,25 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    photon_HG = new ThermalPhoton(paraRdr);
    photon_HG->setupEmissionrate("HG_2to2_total", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
 
-   photon_pirho = new ThermalPhoton(paraRdr);
-   photon_pirho->setupEmissionrate("pion_rho_to_pion_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
-   photon_KstarK = new ThermalPhoton(paraRdr);
-   photon_KstarK->setupEmissionrate("K_Kstar_to_pion_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
-   photon_piK = new ThermalPhoton(paraRdr);
-   photon_piK->setupEmissionrate("pion_K_to_Kstar_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
-   photon_piKstar = new ThermalPhoton(paraRdr);
-   photon_piKstar->setupEmissionrate("pion_Kstar_to_K_gamma",photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
-   photon_pipi = new ThermalPhoton(paraRdr);
-   photon_pipi->setupEmissionrate("pion_pion_to_rho_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
-   photon_rhoK = new ThermalPhoton(paraRdr);
-   photon_rhoK->setupEmissionrate("rho_K_to_K_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
-   photon_rho = new ThermalPhoton(paraRdr);
-   photon_rho->setupEmissionrate("rho_to_pion_pion_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
-   photon_pirho_omegat = new ThermalPhoton(paraRdr);
-   photon_pirho_omegat->setupEmissionrate("pion_rho_to_omega_to_pion_gamma",photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+   if(calHGIdFlag == 1)
+   {
+      photon_pirho = new ThermalPhoton(paraRdr);
+      photon_pirho->setupEmissionrate("pion_rho_to_pion_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+      photon_KstarK = new ThermalPhoton(paraRdr);
+      photon_KstarK->setupEmissionrate("K_Kstar_to_pion_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+      photon_piK = new ThermalPhoton(paraRdr);
+      photon_piK->setupEmissionrate("pion_K_to_Kstar_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+      photon_piKstar = new ThermalPhoton(paraRdr);
+      photon_piKstar->setupEmissionrate("pion_Kstar_to_K_gamma",photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+      photon_pipi = new ThermalPhoton(paraRdr);
+      photon_pipi->setupEmissionrate("pion_pion_to_rho_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+      photon_rhoK = new ThermalPhoton(paraRdr);
+      photon_rhoK->setupEmissionrate("rho_K_to_K_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+      photon_rho = new ThermalPhoton(paraRdr);
+      photon_rho->setupEmissionrate("rho_to_pion_pion_gamma", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+      photon_pirho_omegat = new ThermalPhoton(paraRdr);
+      photon_pirho_omegat->setupEmissionrate("pion_rho_to_omega_to_pion_gamma",photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+   }
 
    return;
 }
