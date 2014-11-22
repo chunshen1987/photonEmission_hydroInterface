@@ -208,7 +208,6 @@ void PhotonEmission::print_hydroGridinfo()
 
    cout << "T_dec = " << T_dec << " GeV." << endl;
    cout << "T_sw = " << T_sw_low <<  " to " << T_sw_high << " GeV."<< endl;
-   cout << "deltaf_alpha = " << paraRdr->getVal("deltaf_alpha") << endl;
    cout << endl;
 
    cout << "Photon momentum: " << paraRdr->getVal("photon_q_i") 

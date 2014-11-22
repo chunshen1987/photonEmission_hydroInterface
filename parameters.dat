@@ -21,8 +21,6 @@ photon_y_f = 0.0              # the largest photon rapidity
 
 norder = 10                   # calculate photon vn to norder
 
-deltaf_alpha = 2.0            # p-dependence of the delta f corrections to external particles
-
 T_dec = 0.120                 # freeze out temperature
 T_sw_high = 0.220             # high end of the switching temperature
 T_sw_low = 0.184              # low end of the switching temperature
@@ -35,9 +33,9 @@ PhotonemRatetableInfo_dE = 0.05     # lattice space of energy in the photon rate
 PhotonemRatetableInfo_dT = 0.002    # lattice space of temperature in the photon rate tables
 
 HydroinfoVisflag = 1         # determine whether to read in the viscous evolution information
-HydroinfoBuffersize = 600    # set the buffer size for hydro evolution profile
+HydroinfoBuffersize = 500    # set the buffer size for hydro evolution profile
 
-differential_flag = 1        # determine whether to output photon yield and vn differential in T and tau
+differential_flag = 0        # determine whether to output photon yield and vn differential in T and tau
 nTcut = 50                   # number of points in T
 T_cuthigh = 0.5              # maximum allowed emission T (GeV)
 T_cutlow = 0.12              # minimum allowed emission T (GeV)
