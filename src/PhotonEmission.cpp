@@ -149,6 +149,8 @@ PhotonEmission::~PhotonEmission()
 
    delete photon_QGP;
    delete photon_HG;
+   delete photon_HG_rho_spectralfun;
+   delete photon_HG_pipiBremsstrahlung;
    if(calHGIdFlag == 1)
    {
       delete photon_pirho;
@@ -240,7 +242,11 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    photon_QGP = new ThermalPhoton(paraRdr);
    photon_QGP->setupEmissionrate("QGP_2to2_total", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
    photon_HG = new ThermalPhoton(paraRdr);
-   photon_HG->setupEmissionrate("HG_2to2_total", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+   photon_HG->setupEmissionrate("HG_2to2_meson_total", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+   photon_HG_rho_spectralfun = new ThermalPhoton(paraRdr);
+   photon_HG_rho_spectralfun->setupEmissionrate("HG_rho_spectralfun", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+   photon_HG_pipiBremsstrahlung = new ThermalPhoton(paraRdr);
+   photon_HG_pipiBremsstrahlung->setupEmissionrate("HG_pipiBremsstrahlung", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
 
    if(calHGIdFlag == 1)
    {
@@ -375,6 +381,8 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
              double HG_fraction = 1 - QGP_fraction;
              photon_QGP->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, QGP_fraction);
              photon_HG->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
+             photon_HG_rho_spectralfun->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
+             photon_HG_pipiBremsstrahlung->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
              if(differential_flag == 1)
              {
                 photon_QGP->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, tau_local, volume, QGP_fraction);
@@ -396,6 +404,8 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
            {
              double HG_fraction = 1.0;
              photon_HG->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
+             photon_HG_rho_spectralfun->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
+             photon_HG_pipiBremsstrahlung->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, volume, HG_fraction);
              if(differential_flag == 1)
                 photon_HG->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
              if(calHGIdFlag == 1)
@@ -437,8 +447,8 @@ void PhotonEmission::calPhoton_total_SpMatrix()
        { 
          for(int m=0;m<nphi;m++)
          {
-           dNd2pTdphidy_eq[l][m][k] =  photon_QGP->getPhotonSpMatrix_eq(l, m, k) + photon_HG->getPhotonSpMatrix_eq(l, m, k);
-           dNd2pTdphidy[l][m][k] =  photon_QGP->getPhotonSpMatrix_tot(l, m, k) + photon_HG->getPhotonSpMatrix_tot(l, m, k);
+           dNd2pTdphidy_eq[l][m][k] =  photon_QGP->getPhotonSpMatrix_eq(l, m, k) + photon_HG->getPhotonSpMatrix_eq(l, m, k) + photon_HG_rho_spectralfun->getPhotonSpMatrix_eq(l, m, k) + photon_HG_pipiBremsstrahlung->getPhotonSpMatrix_eq(l, m, k);
+           dNd2pTdphidy[l][m][k] =  photon_QGP->getPhotonSpMatrix_tot(l, m, k) + photon_HG->getPhotonSpMatrix_tot(l, m, k) + photon_HG_rho_spectralfun->getPhotonSpMatrix_tot(l, m, k) + photon_HG_pipiBremsstrahlung->getPhotonSpMatrix_tot(l, m, k);
          }
        }
      }
@@ -449,6 +459,8 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel()
 {
     photon_QGP->calPhoton_SpvnpT();
     photon_HG->calPhoton_SpvnpT();
+    photon_HG_rho_spectralfun->calPhoton_SpvnpT();
+    photon_HG_pipiBremsstrahlung->calPhoton_SpvnpT();
     if(differential_flag == 1)
     {
        photon_QGP->calPhoton_SpvnpT_dTdtau();
@@ -473,6 +485,8 @@ void PhotonEmission::outputPhotonSpvn()
 {
     photon_QGP->outputPhoton_SpvnpT(output_path);
     photon_HG->outputPhoton_SpvnpT(output_path);
+    photon_HG_rho_spectralfun->outputPhoton_SpvnpT(output_path);
+    photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpT(output_path);
     if(differential_flag == 1)
     {
        photon_QGP->outputPhoton_SpvnpTdTdtau(output_path);
