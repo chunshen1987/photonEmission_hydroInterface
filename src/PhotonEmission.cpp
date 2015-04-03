@@ -20,6 +20,7 @@ PhotonEmission::PhotonEmission(ParameterReader* paraRdr_in)
    output_path = "results/";
    
    differential_flag = paraRdr->getVal("differential_flag");
+   turn_off_transverse_flow = paraRdr->getVal("turn_off_transverse_flow");
    
    set_hydroGridinfo();
    print_hydroGridinfo();
@@ -327,8 +328,16 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
          {
            e_local = fluidCellptr->ed;
            p_local = fluidCellptr->pressure;
-           vx_local = fluidCellptr->vx;
-           vy_local = fluidCellptr->vy;
+           if(turn_off_transverse_flow == 1)
+           {
+              vx_local = 0.0;
+              vy_local = 0.0;
+           }
+           else
+           {
+              vx_local = fluidCellptr->vx;
+              vy_local = fluidCellptr->vy;
+           }
            for(int mu = 0; mu < 4; mu++)
               for(int nu = 0; nu < 4; nu++)
                  pi_tensor_lab[mu][nu] = fluidCellptr->pi[mu][nu];

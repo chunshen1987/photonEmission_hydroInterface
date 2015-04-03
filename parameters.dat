@@ -24,6 +24,7 @@ norder = 10                   # calculate photon vn to norder
 T_dec = 0.120                 # freeze out temperature
 T_sw_high = 0.220             # high end of the switching temperature
 T_sw_low = 0.184              # low end of the switching temperature
+turn_off_transverse_flow = 0  # flag to turn off transverse flow in the photon calculation
 
 calHGIdFlag = 0               # Flag to decide whether to calculate individual HG channels
 
