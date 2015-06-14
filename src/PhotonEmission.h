@@ -33,8 +33,8 @@ class PhotonEmission
       double T_cuthigh, T_cutlow;
       
       int differential_flag;
-      int calHGIdFlag;
       int turn_off_transverse_flow;
+      int calHGIdFlag;
 
       double** lambda; // Lorentz boost transverse only
       double* Eq_localrest_Tb;

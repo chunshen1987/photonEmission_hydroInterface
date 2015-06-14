@@ -245,12 +245,16 @@ void PhotonEmission::InitializePhotonEmissionRateTables()
    
    photon_QGP = new ThermalPhoton(paraRdr);
    photon_QGP->setupEmissionrate("QGP_2to2_total", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+   if(paraRdr->getVal("enable_polyakov_suppression") == 1)
+   {
+       photon_QGP->update_rates_with_polyakov_suppression();
+   }
    photon_HG = new ThermalPhoton(paraRdr);
    photon_HG->setupEmissionrate("HG_2to2_meson_total", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
    photon_HG_rho_spectralfun = new ThermalPhoton(paraRdr);
    photon_HG_rho_spectralfun->setupEmissionrate("HG_rho_spectralfun", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
    photon_HG_pipiBremsstrahlung = new ThermalPhoton(paraRdr);
-   photon_HG_pipiBremsstrahlung->setupEmissionrate("HG_pipiBremsstrahlung", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
+   photon_HG_pipiBremsstrahlung->setupEmissionrate("HG_pipi_bremsstrahlung", photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
 
    if(calHGIdFlag == 1)
    {
@@ -311,8 +315,10 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
   for(int frameId = 0; frameId < nFrame; frameId++)
   {
      tau_local = gridTau0 + frameId*gridDtau;
+
+     //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
      for(int k=0; k<neta; k++)
-        volume[k] = 2 * tau_local * gridDx * gridDy * gridDtau * etaweight_ptr[k]; //volume element: tau*dtau*dx*dy*deta, 2 for symmetry along longitudinal direction
+        volume[k] = 2 * tau_local * gridDx * gridDy * gridDtau * etaweight_ptr[k]; 
   //loops over the transverse plane
      for(int i=0; i < gridNx; i++)
      {
@@ -328,6 +334,7 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
          {
            e_local = fluidCellptr->ed;
            p_local = fluidCellptr->pressure;
+
            if(turn_off_transverse_flow == 1)
            {
               vx_local = 0.0;
@@ -338,6 +345,7 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
               vx_local = fluidCellptr->vx;
               vy_local = fluidCellptr->vy;
            }
+
            for(int mu = 0; mu < 4; mu++)
               for(int nu = 0; nu < 4; nu++)
                  pi_tensor_lab[mu][nu] = fluidCellptr->pi[mu][nu];
@@ -387,8 +395,14 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
            {
              double QGP_fraction = 1.0;
              photon_QGP->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, volume, QGP_fraction);
-             if(differential_flag == 1)
+             if(differential_flag == 1 or differential_flag > 10)
+             {
                 photon_QGP->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, tau_local, volume, QGP_fraction);
+             }
+             if(differential_flag == 2 or differential_flag > 10)
+             {
+                photon_QGP->calThermalPhotonemissiondxperpdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, x_local, tau_local, volume, QGP_fraction);
+             }
            }
            else if(temp_local > T_sw_low)
            {
@@ -398,12 +412,19 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
              photon_HG->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, volume, HG_fraction);
              photon_HG_rho_spectralfun->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, volume, HG_fraction);
              photon_HG_pipiBremsstrahlung->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, volume, HG_fraction);
-             if(differential_flag == 1)
+             if(differential_flag == 1 or differential_flag > 10)
              {
                 photon_QGP->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, tau_local, volume, QGP_fraction);
                 photon_HG->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
                 photon_HG_rho_spectralfun->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
                 photon_HG_pipiBremsstrahlung->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
+             }
+             if(differential_flag == 2 or differential_flag > 10)
+             {
+                photon_QGP->calThermalPhotonemissiondxperpdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, x_local, tau_local, volume, QGP_fraction);
+                photon_HG->calThermalPhotonemissiondxperpdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, x_local, tau_local, volume, HG_fraction);
+                photon_HG_rho_spectralfun->calThermalPhotonemissiondxperpdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, x_local, tau_local, volume, HG_fraction);
+                photon_HG_pipiBremsstrahlung->calThermalPhotonemissiondxperpdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, x_local, tau_local, volume, HG_fraction);
              }
              if(calHGIdFlag == 1)
              {
@@ -423,11 +444,17 @@ void PhotonEmission::calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_p
              photon_HG->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, volume, HG_fraction);
              photon_HG_rho_spectralfun->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, volume, HG_fraction);
              photon_HG_pipiBremsstrahlung->calThermalPhotonemission(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, volume, HG_fraction);
-             if(differential_flag == 1)
+             if(differential_flag == 1 or differential_flag > 10)
              {
                 photon_HG->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
                 photon_HG_rho_spectralfun->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
                 photon_HG_pipiBremsstrahlung->calThermalPhotonemissiondTdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, tau_local, volume, HG_fraction);
+             }
+             if(differential_flag == 2 or differential_flag > 10)
+             {
+                photon_HG->calThermalPhotonemissiondxperpdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, x_local, tau_local, volume, HG_fraction);
+                photon_HG_rho_spectralfun->calThermalPhotonemissiondxperpdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, x_local, tau_local, volume, HG_fraction);
+                photon_HG_pipiBremsstrahlung->calThermalPhotonemissiondxperpdtau(Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb, temp_local, x_local, tau_local, volume, HG_fraction);
              }
              if(calHGIdFlag == 1)
              {
@@ -468,8 +495,16 @@ void PhotonEmission::calPhoton_total_SpMatrix()
        { 
          for(int m=0;m<nphi;m++)
          {
-           dNd2pTdphidy_eq[l][m][k] =  photon_QGP->getPhotonSpMatrix_eq(l, m, k) + photon_HG->getPhotonSpMatrix_eq(l, m, k) + photon_HG_rho_spectralfun->getPhotonSpMatrix_eq(l, m, k) + photon_HG_pipiBremsstrahlung->getPhotonSpMatrix_eq(l, m, k);
-           dNd2pTdphidy[l][m][k] =  photon_QGP->getPhotonSpMatrix_tot(l, m, k) + photon_HG->getPhotonSpMatrix_tot(l, m, k) + photon_HG_rho_spectralfun->getPhotonSpMatrix_tot(l, m, k) + photon_HG_pipiBremsstrahlung->getPhotonSpMatrix_tot(l, m, k);
+           dNd2pTdphidy_eq[l][m][k] =  (
+                 photon_QGP->getPhotonSpMatrix_eq(l, m, k) 
+               + photon_HG->getPhotonSpMatrix_eq(l, m, k) 
+               + photon_HG_rho_spectralfun->getPhotonSpMatrix_eq(l, m, k) 
+               + photon_HG_pipiBremsstrahlung->getPhotonSpMatrix_eq(l, m, k));
+           dNd2pTdphidy[l][m][k] =  (
+                 photon_QGP->getPhotonSpMatrix_tot(l, m, k) 
+               + photon_HG->getPhotonSpMatrix_tot(l, m, k) 
+               + photon_HG_rho_spectralfun->getPhotonSpMatrix_tot(l, m, k) 
+               + photon_HG_pipiBremsstrahlung->getPhotonSpMatrix_tot(l, m, k));
          }
        }
      }
@@ -482,10 +517,19 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel()
     photon_HG->calPhoton_SpvnpT();
     photon_HG_rho_spectralfun->calPhoton_SpvnpT();
     photon_HG_pipiBremsstrahlung->calPhoton_SpvnpT();
-    if(differential_flag == 1)
+    if(differential_flag == 1 or differential_flag > 10)
     {
        photon_QGP->calPhoton_SpvnpT_dTdtau();
        photon_HG->calPhoton_SpvnpT_dTdtau();
+       photon_HG_rho_spectralfun->calPhoton_SpvnpT_dTdtau();
+       photon_HG_pipiBremsstrahlung->calPhoton_SpvnpT_dTdtau();
+    }
+    if(differential_flag == 2 or differential_flag > 10)
+    {
+       photon_QGP->calPhoton_SpvnpT_dxperpdtau();
+       photon_HG->calPhoton_SpvnpT_dxperpdtau();
+       photon_HG_rho_spectralfun->calPhoton_SpvnpT_dxperpdtau();
+       photon_HG_pipiBremsstrahlung->calPhoton_SpvnpT_dxperpdtau();
     }
     if(calHGIdFlag == 1)
     {
@@ -508,10 +552,23 @@ void PhotonEmission::outputPhotonSpvn()
     photon_HG->outputPhoton_SpvnpT(output_path);
     photon_HG_rho_spectralfun->outputPhoton_SpvnpT(output_path);
     photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpT(output_path);
-    if(differential_flag == 1)
+    if(differential_flag == 1 or differential_flag > 10)
     {
        photon_QGP->outputPhoton_SpvnpTdTdtau(output_path);
+       photon_QGP->output_photon_spectra_dTdtau(output_path);
        photon_HG->outputPhoton_SpvnpTdTdtau(output_path);
+       photon_HG->output_photon_spectra_dTdtau(output_path);
+       photon_HG_rho_spectralfun->outputPhoton_SpvnpTdTdtau(output_path);
+       photon_HG_rho_spectralfun->output_photon_spectra_dTdtau(output_path);
+       photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpTdTdtau(output_path);
+       photon_HG_pipiBremsstrahlung->output_photon_spectra_dTdtau(output_path);
+    }
+    if(differential_flag == 2 or differential_flag > 10)
+    {
+       photon_QGP->outputPhoton_SpvnpTdxperpdtau(output_path);
+       photon_HG->outputPhoton_SpvnpTdxperpdtau(output_path);
+       photon_HG_rho_spectralfun->outputPhoton_SpvnpTdxperpdtau(output_path);
+       photon_HG_pipiBremsstrahlung->outputPhoton_SpvnpTdxperpdtau(output_path);
     }
     if(calHGIdFlag == 1)
     {
