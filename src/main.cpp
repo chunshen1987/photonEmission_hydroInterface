@@ -49,6 +49,7 @@ int main(int argc, char** argv)
   PhotonEmission thermalPhotons(paraRdr);
 
   thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, etaweight_ptr);
+  //thermalPhotons.calPhotonemission_fromfiles("evolution_file_lambda=0.2.dat", eta_ptr, etaweight_ptr);
 
   thermalPhotons.calPhoton_SpvnpT_individualchannel();
   thermalPhotons.calPhoton_total_SpMatrix();
