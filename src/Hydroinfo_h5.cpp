@@ -199,7 +199,7 @@ void HydroinfoH5::writeHydroBlock(int Time_id, double **ed_in, double **sd_in, d
 
    herr_t status;
    hid_t groupFrameid;
-   const hsize_t dims[2] = {dimensionX, dimensionY};
+   const hsize_t dims[2] = {static_cast<unsigned int>(dimensionX), static_cast<unsigned int>(dimensionY)};
       
    int XShift = abs(grid_XL%grid_LSX);
    int YShift = abs(grid_YL%grid_LSY);
