@@ -25,11 +25,12 @@ MAIN		=	hydro_photonEmission.e
 endif
 
 SRC		=	main.cpp Hydroinfo_h5.cpp Arsenal.cpp ThermalPhoton.cpp \
-                  Table2D.cpp PhotonEmission.cpp ParameterReader.cpp tensor_trans.cpp \
-                  gauss_quadrature.cpp
+            Table2D.cpp PhotonEmission.cpp ParameterReader.cpp \
+			tensor_trans.cpp gauss_quadrature.cpp Hydroinfo_MUSIC.cpp
 
 INC		= 	Hydroinfo_h5.h Arsenal.h ThermalPhoton.h Table2D.h Stopwatch.h \
-                  PhotonEmission.h ParameterReader.h tensor_trans.h gauss_quadrature.h
+            PhotonEmission.h ParameterReader.h tensor_trans.h \
+			gauss_quadrature.h Hydroinfo_MUSIC.h
 
 
 # -------------------------------------------------
@@ -76,8 +77,9 @@ install:	$(TARGET)
 		cp $(TARGET) $(INSTPATH)
 
 # --------------- Dependencies -------------------
-main.cpp : Hydroinfo_h5.h Stopwatch.h Arsenal.h ParameterReader.h PhotonEmission.h gauss_quadrature.h
+main.cpp : Hydroinfo_h5.h Hydroinfo_MUSIC.h Stopwatch.h Arsenal.h ParameterReader.h PhotonEmission.h gauss_quadrature.h
 Hydroinfo_h5.cpp : Hydroinfo_h5.h
+Hydroinfo_MUSIC.cpp : Hydroinfo_MUSIC.h
 ParameterReader.cpp : ParameterReader.h Arsenal.h
 PhotonEmission.cpp : PhotonEmission.h Hydroinfo_h5.h ThermalPhoton.h tensor_trans.h ParameterReader.h
 tensor_trans.cpp : tensor_trans.h
