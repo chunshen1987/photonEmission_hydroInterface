@@ -15,13 +15,13 @@
 #include <vector>
 #include <string>
 
-
+#include "./Hydroinfo_h5.h"
 #include "./Hydroinfo_MUSIC.h"
 
 using namespace std;
 
 Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
-    lattice = new vector<HydroCell>;
+    lattice = new vector<fluidCell>;
 }
 
 Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
@@ -49,7 +49,6 @@ void Hydroinfo_MUSIC::readHydroData(
 
     hydroWhichHydro = whichHydro;
     use_tau_eta_coordinate = taueta_coord;
-    hydroTfinal = Tfinal;
 
     if (use_tau_eta_coordinate == 0) {
         cout << "Hydroinfo_MUSIC:: Warning hydro grid is set to "
@@ -76,13 +75,13 @@ void Hydroinfo_MUSIC::readHydroData(
         ifstream fin;
         fin.open(evolution_name.c_str(), ios::in);
         if (!fin) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: Unable to open file "
-                 << evolution_name << endl;
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name << endl;
             exit(1);
         }
 
         double T, vx, vy, vz, QGPfrac;
-        HydroCell newCell;
+        fluidCell newCell;
         int ik = 0;
         while (!fin.eof()) {
             ik++;
@@ -91,8 +90,7 @@ void Hydroinfo_MUSIC::readHydroData(
             fin >> vx;
             fin >> vy;
             fin >> vz;
-            newCell.T = T;
-            newCell.QGPfrac = QGPfrac;
+            newCell.temperature = T;
             newCell.vx = vx;
             newCell.vy = vy;
             newCell.vz = vz;
@@ -126,13 +124,13 @@ void Hydroinfo_MUSIC::readHydroData(
 
         float T, QGPfrac, vx, vy, vz;
         if (fin == NULL) {
-            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: Unable to open file "
-                 << evolution_file_name << endl;
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_file_name << endl;
             exit(1);
         }
 
         int ik = 0;
-        HydroCell newCell;
+        fluidCell newCell;
         int size = sizeof(float);
         while (true) {
             int status = 0;
@@ -145,12 +143,6 @@ void Hydroinfo_MUSIC::readHydroData(
             if (status != 5) {  // this is the end of file
                 break;
             }
-
-            // set QGP faction according to temperature
-            if (T < hydroTfinal)
-                QGPfrac = 0.0;
-            else
-                QGPfrac = 1.0;
 
             int ieta_idx = static_cast<int>(ik/num_fluid_cell_trans) % n_eta;
             int itau_idx = static_cast<int>(ik/(num_fluid_cell_trans*n_eta));
@@ -170,12 +162,7 @@ void Hydroinfo_MUSIC::readHydroData(
                 // store the hydro medium at eta_s = 0.0
                 // vz = 0 at eta_s = 0
                 double gamma_L = 1./sqrt(1. - vz*vz);
-                if (gamma_L > 1.01) {
-                    cout << "vz = " << vz << endl;
-                    exit(1);
-                }
-                newCell.T = T;
-                newCell.QGPfrac = QGPfrac;
+                newCell.temperature = T;
                 // convert vx and vy to longitudinal co-moving frame
                 newCell.vx = vx*gamma_L;
                 newCell.vy = vy*gamma_L;
@@ -218,7 +205,7 @@ void Hydroinfo_MUSIC::readHydroData(
 
 
 void Hydroinfo_MUSIC::getHydroValues(double x, double y,
-                                     double z, double t, HydroCell* info) {
+                                     double z, double t, fluidCell* info) {
 // For interpolation of evolution files in tau-eta coordinates. Only the
 // reading of MUSIC's evolution_xyeta.dat file is implemented here.
 // For simplicity, hydroZmax refers to MUSIC's eta_size, and similarly for
@@ -262,8 +249,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
         cout << "t=" << t << " tau=" << tau
              << " itau=" << itau << " itaumax=" << itaumax << endl;
 
-        info->T = 0.0;
-        info->QGPfrac = 0.0;
+        info->temperature = 0.0;
         info->vx = 0.0;
         info->vy = 0.0;
         info->vz = 0.0;
@@ -278,8 +264,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
         cout << "t=" << t << " tau=" << tau
              << " itau=" << itau << " itaumax=" << itaumax << endl;
 
-        info->T = 0.0;
-        info->QGPfrac = 0.0;
+        info->temperature = 0.0;
         info->vx = 0.0;
         info->vy = 0.0;
         info->vz = 0.0;
@@ -293,8 +278,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
              << ", hydroTauMax = " << hydroTauMax
              << ", hydroDtau = " << hydroDtau << endl;
 
-        info->T = 0.0;
-        info->QGPfrac = 0.0;
+        info->temperature = 0.0;
         info->vx = 0.0;
         info->vy = 0.0;
         info->vz = 0.0;
@@ -304,8 +288,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
         cout << "[MARTINI:Hydroinfo_MUSIC::getHydroValues]: WARNING - "
              << "eta out of range, ieta=" << ieta << ", ietamax=" << ietamax
              << endl;
-        info->T = 0.0;
-        info->QGPfrac = 0.0;
+        info->temperature = 0.0;
         info->vx = 0.0;
         info->vy = 0.0;
         info->vz = 0.0;
@@ -346,15 +329,12 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
     }
 
     // And now, the interpolation:
-    double T;
-    double QGPfrac;
-    double vx;
-    double vy;
-    double vz;
-    double veta;
-    T = QGPfrac = vx = vy = vz = veta = 0.;
+    double T = 0.0;
+    double vx = 0.0;
+    double vy = 0.0;
+    double vz = 0.0;
 
-    HydroCell HydroCell_temp1, HydroCell_temp2;
+    fluidCell HydroCell_temp1, HydroCell_temp2;
     for (int iptau = 0; iptau < 2; iptau++) {
         double taufactor;
         if (iptau == 0)
@@ -379,44 +359,36 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
                 HydroCell_temp1 = (*lattice)[position[0][ipy][ipeta][iptau]];
                 HydroCell_temp2 = (*lattice)[position[1][ipy][ipeta][iptau]];
 
-                T += prefrac*((1. - xfrac)*HydroCell_temp1.T
-                              + xfrac*HydroCell_temp2.T);
+                T += prefrac*((1. - xfrac)*HydroCell_temp1.temperature
+                              + xfrac*HydroCell_temp2.temperature);
                 vx += prefrac*((1. - xfrac)*HydroCell_temp1.vx
                                + xfrac*HydroCell_temp2.vx);
                 vy += prefrac*((1. - xfrac)*HydroCell_temp1.vy
                                + xfrac*HydroCell_temp2.vy);
                 if (hydroWhichHydro != 8) {
-                    QGPfrac += prefrac*((1. - xfrac)*HydroCell_temp1.QGPfrac
-                                        + xfrac*HydroCell_temp2.QGPfrac);
                     vz += prefrac*((1. - xfrac)*HydroCell_temp1.vz
                                    + xfrac*HydroCell_temp2.vz);
                 }
             }
         }
     }
+
     if (hydroWhichHydro == 8) {  // for boost invariant medium
-        if (T < hydroTfinal)
-            QGPfrac = 0.;
-        else
-            QGPfrac = 1.;
         vz = z/t;               // Bjorken flow in the lab frame
         double gamma_L_inv = sqrt(1. - vz*vz);
         vx = vx*gamma_L_inv;    // convert vx and vy to lab frame
         vy = vy*gamma_L_inv;
-        veta = 0.0;
     }
 
-    info->T = T;
-    info->QGPfrac = QGPfrac;
+    info->temperature = T;
     info->vx = vx;
     info->vy = vy;
     info->vz = vz;
-
     return;
 }
 
 void Hydroinfo_MUSIC::output_temperature_evolution(string filename_base) {
-    HydroCell *hydroInfo = new HydroCell;
+    fluidCell *hydroInfo = new fluidCell;
     for (int i = 0; i < itaumax; i++) {
         double tau = hydroTau0 + i*hydroDtau;
         ostringstream filename;
@@ -427,7 +399,7 @@ void Hydroinfo_MUSIC::output_temperature_evolution(string filename_base) {
             for (int iy = 0; iy < ixmax; iy++) {
                 double y_local = -hydroXmax + iy*hydroDx;
                 getHydroValues(x_local, y_local, 0.0, tau, hydroInfo);
-                double temp_local = hydroInfo->T;
+                double temp_local = hydroInfo->temperature;
                 temp_evo << scientific << setw(16) << setprecision(8)
                          << temp_local << "   ";
             }

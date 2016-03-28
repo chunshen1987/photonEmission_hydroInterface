@@ -11,14 +11,7 @@
 
 #include <vector>
 #include <string>
-
-struct HydroCell {
-    double T;
-    double vx;
-    double vy;
-    double vz;
-    double QGPfrac;
-};
+#include "./Hydroinfo_h5.h"
 
 class Hydroinfo_MUSIC {
  private:
@@ -33,8 +26,6 @@ class Hydroinfo_MUSIC {
     double hydroDz;         // step dz in fm in the hydro data files in
                             // the z-direction for 3D hydro
 
-    double hydroTfinal;     // temperature at which jet energy loss stops
-
     int hydroWhichHydro;    // choose a hydro evolution model to use
     int use_tau_eta_coordinate;
 
@@ -42,7 +33,7 @@ class Hydroinfo_MUSIC {
 
     int itaumax, ixmax, ietamax;
 
-    std::vector<HydroCell> *lattice;     // array to store hydro information
+    std::vector<fluidCell> *lattice;     // array to store hydro information
 
  public:
     Hydroinfo_MUSIC();       // constructor
@@ -57,7 +48,7 @@ class Hydroinfo_MUSIC {
                        std::string evolution_name);
 
     void getHydroValues(double x, double y, double z, double t, 
-                        HydroCell *info);
+                        fluidCell *info);
     void output_temperature_evolution(std::string filename_base);
     void update_grid_info(double tau0, double tau_max, double dtau,
                           double x_max, double dx, double z_max, double dz);

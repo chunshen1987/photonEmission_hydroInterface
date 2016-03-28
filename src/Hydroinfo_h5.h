@@ -10,7 +10,8 @@
 using namespace std;
 
 struct fluidCell {
-   double ed, sd, vx, vy, temperature, pressure;
+   double ed, sd, temperature, pressure;
+   double vx, vy, vz;
    double pi[4][4];
    double bulkPi;
 };
