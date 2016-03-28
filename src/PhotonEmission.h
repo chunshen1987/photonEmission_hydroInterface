@@ -52,8 +52,10 @@ class PhotonEmission
       double *vn_cos_tot, *vn_sin_tot;
 
       //photon production processes
-      ThermalPhoton* photon_QGP;
-      ThermalPhoton* photon_HG;
+      ThermalPhoton* photon_QGP_2_to_2;
+      ThermalPhoton* photon_QGP_collinear;
+      ThermalPhoton* photon_HG_meson;
+      ThermalPhoton* photon_HG_omega;
       ThermalPhoton* photon_HG_rho_spectralfun;
       ThermalPhoton* photon_HG_pipiBremsstrahlung;
 
@@ -74,7 +76,6 @@ class PhotonEmission
       void print_hydroGridinfo();
       void InitializePhotonEmissionRateTables();
       void calPhotonemission(HydroinfoH5* hydroinfo_ptr, double* eta_ptr, double* etaweight_ptr);
-      void calPhotonemission_fromfiles(string filename, double* eta_ptr, double* etaweight_ptr);
       void calPhoton_total_SpMatrix();
       void calPhoton_SpvnpT_individualchannel();
       void calPhoton_total_Spvn();
