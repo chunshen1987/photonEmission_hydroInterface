@@ -1,6 +1,18 @@
 hydro_flag = 0                # read in mode for hydro medium
                               # 0: read in hdf5 file
                               # 1: read in binary file output from MUSIC
+hydro_tau_0 = 0.4             # starting time in hydro evo file 
+                              # (only works for hydro_flag = 1)
+hydro_dtau = 0.015            # time step in hydro evo file 
+                              # (only works for hydro_flag = 1)
+hydro_x_max = 17.0            # x_max in hydro evo file 
+                              # (only works for hydro_flag = 1)
+hydro_dx = 0.17               # grid spacing in hydro evo file 
+                              # (only works for hydro_flag = 1)
+hydro_z_max = 3.0             # eta_max in hydro evo file 
+                              # (only works for hydro_flag = 1)
+hydro_dz = 3.0                # deta in hydro evo file 
+                              # (only works for hydro_flag = 1)
 Xmin = -13.0                  # minimum points along x direction
 dx = 0.5                      # lattice spacing along x direction
 Ymin = -13.0                  # minimum points along y direction

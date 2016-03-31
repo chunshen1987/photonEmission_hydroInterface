@@ -33,7 +33,7 @@ void Hydroinfo_MUSIC::readHydroData(
     double tau0, double taumax, double dtau,
     double xmax, double zmax, double dx, double dz,
     int nskip_tau, int nskip_x, int nskip_z,
-    int whichHydro, double Tfinal, int taueta_coord, string evolution_name) {
+    int whichHydro, string evolution_name) {
 // all hydro data is stored in tau steps (not t) - the t and z in the MARTINI
 // evolution is converted to tau when accessing the hydro data
     lattice->clear();
@@ -48,7 +48,7 @@ void Hydroinfo_MUSIC::readHydroData(
     hydroDz = dz;
 
     hydroWhichHydro = whichHydro;
-    use_tau_eta_coordinate = taueta_coord;
+    use_tau_eta_coordinate = 1;
 
     if (use_tau_eta_coordinate == 0) {
         cout << "Hydroinfo_MUSIC:: Warning hydro grid is set to "
