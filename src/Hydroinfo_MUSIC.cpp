@@ -21,12 +21,18 @@
 using namespace std;
 
 Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
-    lattice = new vector<fluidCell>;
+    lattice_2D = new vector<fluidCell_2D>;
+    lattice_3D = new vector<fluidCell_3D>;
 }
 
 Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
-    lattice->clear();
-    delete lattice;
+    if (boost_invariant) {
+        lattice_2D->clear();
+    } else {
+        lattice_3D->clear();
+    }
+    delete lattice_2D;
+    delete lattice_3D;
 }
 
 void Hydroinfo_MUSIC::readHydroData(
@@ -35,7 +41,8 @@ void Hydroinfo_MUSIC::readHydroData(
     int nskip_tau, int nskip_x, int nskip_z, int whichHydro) {
 // all hydro data is stored in tau steps (not t) - the t and z in the MARTINI
 // evolution is converted to tau when accessing the hydro data
-    lattice->clear();
+    lattice_2D->clear();
+    lattice_3D->clear();
 
     // get hydro grid information
     hydroTau0 = tau0;
@@ -71,7 +78,7 @@ void Hydroinfo_MUSIC::readHydroData(
         // read in temperature, QGP fraction , flow velocity
         // The name of the evolution file: evolution_name
         string evolution_name = "results/evolution_xyeta.dat";
-        string evolution_name_Wmunu = 
+        string evolution_name_Wmunu =
             "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
         string evolution_name_Pi = "results/evolution_bulk_pressure_xyeta.dat";
         cout << "Evolution file name = " << evolution_name << endl;
@@ -98,7 +105,7 @@ void Hydroinfo_MUSIC::readHydroData(
         }
 
         double T, vx, vy, vz, QGPfrac;
-        fluidCell newCell;
+        fluidCell_3D newCell;
         int ik = 0;
         while (!fin.eof()) {
             ik++;
@@ -112,7 +119,7 @@ void Hydroinfo_MUSIC::readHydroData(
             newCell.vy = vy;
             newCell.vz = vz;
 
-            lattice->push_back(newCell);
+            lattice_3D->push_back(newCell);
             if (ik%50000 == 0)
                 cout << "o" << flush;
         }
@@ -137,7 +144,7 @@ void Hydroinfo_MUSIC::readHydroData(
 
         // read in hydro evolution
         string evolution_name = "results/evolution_xyeta.dat";
-        string evolution_name_Wmunu = 
+        string evolution_name_Wmunu =
                 "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
         string evolution_name_Pi = "resutls/evolution_bulk_pressure_xyeta.dat";
 
@@ -146,13 +153,12 @@ void Hydroinfo_MUSIC::readHydroData(
         cout << "Evolution file name = " << evolution_file_name << endl;
         fin = std::fopen(evolution_file_name.c_str(), "rb");
 
-        float T, QGPfrac, vx, vy, vz;
         if (fin == NULL) {
             cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_file_name << endl;
             exit(1);
         }
-        
+
         std::FILE *fin1;
         fin1 = std::fopen(evolution_name_Wmunu.c_str(), "rb");
         if (fin1 == NULL) {
@@ -160,7 +166,7 @@ void Hydroinfo_MUSIC::readHydroData(
                  << "Unable to open file: " << evolution_name_Wmunu << endl;
             exit(1);
         }
-        
+
         std::FILE *fin2;
         fin2 = std::fopen(evolution_name_Pi.c_str(), "rb");
         if (fin1 == NULL) {
@@ -170,7 +176,8 @@ void Hydroinfo_MUSIC::readHydroData(
         }
 
         int ik = 0;
-        fluidCell newCell;
+        fluidCell_2D newCell;
+        float T, QGPfrac, vx, vy, vz;
         int size = sizeof(float);
         while (true) {
             int status = 0;
@@ -209,38 +216,27 @@ void Hydroinfo_MUSIC::readHydroData(
                 // convert vx and vy to longitudinal co-moving frame
                 newCell.vx = vx*gamma_L;
                 newCell.vy = vy*gamma_L;
-                // vz is Bjorken flow no need to assign values
-                newCell.vz = 0.0;
 
                 // pi^\mu\nu tensor
-                newCell.pi[0][0] = 0.0;
-                newCell.pi[0][1] = 0.0;
-                newCell.pi[0][2] = 0.0;
-                newCell.pi[0][3] = 0.0;
-                newCell.pi[1][0] = 0.0;
-                newCell.pi[1][1] = 0.0;
-                newCell.pi[1][2] = 0.0;
-                newCell.pi[1][3] = 0.0;
-                newCell.pi[2][0] = 0.0;
-                newCell.pi[2][1] = 0.0;
-                newCell.pi[2][2] = 0.0;
-                newCell.pi[2][3] = 0.0;
-                newCell.pi[3][0] = 0.0;
-                newCell.pi[3][1] = 0.0;
-                newCell.pi[3][2] = 0.0;
-                newCell.pi[3][3] = 0.0;
+                newCell.pi00 = 0.0;
+                newCell.pi01 = 0.0;
+                newCell.pi02 = 0.0;
+                newCell.pi11 = 0.0;
+                newCell.pi12 = 0.0;
+                newCell.pi22 = 0.0;
+                newCell.pi33 = 0.0;
 
                 // bulk pressure
                 newCell.bulkPi = 0.0;
 
-                lattice->push_back(newCell);
+                lattice_2D->push_back(newCell);
             }
         }
         std::fclose(fin);
         std::fclose(fin1);
         std::fclose(fin2);
         cout << endl;
-        cout << "number of fluid cells: " << lattice->size() << endl;
+        cout << "number of fluid cells: " << lattice_2D->size() << endl;
     }
 
     // One final step for easy automation of MARTINI:
@@ -248,14 +244,16 @@ void Hydroinfo_MUSIC::readHydroData(
     // ended early (due to all cells freezing out):
     if (whichHydro == 6) {
         hydroTauMax = (
-            hydroTau0 + hydroDtau*(int)((double)lattice->size()
+            hydroTau0 + hydroDtau*static_cast<int>(
+                        static_cast<double>(lattice_3D->size())
                         /((2.*hydroXmax/hydroDx+1.)*(2.*hydroXmax/hydroDx+1.)
                         *2.*(hydroZmax/hydroDz))));
         itaumax = static_cast<int>((hydroTauMax-hydroTau0)/hydroDtau+0.001);
     }
     if (whichHydro == 8) {
         hydroTauMax = (
-            hydroTau0 + hydroDtau*(int)((double)lattice->size()
+            hydroTau0 + hydroDtau*static_cast<int>(
+                        static_cast<double>(lattice_2D->size())
                         /((2.*hydroXmax/hydroDx)*(2.*hydroXmax/hydroDx)) - 1));
         itaumax = static_cast<int>((hydroTauMax-hydroTau0)/hydroDtau+0.001);
     }
@@ -293,18 +291,19 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
         eta = z;
     }
 
-    int ieta = floor((hydroZmax+eta)/hydroDz+0.0001);
+    int ieta = floor((hydroZmax+eta)/hydroDz + 0.0001);
     if (hydroWhichHydro == 8)
         ieta = 0;
 
-    int itau = floor((tau-hydroTau0)/hydroDtau+0.0001);
-    int ix = floor((hydroXmax+x)/hydroDx+0.0001);
-    int iy = floor((hydroXmax+y)/hydroDx+0.0001);
+    int itau = floor((tau-hydroTau0)/hydroDtau + 0.0001);
+    int ix = floor((hydroXmax+x)/hydroDx + 0.0001);
+    int iy = floor((hydroXmax+y)/hydroDx + 0.0001);
 
-    double xfrac = (x - ((double)ix*hydroDx-hydroXmax))/hydroDx;
-    double yfrac = (y - ((double)iy*hydroDx-hydroXmax))/hydroDx;
-    double etafrac = eta/hydroDz-(double)ieta+0.5*(double)ietamax;
-    double taufrac = (tau-hydroTau0)/hydroDtau-(double)itau;
+    double xfrac = (x - (static_cast<double>(ix)*hydroDx - hydroXmax))/hydroDx;
+    double yfrac = (y - (static_cast<double>(iy)*hydroDx - hydroXmax))/hydroDx;
+    double etafrac = (eta/hydroDz - static_cast<double>(ieta)
+                      + 0.5*static_cast<double>(ietamax));
+    double taufrac = (tau - hydroTau0)/hydroDtau - static_cast<double>(itau);
 
     if (ix < 0 || ix >= ixmax) {
         cout << "[MARTINI:Hydroinfo_MUSIC::getHydroValues]: "
@@ -368,27 +367,27 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
         if (ipx == 0 || ix == ixmax-1)
             px = ix;
         else
-            px = ix+1;
+            px = ix + 1;
         for (int ipy = 0; ipy < 2; ipy++) {
             int py;
             if (ipy == 0 || iy == ixmax-1)
                 py = iy;
             else
-                py = iy+1;
+                py = iy + 1;
             for (int ipeta = 0; ipeta < 2; ipeta++) {
                 int peta;
                 if (ipeta == 0 || ieta == ietamax-1)
                     peta = ieta;
                 else
-                    peta = ieta+1;
+                    peta = ieta + 1;
                 for (int iptau = 0; iptau < 2; iptau++) {
                     int ptau;
                     if (iptau == 0 || itau == itaumax-1)
                         ptau = itau;
                     else
-                        ptau = itau+1;
+                        ptau = itau + 1;
                     position[ipx][ipy][ipeta][iptau] = (
-                                    px+ixmax*(py+ixmax*(peta+ietamax*ptau)));
+                                px + ixmax*(py + ixmax*(peta + ietamax*ptau)));
                 }
             }
         }
@@ -399,8 +398,20 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
     double vx = 0.0;
     double vy = 0.0;
     double vz = 0.0;
+    double pi00 = 0.0;
+    double pi01 = 0.0;
+    double pi02 = 0.0;
+    double pi03 = 0.0;
+    double pi11 = 0.0;
+    double pi12 = 0.0;
+    double pi13 = 0.0;
+    double pi22 = 0.0;
+    double pi23 = 0.0;
+    double pi33 = 0.0;
+    double bulkPi = 0.0;
 
-    fluidCell HydroCell_temp1, HydroCell_temp2;
+    fluidCell_2D *HydroCell_2D_ptr1, *HydroCell_2D_ptr2;
+    fluidCell_3D *HydroCell_3D_ptr1, *HydroCell_3D_ptr2;
     for (int iptau = 0; iptau < 2; iptau++) {
         double taufactor;
         if (iptau == 0)
@@ -422,24 +433,74 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
 
                 double prefrac = yfactor*etafactor*taufactor;
 
-                HydroCell_temp1 = (*lattice)[position[0][ipy][ipeta][iptau]];
-                HydroCell_temp2 = (*lattice)[position[1][ipy][ipeta][iptau]];
-
-                T += prefrac*((1. - xfrac)*HydroCell_temp1.temperature
-                              + xfrac*HydroCell_temp2.temperature);
-                vx += prefrac*((1. - xfrac)*HydroCell_temp1.vx
-                               + xfrac*HydroCell_temp2.vx);
-                vy += prefrac*((1. - xfrac)*HydroCell_temp1.vy
-                               + xfrac*HydroCell_temp2.vy);
-                if (hydroWhichHydro != 8) {
-                    vz += prefrac*((1. - xfrac)*HydroCell_temp1.vz
-                                   + xfrac*HydroCell_temp2.vz);
+                if (boost_invariant) {
+                    HydroCell_2D_ptr1 = (
+                            &(*lattice_2D)[position[0][ipy][ipeta][iptau]]);
+                    HydroCell_2D_ptr2 = (
+                            &(*lattice_2D)[position[1][ipy][ipeta][iptau]]);
+                    T += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->temperature
+                                  + xfrac*HydroCell_2D_ptr2->temperature);
+                    vx += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->vx
+                                    + xfrac*HydroCell_2D_ptr2->vx);
+                    vy += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->vy
+                                    + xfrac*HydroCell_2D_ptr2->vy);
+                    pi00 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi00
+                                    + xfrac*HydroCell_2D_ptr2->pi00);
+                    pi01 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi01
+                                    + xfrac*HydroCell_2D_ptr2->pi01);
+                    pi02 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi02
+                                    + xfrac*HydroCell_2D_ptr2->pi02);
+                    pi11 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi11
+                                    + xfrac*HydroCell_2D_ptr2->pi11);
+                    pi12 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi12
+                                    + xfrac*HydroCell_2D_ptr2->pi12);
+                    pi22 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi22
+                                    + xfrac*HydroCell_2D_ptr2->pi22);
+                    pi33 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi33
+                                    + xfrac*HydroCell_2D_ptr2->pi33);
+                    bulkPi += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->bulkPi
+                                    + xfrac*HydroCell_2D_ptr2->bulkPi);
+                } else {
+                    HydroCell_3D_ptr1 = (
+                            &(*lattice_3D)[position[0][ipy][ipeta][iptau]]);
+                    HydroCell_3D_ptr2 = (
+                            &(*lattice_3D)[position[1][ipy][ipeta][iptau]]);
+                    T += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->temperature
+                                  + xfrac*HydroCell_3D_ptr2->temperature);
+                    vx += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->vx
+                                    + xfrac*HydroCell_3D_ptr2->vx);
+                    vy += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->vy
+                                    + xfrac*HydroCell_3D_ptr2->vy);
+                    vz += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->vz
+                                    + xfrac*HydroCell_3D_ptr2->vz);
+                    pi00 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi00
+                                    + xfrac*HydroCell_3D_ptr2->pi00);
+                    pi01 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi01
+                                    + xfrac*HydroCell_3D_ptr2->pi01);
+                    pi02 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi02
+                                    + xfrac*HydroCell_3D_ptr2->pi02);
+                    pi03 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi03
+                                    + xfrac*HydroCell_3D_ptr2->pi03);
+                    pi11 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi11
+                                    + xfrac*HydroCell_3D_ptr2->pi11);
+                    pi12 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi12
+                                    + xfrac*HydroCell_3D_ptr2->pi12);
+                    pi13 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi13
+                                    + xfrac*HydroCell_3D_ptr2->pi13);
+                    pi22 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi22
+                                    + xfrac*HydroCell_3D_ptr2->pi22);
+                    pi23 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi23
+                                    + xfrac*HydroCell_3D_ptr2->pi23);
+                    pi33 += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->pi33
+                                    + xfrac*HydroCell_3D_ptr2->pi33);
+                    bulkPi += prefrac*((1. - xfrac)*HydroCell_3D_ptr1->bulkPi
+                                    + xfrac*HydroCell_3D_ptr2->bulkPi);
                 }
             }
         }
     }
 
-    if (hydroWhichHydro == 8) {  // for boost invariant medium
+    if (boost_invariant) {      // for boost invariant medium
         vz = z/t;               // Bjorken flow in the lab frame
         double gamma_L_inv = sqrt(1. - vz*vz);
         vx = vx*gamma_L_inv;    // convert vx and vy to lab frame
@@ -450,6 +511,29 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
     info->vx = vx;
     info->vy = vy;
     info->vz = vz;
+
+    info->ed = 1.0;
+    info->sd = 0.0;
+    info->pressure = 0.0;
+
+    info->pi[0][0] = pi00;
+    info->pi[0][1] = pi01;
+    info->pi[0][2] = pi02;
+    info->pi[0][3] = pi03;
+    info->pi[1][0] = pi01;
+    info->pi[1][1] = pi11;
+    info->pi[1][2] = pi12;
+    info->pi[1][3] = pi13;
+    info->pi[2][0] = pi02;
+    info->pi[2][1] = pi12;
+    info->pi[2][2] = pi22;
+    info->pi[2][3] = pi23;
+    info->pi[3][0] = pi03;
+    info->pi[3][1] = pi13;
+    info->pi[3][2] = pi23;
+    info->pi[3][3] = pi33;
+
+    info->bulkPi = bulkPi;
     return;
 }
 

@@ -13,6 +13,28 @@
 #include <string>
 #include "./Hydroinfo_h5.h"
 
+struct fluidCell_2D {
+    double temperature;
+    double vx, vy;
+    // the shear stress tensor are already divided by e+P
+    double pi00, pi01, pi02;
+    double pi11, pi12;
+    double pi22;
+    double pi33;
+    double bulkPi;
+};
+
+struct fluidCell_3D {
+    double temperature;
+    double vx, vy, vz;
+    // the shear stress tensor are already divided by e+P
+    double pi00, pi01, pi02, pi03;
+    double pi11, pi12, pi13;
+    double pi22, pi23;
+    double pi33;
+    double bulkPi;
+};
+
 class Hydroinfo_MUSIC {
  private:
     double hydroTau0;       // tau_0 in the hydro data files
@@ -33,7 +55,8 @@ class Hydroinfo_MUSIC {
 
     int itaumax, ixmax, ietamax;
 
-    std::vector<fluidCell> *lattice;     // array to store hydro information
+    std::vector<fluidCell_2D> *lattice_2D;  // array to store hydro information
+    std::vector<fluidCell_3D> *lattice_3D;  // array to store hydro information
 
  public:
     Hydroinfo_MUSIC();       // constructor
@@ -46,7 +69,7 @@ class Hydroinfo_MUSIC {
                        int nskip_tau, int nskip_x, int nskip_z,
                        int whichHydro);
 
-    void getHydroValues(double x, double y, double z, double t, 
+    void getHydroValues(double x, double y, double z, double t,
                         fluidCell *info);
     void output_temperature_evolution(std::string filename_base);
     void update_grid_info(double tau0, double tau_max, double dtau,
