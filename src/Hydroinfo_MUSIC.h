@@ -44,7 +44,7 @@ class Hydroinfo_MUSIC {
     void readHydroData(double tau0, double taumax, double dtau,
                        double xmax, double zmax, double dx, double dz,
                        int nskip_tau, int nskip_x, int nskip_z,
-                       int whichHydro, std::string evolution_name);
+                       int whichHydro);
 
     void getHydroValues(double x, double y, double z, double t, 
                         fluidCell *info);

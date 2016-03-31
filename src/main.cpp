@@ -60,7 +60,6 @@ int main(int argc, char** argv) {
         delete hydroinfo_ptr;
     } else if (hydro_flag == 1) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
-        string evolution_name = "results/evolution_xyeta.dat";
         int hydro_mode = 8;
         int nskip_x = 1;
         int nskip_z = 1;
@@ -74,7 +73,7 @@ int main(int argc, char** argv) {
         double hydro_dz = paraRdr->getVal("hydro_dz");
         hydroinfo_ptr->readHydroData(hydro_tau_0, hydro_tau_max, hydro_dtau,
                 hydro_x_max, hydro_z_max, hydro_dx, hydro_dz,
-                nskip_tau, nskip_x, nskip_z, hydro_mode, evolution_name);
+                nskip_tau, nskip_x, nskip_z, hydro_mode);
         // calculate thermal photons from the hydro medium
         thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, 
                                          etaweight_ptr);

@@ -32,8 +32,7 @@ Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
 void Hydroinfo_MUSIC::readHydroData(
     double tau0, double taumax, double dtau,
     double xmax, double zmax, double dx, double dz,
-    int nskip_tau, int nskip_x, int nskip_z,
-    int whichHydro, string evolution_name) {
+    int nskip_tau, int nskip_x, int nskip_z, int whichHydro) {
 // all hydro data is stored in tau steps (not t) - the t and z in the MARTINI
 // evolution is converted to tau when accessing the hydro data
     lattice->clear();
@@ -71,12 +70,30 @@ void Hydroinfo_MUSIC::readHydroData(
 
         // read in temperature, QGP fraction , flow velocity
         // The name of the evolution file: evolution_name
+        string evolution_name = "results/evolution_xyeta.dat";
+        string evolution_name_Wmunu = 
+            "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
+        string evolution_name_Pi = "results/evolution_bulk_pressure_xyeta.dat";
         cout << "Evolution file name = " << evolution_name << endl;
         ifstream fin;
         fin.open(evolution_name.c_str(), ios::in);
         if (!fin) {
             cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name << endl;
+            exit(1);
+        }
+        ifstream fin1;
+        fin1.open(evolution_name_Wmunu.c_str(), ios::in);
+        if (!fin) {
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name_Wmunu << endl;
+            exit(1);
+        }
+        ifstream fin2;
+        fin2.open(evolution_name_Pi.c_str(), ios::in);
+        if (!fin) {
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name_Pi << endl;
             exit(1);
         }
 
@@ -101,6 +118,8 @@ void Hydroinfo_MUSIC::readHydroData(
         }
         cout << ik << endl;
         fin.close();
+        fin1.close();
+        fin2.close();
     } else if (whichHydro == 8) {
         // event-by-event (2+1)-d MUSIC hydro from JF
         // there are two slices in medium in eta_s
@@ -116,7 +135,12 @@ void Hydroinfo_MUSIC::readHydroData(
         // number of fluid cell in the transverse plane
         int num_fluid_cell_trans = ixmax*ixmax;
 
-        // read in temperature, QGP fraction , flow velocity
+        // read in hydro evolution
+        string evolution_name = "results/evolution_xyeta.dat";
+        string evolution_name_Wmunu = 
+                "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
+        string evolution_name_Pi = "resutls/evolution_bulk_pressure_xyeta.dat";
+
         std::FILE *fin;
         string evolution_file_name = evolution_name;
         cout << "Evolution file name = " << evolution_file_name << endl;
@@ -126,6 +150,22 @@ void Hydroinfo_MUSIC::readHydroData(
         if (fin == NULL) {
             cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_file_name << endl;
+            exit(1);
+        }
+        
+        std::FILE *fin1;
+        fin1 = std::fopen(evolution_name_Wmunu.c_str(), "rb");
+        if (fin1 == NULL) {
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name_Wmunu << endl;
+            exit(1);
+        }
+        
+        std::FILE *fin2;
+        fin2 = std::fopen(evolution_name_Pi.c_str(), "rb");
+        if (fin1 == NULL) {
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name_Pi << endl;
             exit(1);
         }
 
@@ -172,10 +212,33 @@ void Hydroinfo_MUSIC::readHydroData(
                 // vz is Bjorken flow no need to assign values
                 newCell.vz = 0.0;
 
+                // pi^\mu\nu tensor
+                newCell.pi[0][0] = 0.0;
+                newCell.pi[0][1] = 0.0;
+                newCell.pi[0][2] = 0.0;
+                newCell.pi[0][3] = 0.0;
+                newCell.pi[1][0] = 0.0;
+                newCell.pi[1][1] = 0.0;
+                newCell.pi[1][2] = 0.0;
+                newCell.pi[1][3] = 0.0;
+                newCell.pi[2][0] = 0.0;
+                newCell.pi[2][1] = 0.0;
+                newCell.pi[2][2] = 0.0;
+                newCell.pi[2][3] = 0.0;
+                newCell.pi[3][0] = 0.0;
+                newCell.pi[3][1] = 0.0;
+                newCell.pi[3][2] = 0.0;
+                newCell.pi[3][3] = 0.0;
+
+                // bulk pressure
+                newCell.bulkPi = 0.0;
+
                 lattice->push_back(newCell);
             }
         }
         std::fclose(fin);
+        std::fclose(fin1);
+        std::fclose(fin2);
         cout << endl;
         cout << "number of fluid cells: " << lattice->size() << endl;
     }
