@@ -41,11 +41,11 @@ void Hydroinfo_MUSIC::readHydroData(
     // get hydro grid information
     hydroTau0 = tau0;
     hydroTauMax = taumax;
-    hydroDtau = dtau;
+    hydroDtau = dtau*nskip_tau;
     hydroXmax = xmax;
     hydroZmax = zmax;
-    hydroDx = dx;
-    hydroDz = dz;
+    hydroDx = dx*nskip_x;
+    hydroDz = dz*nskip_z;
 
     hydroWhichHydro = whichHydro;
     use_tau_eta_coordinate = 1;
@@ -162,6 +162,9 @@ void Hydroinfo_MUSIC::readHydroData(
                 // store the hydro medium at eta_s = 0.0
                 // vz = 0 at eta_s = 0
                 double gamma_L = 1./sqrt(1. - vz*vz);
+                if (gamma_L > 1.01) {
+                    cout << "gamma_L :" << gamma_L << endl;
+                }
                 newCell.temperature = T;
                 // convert vx and vy to longitudinal co-moving frame
                 newCell.vx = vx*gamma_L;

@@ -16,6 +16,7 @@
 #include <fstream>
 #include <cmath>
 #include <iomanip>
+#include <cstdlib>
 
 #include "./PhotonEmission.h"
 #include "./Hydroinfo_h5.h"
@@ -63,7 +64,7 @@ int main(int argc, char** argv) {
         int hydro_mode = 8;
         int nskip_x = 1;
         int nskip_z = 1;
-        int nskip_tau = 1;
+        int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
         double hydro_tau_0 = paraRdr->getVal("hydro_tau_0");
         double hydro_dtau = paraRdr->getVal("hydro_dtau");
         double hydro_tau_max = 100.0;
@@ -74,6 +75,10 @@ int main(int argc, char** argv) {
         hydroinfo_ptr->readHydroData(hydro_tau_0, hydro_tau_max, hydro_dtau,
                 hydro_x_max, hydro_z_max, hydro_dx, hydro_dz,
                 nskip_tau, nskip_x, nskip_z, hydro_mode, evolution_name);
+        // calculate thermal photons from the hydro medium
+        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, 
+                                         etaweight_ptr);
+        delete hydroinfo_ptr;
     } else {
         cout << "main: unrecognized hydro_flag = " << hydro_flag << endl;
         exit(1);
@@ -93,7 +98,6 @@ int main(int argc, char** argv) {
     // clean up
     delete [] eta_ptr;
     delete [] etaweight_ptr;
-    delete paraRdr;
 
     return(0);
 }
