@@ -146,7 +146,7 @@ void Hydroinfo_MUSIC::readHydroData(
         string evolution_name = "results/evolution_xyeta.dat";
         string evolution_name_Wmunu =
                 "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
-        string evolution_name_Pi = "resutls/evolution_bulk_pressure_xyeta.dat";
+        string evolution_name_Pi = "results/evolution_bulk_pressure_xyeta.dat";
 
         std::FILE *fin;
         string evolution_file_name = evolution_name;
@@ -169,7 +169,7 @@ void Hydroinfo_MUSIC::readHydroData(
 
         std::FILE *fin2;
         fin2 = std::fopen(evolution_name_Pi.c_str(), "rb");
-        if (fin1 == NULL) {
+        if (fin2 == NULL) {
             cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
                  << "Unable to open file: " << evolution_name_Pi << endl;
             exit(1);
