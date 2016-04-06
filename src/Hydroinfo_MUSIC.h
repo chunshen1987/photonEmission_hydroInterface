@@ -37,6 +37,7 @@ struct fluidCell_3D {
 
 class Hydroinfo_MUSIC {
  private:
+    double hbarC;
     double hydroTau0;       // tau_0 in the hydro data files
     double hydroTauMax;     // tau_max in the hydro data files
     double hydroDtau;       // step dtau in fm/c in the hydro data files

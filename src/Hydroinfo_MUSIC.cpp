@@ -21,6 +21,7 @@
 using namespace std;
 
 Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
+    hbarC = 0.19733;
     lattice_2D = new vector<fluidCell_2D>;
     lattice_3D = new vector<fluidCell_3D>;
 }
@@ -178,6 +179,8 @@ void Hydroinfo_MUSIC::readHydroData(
         int ik = 0;
         fluidCell_2D newCell;
         float T, QGPfrac, vx, vy, vz;
+        float pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33;
+        float bulkPi, e_plus_P, cs2;
         int size = sizeof(float);
         while (true) {
             int status = 0;
@@ -189,6 +192,37 @@ void Hydroinfo_MUSIC::readHydroData(
 
             if (status != 5) {  // this is the end of file
                 break;
+            }
+            
+            int status_pi = 0;
+            status_pi = std::fread(&pi00, size, 1, fin1);
+            status_pi += std::fread(&pi01, size, 1, fin1);
+            status_pi += std::fread(&pi02, size, 1, fin1);
+            status_pi += std::fread(&pi03, size, 1, fin1);
+            status_pi += std::fread(&pi11, size, 1, fin1);
+            status_pi += std::fread(&pi12, size, 1, fin1);
+            status_pi += std::fread(&pi13, size, 1, fin1);
+            status_pi += std::fread(&pi22, size, 1, fin1);
+            status_pi += std::fread(&pi23, size, 1, fin1);
+            status_pi += std::fread(&pi33, size, 1, fin1);
+            
+            if (status_pi != 10) {
+                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                     << "Wmunu file does not have the same number of "
+                     << "fluid cells as the ideal file!" << endl;
+                exit(1);
+            }
+
+            int status_bulkPi = 0;
+            status_bulkPi = std::fread(&bulkPi, size, 1, fin2);
+            status_bulkPi += std::fread(&e_plus_P, size, 1, fin2);
+            status_bulkPi += std::fread(&cs2, size, 1, fin2);
+            
+            if (status_bulkPi != 3) {
+                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                     << "bulkPi file does not have the same number of "
+                     << "fluid cells as the ideal file!" << endl;
+                exit(1);
             }
 
             int ieta_idx = static_cast<int>(ik/num_fluid_cell_trans) % n_eta;
@@ -218,16 +252,21 @@ void Hydroinfo_MUSIC::readHydroData(
                 newCell.vy = vy*gamma_L;
 
                 // pi^\mu\nu tensor
-                newCell.pi00 = 0.0;
-                newCell.pi01 = 0.0;
-                newCell.pi02 = 0.0;
-                newCell.pi11 = 0.0;
-                newCell.pi12 = 0.0;
-                newCell.pi22 = 0.0;
-                newCell.pi33 = 0.0;
+                newCell.pi00 = pi00;
+                newCell.pi01 = pi01;
+                newCell.pi02 = pi02;
+                newCell.pi11 = pi11;
+                newCell.pi12 = pi12;
+                newCell.pi22 = pi22;
+                newCell.pi33 = pi33;
 
                 // bulk pressure
-                newCell.bulkPi = 0.0;
+                if (T > 0.18) {
+                    // QGP phase prefactor is divided out here
+                    newCell.bulkPi = bulkPi/(15.*(1./3. - cs2)*e_plus_P);
+                } else {
+                    newCell.bulkPi = bulkPi*hbarC;   // convert to GeV/fm^3
+                }
 
                 lattice_2D->push_back(newCell);
             }
@@ -512,7 +551,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
     info->vy = vy;
     info->vz = vz;
 
-    info->ed = 1.0;
+    info->ed = 1.0;                 // pi's are already divided by e+P
     info->sd = 0.0;
     info->pressure = 0.0;
 
