@@ -22,11 +22,11 @@ channel_list = ['K_Kstar_to_pion_gamma',
 
 rate_type_list = ['eqrate', 'viscous', 'bulkvis']
 
-sum_data = 0.0*loadtxt('rate_%s_%s.dat' % (channel_list[0], rate_type_list[0]))
 for itype in range(len(rate_type_list)):
+    sum_data = zeros([76, 80])
     for ich in range(len(channel_list)):
         filename = 'rate_%s_%s.dat' % (channel_list[ich], rate_type_list[itype])
         data = loadtxt(filename)
-        sum_data += data
+        sum_data[0:75, :] += data
     savetxt('rate_HG_2to2_meson_total_%s.dat' % rate_type_list[itype], 
             sum_data, fmt='%.10e', delimiter = '   ')
