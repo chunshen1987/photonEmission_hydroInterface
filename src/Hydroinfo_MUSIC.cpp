@@ -265,9 +265,8 @@ void Hydroinfo_MUSIC::readHydroData(
                     // QGP phase prefactor is divided out here
                     newCell.bulkPi = bulkPi/(15.*(1./3. - cs2)*e_plus_P);
                 } else {
-                    newCell.bulkPi = bulkPi*hbarC;   // convert to GeV/fm^3
+                    newCell.bulkPi = bulkPi;   // [1/fm^4]
                 }
-
                 lattice_2D->push_back(newCell);
             }
         }
