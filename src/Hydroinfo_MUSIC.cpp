@@ -25,7 +25,6 @@ Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
     lattice_2D = new vector<fluidCell_2D>;
     lattice_3D = new vector<fluidCell_3D>;
     lattice_3D_new = new vector<fluidCell_3D_new>;
-    turn_on_shear = 1;
 }
 
 Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
@@ -40,24 +39,69 @@ Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
     delete lattice_3D_new;
 }
 
-void Hydroinfo_MUSIC::readHydroData(
-    double tau0, double taumax, double dtau,
-    double xmax, double zmax, double dx, double dz,
-    int nskip_tau, int nskip_x, int nskip_z, int whichHydro) {
+void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
     // all hydro data is stored in tau steps (not t)
     // evolution is converted to tau when accessing the hydro data
     lattice_2D->clear();
     lattice_3D->clear();
     lattice_3D_new->clear();
 
-    // get hydro grid information
-    hydroTau0 = tau0;
-    hydroTauMax = taumax;
-    hydroDtau = dtau*nskip_tau;
-    hydroXmax = xmax;
-    hydroZmax = zmax;
-    hydroDx = dx*nskip_x;
-    hydroDz = dz*nskip_z;
+    // read in setups of the hydro simulation
+    ostringstream config_file;
+    config_file << "results/music_input";
+    ifstream configuration;
+    configuration.open(config_file.str().c_str(), ios::in);
+    if (!configuration) {
+        cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+             << "Unable to open file: " << config_file.str() << endl;
+        exit(1);
+    }
+    string temp1;
+    string temp_name;
+    while (!configuration.eof()) {
+        getline(configuration, temp1);
+        stringstream ss(temp1);
+        ss >> temp_name;
+
+        // read in grid information
+        if (temp_name == "Initial_time_tau_0") {
+            ss >> hydroTau0;
+        } else if (temp_name == "Delta_Tau") {
+            ss >> hydroDtau;
+        } else if (temp_name == "X_grid_size_in_fm") {
+            double temp;
+            ss >> temp;
+            hydroXmax = temp/2.;
+        } else if (temp_name == "Grid_size_in_x") {
+            ss >> ixmax;
+        } else if (temp_name == "Eta_grid_size") {
+            double temp;
+            ss >> temp;
+            hydro_eta_max = temp/2.;
+        } else if (temp_name == "Grid_size_in_eta") {
+            ss >> ietamax;
+        } else if (temp_name == "output_evolution_every_N_timesteps") {
+            ss >> nskip_tau;
+        } else if (temp_name == "output_evolution_every_N_x") {
+            ss >> nskip_x;
+        } else if (temp_name == "output_evolution_every_N_eta") {
+            ss >> nskip_eta;
+        }
+        // read in additioinal information
+        if (temp_name == "Include_Rhob_Yes_1_No_0") {
+            ss >> turn_on_rhob;
+        } else if (temp_name == "Include_Shear_Visc_Yes_1_No_0") {
+            ss >> turn_on_shear;
+        } else if (temp_name == "Include_Bulk_Visc_Yes_1_No_0") {
+            ss >> turn_on_bulk;
+        } else if (temp_name == "turn_on_baryon_diffusion") {
+            ss >> turn_on_diff;
+        }
+    }
+    configuration.close();
+
+    hydroDx = 2.*hydroXmax/(ixmax - 1.);
+    hydroDeta = 2.*hydro_eta_max/(static_cast<double>(ietamax));
 
     hydroWhichHydro = whichHydro;
     use_tau_eta_coordinate = 1;
@@ -77,9 +121,8 @@ void Hydroinfo_MUSIC::readHydroData(
         cout << "Using 3+1D Jeon Schenke hydro reading data ..." << endl;
         boost_invariant = false;
 
-        itaumax = static_cast<int>((taumax-tau0)/dtau+0.001);
-        ixmax = static_cast<int>(2*xmax/dx+0.001);
-        ietamax = static_cast<int>(2*zmax/dz+0.001);
+        ixmax = static_cast<int>(2.*hydroXmax/hydroDx + 0.001);
+        ietamax = static_cast<int>(2.*hydro_eta_max/hydroDeta + 0.001);
 
         // read in temperature, QGP fraction , flow velocity
         // The name of the evolution file: evolution_name
@@ -141,8 +184,14 @@ void Hydroinfo_MUSIC::readHydroData(
         boost_invariant = true;
         cout << "Reading event-by-event hydro evolution data from JF ..."
              << endl;
-        ixmax = static_cast<int>(2*xmax/dx+0.001);
+
+        ixmax = static_cast<int>(2.*hydroXmax/hydroDx + 0.001);
         ietamax = 1;
+        nskip_tau = nskip_tau_in;
+
+        hydroDx *= nskip_x;
+        hydroDtau *= nskip_tau;
+        hydroDeta *= nskip_eta;
 
         int n_eta = 2;  // there are two slices in eta_s
         // number of fluid cell in the transverse plane
@@ -285,8 +334,8 @@ void Hydroinfo_MUSIC::readHydroData(
         cout << "Using 3+1D new MUSIC hydro reading data ..." << endl;
         boost_invariant = false;
 
-        ixmax = static_cast<int>(2*xmax/dx + 0.001);
-        ietamax = static_cast<int>(2*zmax/dz + 0.001);
+        ixmax = static_cast<int>(2.*hydroXmax/hydroDx + 0.001);
+        ietamax = static_cast<int>(2.*hydro_eta_max/hydroDeta + 0.001);
 
         // read in temperature, QGP fraction , flow velocity
         // The name of the evolution file: evolution_name
@@ -398,7 +447,7 @@ void Hydroinfo_MUSIC::readHydroData(
             hydroTau0 + hydroDtau*static_cast<int>(
                         static_cast<double>(lattice_3D->size())
                         /((2.*hydroXmax/hydroDx+1.)*(2.*hydroXmax/hydroDx+1.)
-                        *2.*(hydroZmax/hydroDz))));
+                        *2.*(hydro_eta_max/hydroDeta))));
         itaumax = static_cast<int>((hydroTauMax-hydroTau0)/hydroDtau+0.001);
     }
     if (whichHydro == 8) {
@@ -414,8 +463,8 @@ void Hydroinfo_MUSIC::readHydroData(
     cout << "hydry_dtau = " << hydroDtau << " fm" << endl;
     cout << "hydro_Xmax = " << hydroXmax << " fm" << endl;
     cout << "hydro_dx = " << hydroDx << " fm" << endl;
-    cout << "hydro_eta_max = " << hydroZmax << " fm" << endl;
-    cout << "hydro_deta = " << hydroDz << " fm" << endl;
+    cout << "hydro_eta_max = " << hydro_eta_max << " fm" << endl;
+    cout << "hydro_deta = " << hydroDeta << " fm" << endl;
 }
 
 void Hydroinfo_MUSIC::get_hydro_cell_info_3d(int cell_id,
@@ -440,8 +489,8 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
                                      double z, double t, fluidCell* info) {
 // For interpolation of evolution files in tau-eta coordinates. Only the
 // reading of MUSIC's evolution_xyeta.dat file is implemented here.
-// For simplicity, hydroZmax refers to MUSIC's eta_size, and similarly for
-// hydroDz; however, x, y, z, and t are as usual to stay compatible with
+// For simplicity, hydro_eta_max refers to MUSIC's eta_size, and similarly for
+// hydroDeta; however, x, y, z, and t are as usual to stay compatible with
 // MARTINI.
     double tau, eta;
     if (use_tau_eta_coordinate == 1) {
@@ -459,7 +508,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
         eta = z;
     }
 
-    int ieta = floor((hydroZmax+eta)/hydroDz + 0.0001);
+    int ieta = floor((hydro_eta_max+eta)/hydroDeta + 0.0001);
     if (hydroWhichHydro == 8)
         ieta = 0;
 
@@ -469,7 +518,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
 
     double xfrac = (x - (static_cast<double>(ix)*hydroDx - hydroXmax))/hydroDx;
     double yfrac = (y - (static_cast<double>(iy)*hydroDx - hydroXmax))/hydroDx;
-    double etafrac = (eta/hydroDz - static_cast<double>(ieta)
+    double etafrac = (eta/hydroDeta - static_cast<double>(ieta)
                       + 0.5*static_cast<double>(ietamax));
     double taufrac = (tau - hydroTau0)/hydroDtau - static_cast<double>(itau);
 
@@ -730,22 +779,22 @@ void Hydroinfo_MUSIC::output_temperature_evolution(string filename_base) {
 
 void Hydroinfo_MUSIC::update_grid_info(
     double tau0, double tau_max, double dtau,
-    double x_max, double dx, double z_max, double dz) {
+    double x_max, double dx, double eta_max, double deta) {
     hydroTau0 = tau0;
     hydroTauMax = tau_max;
     hydroDtau = dtau;
     hydroXmax = x_max;
     hydroDx = dx;
-    hydroZmax = z_max;
-    hydroDz = dz;
+    hydro_eta_max = eta_max;
+    hydroDeta = deta;
     if (hydroWhichHydro == 8) {
         itaumax = static_cast<int>((tau_max-tau0)/dtau+0.001);
         ixmax = static_cast<int>(2*x_max/dx+0.001);
-        ietamax = static_cast<int>(2*z_max/dz+0.001);
+        ietamax = static_cast<int>(2*eta_max/deta+0.001);
     }
     if (hydroWhichHydro == 6) {
         itaumax = static_cast<int>((tau_max-tau0)/dtau+0.001);
         ixmax = static_cast<int>(2*x_max/dx+0.001);
-        ietamax = static_cast<int>(2*z_max/dz+0.001);
+        ietamax = static_cast<int>(2*eta_max/deta+0.001);
     }
 }

@@ -53,11 +53,13 @@ class Hydroinfo_MUSIC {
     double hydroDtau;       // step dtau in fm/c in the hydro data files
     double hydroXmax;       // maximum x in fm in the hydro data files
                             // [-xmax, +xmax] for both x and y
-    double hydroZmax;       // maximum z in fm in the hydro data files
+    double hydro_eta_max;       // maximum z in fm in the hydro data files
                             // [-zmax, +zmax] for 3D hydro
     double hydroDx;         // step dx in fm in the hydro data files
-    double hydroDz;         // step dz in fm in the hydro data files in
+    double hydroDeta;         // step dz in fm in the hydro data files in
                             // the z-direction for 3D hydro
+
+    int nskip_tau, nskip_x, nskip_eta;
 
     int hydroWhichHydro;    // choose a hydro evolution model to use
     int use_tau_eta_coordinate;
@@ -82,15 +84,15 @@ class Hydroinfo_MUSIC {
     double get_hydro_tau0() {return(hydroTau0);}
     double get_hydro_dtau() {return(hydroDtau);}
     double get_hydro_dx() {return(hydroDx);}
-    double get_hydro_deta() {return(hydroDz);}
-    double get_hydro_eta_max() {return(hydroZmax);}
+    double get_hydro_deta() {return(hydroDeta);}
+    double get_hydro_eta_max() {return(hydro_eta_max);}
     double get_hydro_x_max() {return(hydroXmax);}
+    int get_hydro_Nskip_tau() {return(nskip_tau);}
+    int get_hydro_Nskip_x() {return(nskip_x);}
+    int get_hydro_Nskip_eta() {return(nskip_eta);}
     int get_number_of_fluid_cells_3d() {return(lattice_3D_new->size());}
 
-    void readHydroData(double tau0, double taumax, double dtau,
-                       double xmax, double zmax, double dx, double dz,
-                       int nskip_tau, int nskip_x, int nskip_z,
-                       int whichHydro);
+    void readHydroData(int whichHydro, int nskip_tau_in);
 
     void getHydroValues(double x, double y, double z, double t,
                         fluidCell *info);

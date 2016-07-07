@@ -2,18 +2,6 @@ hydro_flag = 2                # read in mode for hydro medium
                               # 0: read in hdf5 file
                               # 1: read in binary file output from MUSIC
                               # 2: read in binary file output from new MUSIC
-hydro_tau_0 = 0.6             # starting time in hydro evo file 
-                              # (only works for hydro_flag = 1, 2)
-hydro_dtau = 0.020            # time step in hydro evo file 
-                              # (only works for hydro_flag = 1, 2)
-hydro_x_max = 10.0            # x_max in hydro evo file 
-                              # (only works for hydro_flag = 1, 2)
-hydro_dx = 0.10               # grid spacing in hydro evo file 
-                              # (only works for hydro_flag = 1, 2)
-hydro_z_max = 6.4             # eta_max in hydro evo file 
-                              # (only works for hydro_flag = 1, 2)
-hydro_dz = 0.2                # deta in hydro evo file 
-                              # (only works for hydro_flag = 1, 2)
 hydro_nskip_tau = 1           # read in hydro slice every hydro_nskip_tau 
                               # steps from the medium file
                               # (only works for hydro_flag = 1)

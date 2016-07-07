@@ -693,6 +693,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double deta = hydroinfo_MUSIC_ptr->get_hydro_deta();
     double eta_max = hydroinfo_MUSIC_ptr->get_hydro_eta_max();
     double X_max = hydroinfo_MUSIC_ptr->get_hydro_x_max();
+    double Nskip_x = hydroinfo_MUSIC_ptr->get_hydro_Nskip_x();
+    double Nskip_eta = hydroinfo_MUSIC_ptr->get_hydro_Nskip_eta();
+    double Nskip_tau = hydroinfo_MUSIC_ptr->get_hydro_Nskip_tau();
+    double volume = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
 
     double tau_now = 0.0;
     double flow_u_mu_low[4];
@@ -709,12 +713,12 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         double tau_local = tau0 + fluidCellptr->itau*dtau;
         if (fabs(tau_now - tau_local) > 1e-10) {
             tau_now = tau_local;
-            cout << " Doing tau = " << setw(4) << setprecision(3) << tau_now
-                 << " fm/c" << endl;
+            cout << "Calculating tau = " << setw(4) << setprecision(3)
+                 << tau_now << " fm/c..." << endl;
         }
 
         // volume element: tau*dtau*dx*dy*deta,
-        double volume = tau_now*dtau*dx*dx*deta;
+        volume *= tau_local;
         
         int idx_Tb = 0;
         double temp_local = fluidCellptr->temperature;
