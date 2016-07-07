@@ -78,6 +78,25 @@ int main(int argc, char** argv) {
         thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, 
                                          etaweight_ptr);
         delete hydroinfo_ptr;
+    } else if (hydro_flag == 2) {
+        Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
+        int hydro_mode = 10;
+        int nskip_x = 1;
+        int nskip_z = 1;
+        int nskip_tau = 1;
+        double hydro_tau_0 = paraRdr->getVal("hydro_tau_0");
+        double hydro_dtau = paraRdr->getVal("hydro_dtau");
+        double hydro_tau_max = 100.0;
+        double hydro_x_max = paraRdr->getVal("hydro_x_max");
+        double hydro_dx = paraRdr->getVal("hydro_dx");
+        double hydro_z_max = paraRdr->getVal("hydro_z_max");
+        double hydro_dz = paraRdr->getVal("hydro_dz");
+        hydroinfo_ptr->readHydroData(hydro_tau_0, hydro_tau_max, hydro_dtau,
+                hydro_x_max, hydro_z_max, hydro_dx, hydro_dz,
+                nskip_tau, nskip_x, nskip_z, hydro_mode);
+        // calculate thermal photons from the hydro medium
+        thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
+        delete hydroinfo_ptr;
     } else {
         cout << "main: unrecognized hydro_flag = " << hydro_flag << endl;
         exit(1);

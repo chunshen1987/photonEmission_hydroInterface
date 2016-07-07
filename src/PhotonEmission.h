@@ -78,6 +78,7 @@ class PhotonEmission {
     void InitializePhotonEmissionRateTables();
     void calPhotonemission(void *hydroinfo_ptr_in, double* eta_ptr, 
                            double* etaweight_ptr);
+    void calPhotonemission_3d(void *hydroinfo_ptr_in);
     void calPhoton_total_SpMatrix();
     void calPhoton_SpvnpT_individualchannel();
     void calPhoton_total_Spvn();

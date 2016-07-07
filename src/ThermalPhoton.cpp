@@ -702,76 +702,139 @@ void ThermalPhoton::getPhotonemissionRate(double* Eq, double* pi_zz, double* bul
     return;
 }
 
-void ThermalPhoton::calThermalPhotonemission(double* Eq, double* pi_zz, double* bulkPi, int Tb_length, double T, double* volume, double fraction)
-{
-    double* em_eqrate = new double [Tb_length];   //photon emission equilibrium rate at local rest cell
-    double* em_visrate = new double [Tb_length];   //photon emission viscous correction at local rest cell
-    double* em_bulkvis = new double [Tb_length];   //photon emission bulk viscous correction at local rest cell
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T, em_eqrate, em_visrate, em_bulkvis);
+void ThermalPhoton::calThermalPhotonemission_3d(
+        double* Eq, double* pi_zz, double* bulkPi, int Tb_length, double T,
+        double volume, double fraction) {
+    // photon emission equilibrium rate at local rest cell
+    double* em_eqrate = new double [Tb_length];
+    // photon emission viscous correction at local rest cell
+    double* em_visrate = new double [Tb_length];
+    // photon emission bulk viscous correction at local rest cell
+    double* em_bulkvis = new double [Tb_length];
+
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+                          em_eqrate, em_visrate, em_bulkvis);
+
+    int idx = 0;
+    for (int k = 0; k < nrapidity; k++) {
+        for (int m = 0; m < nphi; m++) {
+            for (int l = 0; l < np; l++) {
+                double local_eq = em_eqrate[idx];
+                double local_vis = em_visrate[idx];
+                double local_bulk = em_bulkvis[idx];
+
+                double temp_eq_sum = local_eq*volume*fraction;
+                double temp_vis_sum = local_vis*volume*fraction;
+                double temp_bulkvis_sum = local_bulk*volume*fraction;
+             
+                double ratio = fabs(local_vis + local_bulk)/(local_eq + 1e-20);
+                if (ratio > 1.0) {
+                    local_vis = local_vis/ratio;
+                    local_bulk = local_bulk/ratio;
+                }
+             
+                double temp_vis_deltaf_restricted_sum = (
+                                                local_vis*volume*fraction);
+                double temp_bulkvis_deltaf_restricted_sum = (
+                                                local_bulk*volume*fraction);
+
+                dNd2pTdphidy_eq[l][m][k] += temp_eq_sum;
+                dNd2pTdphidy_vis[l][m][k] += temp_eq_sum + temp_vis_sum;
+                dNd2pTdphidy_vis_deltaf_restricted[l][m][k] += (
+                            temp_eq_sum + temp_vis_deltaf_restricted_sum);
+                dNd2pTdphidy_bulkvis[l][m][k] += (
+                            temp_eq_sum + temp_bulkvis_sum);
+                dNd2pTdphidy_bulkvis_deltaf_restricted[l][m][k] += (
+                            temp_eq_sum + temp_bulkvis_deltaf_restricted_sum);
+                dNd2pTdphidy_tot[l][m][k] += (temp_eq_sum + temp_vis_sum
+                                              + temp_bulkvis_sum);
+                idx++;
+            }
+        }
+    }
+    delete[] em_eqrate;
+    delete[] em_visrate;
+    delete[] em_bulkvis;
+    return;
+}
+
+void ThermalPhoton::calThermalPhotonemission(
+        double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
+        double T, double* volume, double fraction) {
+    // photon emission equilibrium rate at local rest cell
+    double* em_eqrate = new double [Tb_length];
+    // photon emission viscous correction at local rest cell
+    double* em_visrate = new double [Tb_length];
+    // photon emission bulk viscous correction at local rest cell
+    double* em_bulkvis = new double [Tb_length];
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+                          em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
     
     double temp_eq_sum, temp_vis_sum, temp_bulkvis_sum;
     double temp_vis_deltaf_restricted_sum, temp_bulkvis_deltaf_restricted_sum;
-    int idx=0;
-    for(int k=0; k<nrapidity; k++)
-    {
-      for(int m=0; m<nphi; m++)
-      {
-        for(int l=0; l<np; l++)
-        {
-          temp_eq_sum = 0.0;
-          temp_vis_sum = 0.0;
-          temp_bulkvis_sum = 0.0;
-          temp_vis_deltaf_restricted_sum = 0.0;
-          temp_bulkvis_deltaf_restricted_sum = 0.0;
-          for(int i=0; i < neta; i++)
-          {
-             double local_eq = em_eqrate[idx + i*n_pt_point];
-             double local_vis = em_visrate[idx + i*n_pt_point];
-             double local_bulk = em_bulkvis[idx + i*n_pt_point];
+    int idx = 0;
+    for (int k = 0; k < nrapidity; k++) {
+        for (int m = 0; m < nphi; m++) {
+            for (int l = 0; l < np; l++) {
+                temp_eq_sum = 0.0;
+                temp_vis_sum = 0.0;
+                temp_bulkvis_sum = 0.0;
+                temp_vis_deltaf_restricted_sum = 0.0;
+                temp_bulkvis_deltaf_restricted_sum = 0.0;
+                for (int i = 0; i < neta; i++) {
+                    double local_eq = em_eqrate[idx + i*n_pt_point];
+                    double local_vis = em_visrate[idx + i*n_pt_point];
+                    double local_bulk = em_bulkvis[idx + i*n_pt_point];
 
-             temp_eq_sum += local_eq*volume[i]*fraction;
-             temp_vis_sum += local_vis*volume[i]*fraction;
-             temp_bulkvis_sum += local_bulk*volume[i]*fraction;
+                    temp_eq_sum += local_eq*volume[i]*fraction;
+                    temp_vis_sum += local_vis*volume[i]*fraction;
+                    temp_bulkvis_sum += local_bulk*volume[i]*fraction;
              
-             double ratio = fabs(local_vis + local_bulk)/(local_eq + 1e-20);
-             if(ratio > 1.0)
-             {
-                 local_vis = local_vis/ratio;
-                 local_bulk = local_bulk/ratio;
-             }
+                    double ratio = (fabs(local_vis + local_bulk)
+                                    /(local_eq + 1e-20));
+                    if (ratio > 1.0) {
+                        local_vis = local_vis/ratio;
+                        local_bulk = local_bulk/ratio;
+                    }
              
-             temp_vis_deltaf_restricted_sum += local_vis*volume[i]*fraction;
-             temp_bulkvis_deltaf_restricted_sum += local_bulk*volume[i]*fraction;
-          }
-          dNd2pTdphidy_eq[l][m][k] += temp_eq_sum;
-          dNd2pTdphidy_vis[l][m][k] += temp_eq_sum + temp_vis_sum;
-          dNd2pTdphidy_vis_deltaf_restricted[l][m][k] += temp_eq_sum + temp_vis_deltaf_restricted_sum;
-          dNd2pTdphidy_bulkvis[l][m][k] += temp_eq_sum + temp_bulkvis_sum;
-          dNd2pTdphidy_bulkvis_deltaf_restricted[l][m][k] += temp_eq_sum + temp_bulkvis_deltaf_restricted_sum;
-          dNd2pTdphidy_tot[l][m][k] += temp_eq_sum + temp_vis_sum + temp_bulkvis_sum;
-          idx++;
+                    temp_vis_deltaf_restricted_sum +=
+                                            local_vis*volume[i]*fraction;
+                    temp_bulkvis_deltaf_restricted_sum +=
+                                            local_bulk*volume[i]*fraction;
+                }
+                dNd2pTdphidy_eq[l][m][k] += temp_eq_sum;
+                dNd2pTdphidy_vis[l][m][k] += temp_eq_sum + temp_vis_sum;
+                dNd2pTdphidy_vis_deltaf_restricted[l][m][k] +=
+                            temp_eq_sum + temp_vis_deltaf_restricted_sum;
+                dNd2pTdphidy_bulkvis[l][m][k] +=
+                            temp_eq_sum + temp_bulkvis_sum;
+                dNd2pTdphidy_bulkvis_deltaf_restricted[l][m][k] +=
+                            temp_eq_sum + temp_bulkvis_deltaf_restricted_sum;
+                dNd2pTdphidy_tot[l][m][k] +=
+                            temp_eq_sum + temp_vis_sum + temp_bulkvis_sum;
+                idx++;
+            }
         }
-      }
     }
     delete[] em_eqrate;
     delete[] em_visrate;
     delete[] em_bulkvis;
-    /*if(isnan(em_rate))
-    {
-        cout<<" em_rate is nan" << endl;
-        exit(1);
-    }*/
     return;
 }
 
-void ThermalPhoton::calThermalPhotonemissiondTdtau(double* Eq, double* pi_zz, double* bulkPi, int Tb_length, double T, double tau, double* volume, double fraction)
-{
-    double* em_eqrate = new double [Tb_length];   //photon emission equilibrium rate at local rest cell
-    double* em_visrate = new double [Tb_length];   //photon emission viscous correction at local rest cell
-    double* em_bulkvis = new double [Tb_length];   //photon emission bulk viscous correction at local rest cell
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T, em_eqrate, em_visrate, em_bulkvis);
+void ThermalPhoton::calThermalPhotonemissiondTdtau(
+    double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
+    double T, double tau, double* volume, double fraction) {
+    // photon emission equilibrium rate at local rest cell
+    double* em_eqrate = new double [Tb_length];
+    // photon emission viscous correction at local rest cell
+    double* em_visrate = new double [Tb_length];
+    // photon emission bulk viscous correction at local rest cell
+    double* em_bulkvis = new double [Tb_length];
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+                          em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
 
@@ -783,42 +846,90 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau(double* Eq, double* pi_zz, do
 
     double temp_eq_sum, temp_vis_sum, temp_bulkvis_sum;
     int idx=0;
-    for(int k=0; k<nrapidity; k++)
-    {
-      for(int m=0; m<nphi; m++)
-      {
-        for(int l=0; l<np; l++)
-        {
-          temp_eq_sum = 0.0;
-          temp_vis_sum = 0.0;
-          temp_bulkvis_sum = 0.0;
-          for(int i=0; i < neta; i++)
-          {
-             temp_eq_sum += em_eqrate[idx + i*n_pt_point]*volume[i]*fraction;
-             temp_vis_sum += em_visrate[idx + i*n_pt_point]*volume[i]*fraction;
-             temp_bulkvis_sum += em_bulkvis[idx + i*n_pt_point]*volume[i]*fraction;
-          }
-          dNd2pTdphidydTdtau_eq[idx_T][idx_tau][l][m][k] += temp_eq_sum;
-          dNd2pTdphidydTdtau_vis[idx_T][idx_tau][l][m][k] += temp_eq_sum + temp_vis_sum;
-          dNd2pTdphidydTdtau_bulkvis[idx_T][idx_tau][l][m][k] += temp_eq_sum + temp_bulkvis_sum;
-          dNd2pTdphidydTdtau_tot[idx_T][idx_tau][l][m][k] += temp_eq_sum + temp_vis_sum + temp_bulkvis_sum;
-          idx++;
+    for (int k = 0; k < nrapidity; k++) {
+        for (int m = 0; m < nphi; m++) {
+            for (int l = 0; l < np; l++) {
+                temp_eq_sum = 0.0;
+                temp_vis_sum = 0.0;
+                temp_bulkvis_sum = 0.0;
+                for (int i = 0; i < neta; i++) {
+                    temp_eq_sum +=
+                            em_eqrate[idx + i*n_pt_point]*volume[i]*fraction;
+                    temp_vis_sum +=
+                            em_visrate[idx + i*n_pt_point]*volume[i]*fraction;
+                    temp_bulkvis_sum +=
+                            em_bulkvis[idx + i*n_pt_point]*volume[i]*fraction;
+                }
+                dNd2pTdphidydTdtau_eq[idx_T][idx_tau][l][m][k] += temp_eq_sum;
+                dNd2pTdphidydTdtau_vis[idx_T][idx_tau][l][m][k] += (
+                                            temp_eq_sum + temp_vis_sum);
+                dNd2pTdphidydTdtau_bulkvis[idx_T][idx_tau][l][m][k] += (
+                                            temp_eq_sum + temp_bulkvis_sum);
+                dNd2pTdphidydTdtau_tot[idx_T][idx_tau][l][m][k] += (
+                            temp_eq_sum + temp_vis_sum + temp_bulkvis_sum);
+                idx++;
+            }
         }
-      }
     }
-
     delete[] em_eqrate;
     delete[] em_visrate;
     delete[] em_bulkvis;
     return;
 }
 
-void ThermalPhoton::calThermalPhotonemissiondxperpdtau(double* Eq, double* pi_zz, double* bulkPi, int Tb_length, double T, double x_local, double tau, double* volume, double fraction)
-{
-    double* em_eqrate = new double [Tb_length];   //photon emission equilibrium rate at local rest cell
-    double* em_visrate = new double [Tb_length];   //photon emission viscous correction at local rest cell
-    double* em_bulkvis = new double [Tb_length];   //photon emission bulk viscous correction at local rest cell
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T, em_eqrate, em_visrate, em_bulkvis);
+void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
+    double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
+    double T, double tau, double volume, double fraction) {
+    // photon emission equilibrium rate at local rest cell
+    double* em_eqrate = new double [Tb_length];
+    // photon emission viscous correction at local rest cell
+    double* em_visrate = new double [Tb_length];
+    // photon emission bulk viscous correction at local rest cell
+    double* em_bulkvis = new double [Tb_length];
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+                          em_eqrate, em_visrate, em_bulkvis);
+
+    double eps = 1e-15;
+    double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
+    double dtau = (Taucut_high - Taucut_low)/(nTaucut - 1);
+    int idx_T = (int)((T - Tcut_low)/dT + eps);
+    int idx_tau = (int)((tau - Taucut_low)/dtau + eps);
+
+    int idx = 0;
+    for (int k = 0; k < nrapidity; k++) {
+        for (int m = 0; m < nphi; m++) {
+            for (int l = 0; l < np; l++) {
+                double temp_eq_sum = em_eqrate[idx]*volume*fraction;
+                double temp_vis_sum = em_visrate[idx]*volume*fraction;
+                double temp_bulkvis_sum = em_bulkvis[idx]*volume*fraction;
+                dNd2pTdphidydTdtau_eq[idx_T][idx_tau][l][m][k] += temp_eq_sum;
+                dNd2pTdphidydTdtau_vis[idx_T][idx_tau][l][m][k] += (
+                                            temp_eq_sum + temp_vis_sum);
+                dNd2pTdphidydTdtau_bulkvis[idx_T][idx_tau][l][m][k] += (
+                                            temp_eq_sum + temp_bulkvis_sum);
+                dNd2pTdphidydTdtau_tot[idx_T][idx_tau][l][m][k] += (
+                            temp_eq_sum + temp_vis_sum + temp_bulkvis_sum);
+                idx++;
+            }
+        }
+    }
+    delete[] em_eqrate;
+    delete[] em_visrate;
+    delete[] em_bulkvis;
+    return;
+}
+
+void ThermalPhoton::calThermalPhotonemissiondxperpdtau(
+    double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
+    double T, double x_local, double tau, double* volume, double fraction) {
+    // photon emission equilibrium rate at local rest cell
+    double* em_eqrate = new double [Tb_length];
+    // photon emission viscous correction at local rest cell
+    double* em_visrate = new double [Tb_length];
+    // photon emission bulk viscous correction at local rest cell
+    double* em_bulkvis = new double [Tb_length];
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+                          em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
 
@@ -829,29 +940,76 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau(double* Eq, double* pi_zz
     int idx_tau = (int)((tau - tau_cut_low)/dtau + eps);
 
     double temp_eq_sum, temp_vis_sum, temp_bulkvis_sum;
-    int idx=0;
-    for(int k=0; k<nrapidity; k++)
-    {
-      for(int m=0; m<nphi; m++)
-      {
-        for(int l=0; l<np; l++)
-        {
-          temp_eq_sum = 0.0;
-          temp_vis_sum = 0.0;
-          temp_bulkvis_sum = 0.0;
-          for(int i=0; i < neta; i++)
-          {
-             temp_eq_sum += em_eqrate[idx + i*n_pt_point]*volume[i]*fraction;
-             temp_vis_sum += em_visrate[idx + i*n_pt_point]*volume[i]*fraction;
-             temp_bulkvis_sum += em_bulkvis[idx + i*n_pt_point]*volume[i]*fraction;
-          }
-          dNd2pTdphidydxperpdtau_eq[idx_xperp][idx_tau][l][m][k] += temp_eq_sum;
-          dNd2pTdphidydxperpdtau_vis[idx_xperp][idx_tau][l][m][k] += temp_eq_sum + temp_vis_sum;
-          dNd2pTdphidydxperpdtau_bulkvis[idx_xperp][idx_tau][l][m][k] += temp_eq_sum + temp_bulkvis_sum;
-          dNd2pTdphidydxperpdtau_tot[idx_xperp][idx_tau][l][m][k] += temp_eq_sum + temp_vis_sum + temp_bulkvis_sum;
-          idx++;
+    int idx = 0;
+    for (int k = 0; k < nrapidity; k++) {
+        for (int m = 0; m < nphi; m++) {
+            for (int l = 0; l < np; l++) {
+                temp_eq_sum = 0.0;
+                temp_vis_sum = 0.0;
+                temp_bulkvis_sum = 0.0;
+                for (int i = 0; i < neta; i++) {
+                    temp_eq_sum +=
+                        em_eqrate[idx + i*n_pt_point]*volume[i]*fraction;
+                    temp_vis_sum +=
+                        em_visrate[idx + i*n_pt_point]*volume[i]*fraction;
+                    temp_bulkvis_sum +=
+                        em_bulkvis[idx + i*n_pt_point]*volume[i]*fraction;
+                }
+                dNd2pTdphidydxperpdtau_eq[idx_xperp][idx_tau][l][m][k] +=
+                                                                temp_eq_sum;
+                dNd2pTdphidydxperpdtau_vis[idx_xperp][idx_tau][l][m][k] +=
+                                            temp_eq_sum + temp_vis_sum;
+                dNd2pTdphidydxperpdtau_bulkvis[idx_xperp][idx_tau][l][m][k] +=
+                                            temp_eq_sum + temp_bulkvis_sum;
+                dNd2pTdphidydxperpdtau_tot[idx_xperp][idx_tau][l][m][k] +=
+                                temp_eq_sum + temp_vis_sum + temp_bulkvis_sum;
+                idx++;
+            }
         }
-      }
+    }
+
+    delete[] em_eqrate;
+    delete[] em_visrate;
+    delete[] em_bulkvis;
+    return;
+}
+
+void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
+    double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
+    double T, double x_local, double tau, double volume, double fraction) {
+    // photon emission equilibrium rate at local rest cell
+    double* em_eqrate = new double [Tb_length];
+    // photon emission viscous correction at local rest cell
+    double* em_visrate = new double [Tb_length];
+    // photon emission bulk viscous correction at local rest cell
+    double* em_bulkvis = new double [Tb_length];
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+                          em_eqrate, em_visrate, em_bulkvis);
+
+    double eps = 1e-15;
+    double dxperp = (xperp_high - xperp_low)/(n_xperp_cut - 1);
+    double dtau = (tau_cut_high - tau_cut_low)/(n_tau_cut_xtau - 1);
+    int idx_xperp = (int)((x_local - xperp_low)/dxperp + eps);
+    int idx_tau = (int)((tau - tau_cut_low)/dtau + eps);
+
+    int idx = 0;
+    for (int k = 0; k < nrapidity; k++) {
+        for (int m = 0; m < nphi; m++) {
+            for (int l = 0; l < np; l++) {
+                double temp_eq_sum = em_eqrate[idx]*volume*fraction;
+                double temp_vis_sum = em_visrate[idx]*volume*fraction;
+                double temp_bulkvis_sum = em_bulkvis[idx]*volume*fraction;
+                dNd2pTdphidydxperpdtau_eq[idx_xperp][idx_tau][l][m][k] +=
+                                                                temp_eq_sum;
+                dNd2pTdphidydxperpdtau_vis[idx_xperp][idx_tau][l][m][k] +=
+                                            temp_eq_sum + temp_vis_sum;
+                dNd2pTdphidydxperpdtau_bulkvis[idx_xperp][idx_tau][l][m][k] +=
+                                            temp_eq_sum + temp_bulkvis_sum;
+                dNd2pTdphidydxperpdtau_tot[idx_xperp][idx_tau][l][m][k] +=
+                                temp_eq_sum + temp_vis_sum + temp_bulkvis_sum;
+                idx++;
+            }
+        }
     }
 
     delete[] em_eqrate;

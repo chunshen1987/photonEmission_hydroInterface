@@ -35,6 +35,16 @@ struct fluidCell_3D {
     double bulkPi;
 };
 
+struct fluidCell_3D_new {
+    int itau, ix, iy, ieta;
+    double temperature;
+    double ux, uy, ueta;
+    // the shear stress tensor are already divided by e+P
+    double pi11, pi12, pi13;
+    double pi22, pi23;
+    double bulkPi;
+};
+
 class Hydroinfo_MUSIC {
  private:
     double hbarC;
@@ -55,15 +65,27 @@ class Hydroinfo_MUSIC {
     bool boost_invariant;
 
     int itaumax, ixmax, ietamax;
+    int turn_on_shear;
+    int turn_on_bulk;
+    int turn_on_rhob;
+    int turn_on_diff;
 
     std::vector<fluidCell_2D> *lattice_2D;  // array to store hydro information
     std::vector<fluidCell_3D> *lattice_3D;  // array to store hydro information
+    std::vector<fluidCell_3D_new> *lattice_3D_new;
 
  public:
     Hydroinfo_MUSIC();       // constructor
     ~Hydroinfo_MUSIC();      // destructor
 
     double get_hydro_tau_max() {return(hydroTauMax);}
+    double get_hydro_tau0() {return(hydroTau0);}
+    double get_hydro_dtau() {return(hydroDtau);}
+    double get_hydro_dx() {return(hydroDx);}
+    double get_hydro_deta() {return(hydroDz);}
+    double get_hydro_eta_max() {return(hydroZmax);}
+    double get_hydro_x_max() {return(hydroXmax);}
+    int get_number_of_fluid_cells_3d() {return(lattice_3D_new->size());}
 
     void readHydroData(double tau0, double taumax, double dtau,
                        double xmax, double zmax, double dx, double dz,
@@ -72,6 +94,7 @@ class Hydroinfo_MUSIC {
 
     void getHydroValues(double x, double y, double z, double t,
                         fluidCell *info);
+    void get_hydro_cell_info_3d(int cell_id, fluidCell_3D_new *info);
     void output_temperature_evolution(std::string filename_base);
     void update_grid_info(double tau0, double tau_max, double dtau,
                           double x_max, double dx, double z_max, double dz);

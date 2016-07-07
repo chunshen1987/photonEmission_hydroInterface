@@ -46,8 +46,7 @@ void boost_matrix(double** lambda_munu, double vx, double vy, double vz)
       lambda_munu[3][3] = 1+(gamma-1)*beta_3*beta_3/beta/beta;
 }
 
-void getTransverseflow_u_mu_low(double* flow_u_mu_low, double vx, double vy)
-{
+void getTransverseflow_u_mu_low(double* flow_u_mu_low, double vx, double vy) {
       double gamma;
       double eps = 1e-100;
       

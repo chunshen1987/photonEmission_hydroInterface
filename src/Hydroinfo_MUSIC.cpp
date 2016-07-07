@@ -24,6 +24,8 @@ Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
     hbarC = 0.19733;
     lattice_2D = new vector<fluidCell_2D>;
     lattice_3D = new vector<fluidCell_3D>;
+    lattice_3D_new = new vector<fluidCell_3D_new>;
+    turn_on_shear = 1;
 }
 
 Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
@@ -31,19 +33,22 @@ Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
         lattice_2D->clear();
     } else {
         lattice_3D->clear();
+        lattice_3D_new->clear();
     }
     delete lattice_2D;
     delete lattice_3D;
+    delete lattice_3D_new;
 }
 
 void Hydroinfo_MUSIC::readHydroData(
     double tau0, double taumax, double dtau,
     double xmax, double zmax, double dx, double dz,
     int nskip_tau, int nskip_x, int nskip_z, int whichHydro) {
-// all hydro data is stored in tau steps (not t) - the t and z in the MARTINI
-// evolution is converted to tau when accessing the hydro data
+    // all hydro data is stored in tau steps (not t)
+    // evolution is converted to tau when accessing the hydro data
     lattice_2D->clear();
     lattice_3D->clear();
+    lattice_3D_new->clear();
 
     // get hydro grid information
     hydroTau0 = tau0;
@@ -63,7 +68,7 @@ void Hydroinfo_MUSIC::readHydroData(
              << endl;
     }
 
-    if (whichHydro != 6 && whichHydro != 8) {
+    if (whichHydro != 6 && whichHydro != 8 && whichHydro !=10) {
         cout << "Hydroinfo_MUSIC:: This option is obsolete! whichHydro = "
              << whichHydro << endl;
         exit(1);
@@ -275,6 +280,114 @@ void Hydroinfo_MUSIC::readHydroData(
         std::fclose(fin2);
         cout << endl;
         cout << "number of fluid cells: " << lattice_2D->size() << endl;
+    } else if (whichHydro == 10) {
+        // new 3+1D MUSIC hydro (Schenke, Jeon, Gale, Shen)
+        cout << "Using 3+1D new MUSIC hydro reading data ..." << endl;
+        boost_invariant = false;
+
+        ixmax = static_cast<int>(2*xmax/dx + 0.001);
+        ietamax = static_cast<int>(2*zmax/dz + 0.001);
+
+        // read in temperature, QGP fraction , flow velocity
+        // The name of the evolution file: evolution_name
+        string evolution_name = "results/evolution_all_xyeta.dat";
+        cout << "Evolution file name = " << evolution_name << endl;
+        std::FILE *fin;
+        fin = std::fopen(evolution_name.c_str(), "rb");
+        if (fin == NULL) {
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name << endl;
+            exit(1);
+        }
+        
+        int idx[4];
+        int itau_max = 0;
+        double ideal_variables[4];
+        fluidCell_3D_new newCell;
+        int ik = 0;
+        while (true) {
+            int status = 0;
+            status = std::fread(&idx, sizeof(int), 4, fin);
+            if (status == 0) break;
+            
+            status = std::fread(&ideal_variables, sizeof(double), 4, fin);
+            if (status == 0) {
+                cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                     << "file format is read in wrong" << endl;
+                exit(1);
+            }
+
+            double muB_local = 0.0;
+            if (turn_on_rhob == 1) {
+                status = std::fread(&muB_local, sizeof(double), 1, fin);
+                if (status == 0) {
+                    cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                         << "file format is read in wrong" << endl;
+                    exit(1);
+                }
+            }
+            
+            double Wmunu[5] = {0., 0., 0., 0., 0.};
+            if (turn_on_shear == 1) {
+                status = std::fread(&Wmunu, sizeof(double), 5, fin);
+                if (status == 0) {
+                    cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                         << "file format is read in wrong" << endl;
+                    exit(1);
+                }
+            }
+
+            double pi11 = Wmunu[0];
+            double pi12 = Wmunu[1];
+            double pi13 = Wmunu[2];
+            double pi22 = Wmunu[3];
+            double pi23 = Wmunu[4];
+           
+            double bulkPi;
+            if (turn_on_bulk == 1) {
+                status = std::fread(&bulkPi, sizeof(double), 1, fin);
+                if (status == 0) {
+                    cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                         << "file format is read in wrong" << endl;
+                    exit(1);
+                }
+            }
+
+            double qmu[3] = {0., 0., 0.};
+            if (turn_on_diff == 1) {
+                status = std::fread(&qmu, sizeof(double), 3, fin);
+                if (status == 0) {
+                    cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                         << "file format is read in wrong" << endl;
+                    exit(1);
+                }
+            }
+
+            if (itau_max < idx[0])
+                itau_max = idx[0];
+            newCell.itau = idx[0];
+            newCell.ix = idx[1];
+            newCell.iy = idx[2];
+            newCell.ieta = idx[3];
+            newCell.temperature = ideal_variables[0];
+            newCell.ux = ideal_variables[1];
+            newCell.uy = ideal_variables[2];
+            newCell.ueta = ideal_variables[3];
+            newCell.pi11 = pi11;
+            newCell.pi12 = pi12;
+            newCell.pi13 = pi13;
+            newCell.pi22 = pi22;
+            newCell.pi23 = pi23;
+            newCell.bulkPi = bulkPi;
+            lattice_3D_new->push_back(newCell);
+            ik++;
+            if (ik%50000 == 0)
+                cout << "o" << flush;
+        }
+        cout << endl;
+        std::fclose(fin);
+        itaumax = itau_max;
+        hydroTauMax = hydroTau0 + hydroDtau*itaumax;
     }
 
     // One final step for easy automation of MARTINI:
@@ -296,15 +409,32 @@ void Hydroinfo_MUSIC::readHydroData(
         itaumax = static_cast<int>((hydroTauMax-hydroTau0)/hydroDtau+0.001);
     }
 
-    cout << "hydroTau0 = " << hydroTau0 << endl;
-    cout << "hydroTauMax = " << hydroTauMax << endl;
-    cout << "hydroDtau = " << hydroDtau << endl;
-    cout << "hydroXmax = " << hydroXmax << endl;
-    cout << "hydroDx = " << hydroDx << endl;
-    cout << "hydroZmax = " << hydroZmax << endl;
-    cout << "hydroDz = " << hydroDz << endl;
+    cout << "hydro_tau0 = " << hydroTau0 << " fm"<< endl;
+    cout << "hydro_tau_max = " << hydroTauMax << " fm" << endl;
+    cout << "hydry_dtau = " << hydroDtau << " fm" << endl;
+    cout << "hydro_Xmax = " << hydroXmax << " fm" << endl;
+    cout << "hydro_dx = " << hydroDx << " fm" << endl;
+    cout << "hydro_eta_max = " << hydroZmax << " fm" << endl;
+    cout << "hydro_deta = " << hydroDz << " fm" << endl;
 }
 
+void Hydroinfo_MUSIC::get_hydro_cell_info_3d(int cell_id,
+                                             fluidCell_3D_new *info) {
+    info->itau = (*lattice_3D_new)[cell_id].itau;
+    info->ix = (*lattice_3D_new)[cell_id].ix;
+    info->iy = (*lattice_3D_new)[cell_id].iy;
+    info->ieta = (*lattice_3D_new)[cell_id].ieta;
+    info->temperature = (*lattice_3D_new)[cell_id].temperature;
+    info->ux = (*lattice_3D_new)[cell_id].ux;
+    info->uy = (*lattice_3D_new)[cell_id].uy;
+    info->ueta = (*lattice_3D_new)[cell_id].ueta;
+    info->pi11 = (*lattice_3D_new)[cell_id].pi11;
+    info->pi12 = (*lattice_3D_new)[cell_id].pi12;
+    info->pi13 = (*lattice_3D_new)[cell_id].pi13;
+    info->pi22 = (*lattice_3D_new)[cell_id].pi22;
+    info->pi23 = (*lattice_3D_new)[cell_id].pi23;
+    info->bulkPi = (*lattice_3D_new)[cell_id].bulkPi;
+}
 
 void Hydroinfo_MUSIC::getHydroValues(double x, double y,
                                      double z, double t, fluidCell* info) {
