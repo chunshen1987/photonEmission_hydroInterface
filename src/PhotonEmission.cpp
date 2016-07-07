@@ -696,7 +696,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double Nskip_x = hydroinfo_MUSIC_ptr->get_hydro_Nskip_x();
     double Nskip_eta = hydroinfo_MUSIC_ptr->get_hydro_Nskip_eta();
     double Nskip_tau = hydroinfo_MUSIC_ptr->get_hydro_Nskip_tau();
-    double volume = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
+    double volume_base = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
 
     double tau_now = 0.0;
     double flow_u_mu_low[4];
@@ -718,8 +718,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         }
 
         // volume element: tau*dtau*dx*dy*deta,
-        volume *= tau_local;
-        
+        double volume = tau_local*volume_base;
+
         int idx_Tb = 0;
         double temp_local = fluidCellptr->temperature;
 
