@@ -19,6 +19,8 @@ class ThermalPhoton {
     int neta;
     string rate_path;
 
+    double dy;
+
     // photon emission rate
     Table2D* Photonemission_eqrateTable_ptr;
     Table2D* Photonemission_viscous_rateTable_ptr;
@@ -100,6 +102,8 @@ class ThermalPhoton {
     void setupEmissionrate(string emissionProcess, double Xmin, double dX,
                            double Ymin, double dY);
     void readEmissionrate(string);
+
+    double get_dy() {return(dy);}
 
     Table2D* get_eqRatetableptr() {return(Photonemission_eqrateTable_ptr);}
     Table2D* get_visRatetableptr() {
