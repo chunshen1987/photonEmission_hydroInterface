@@ -723,7 +723,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         int idx_Tb = 0;
         double temp_local = fluidCellptr->temperature;
 
-        if (temp_local > T_cuthigh || temp_local < T_cutlow) {
+        if (temp_local < T_dec ||
+            temp_local > T_cuthigh || temp_local < T_cutlow) {
             // fluid cell is out of interest
             continue;
         }
