@@ -67,6 +67,15 @@ int main(int argc, char** argv) {
         thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, 
                                          etaweight_ptr);
         delete hydroinfo_ptr;
+    } else if (hydro_flag == 3) {
+        Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
+        int hydro_mode = 9;
+        int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
+        hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
+        // calculate thermal photons from the hydro medium
+        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, 
+                                         etaweight_ptr);
+        delete hydroinfo_ptr;
     } else if (hydro_flag == 2) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
         int hydro_mode = 10;

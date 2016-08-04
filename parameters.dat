@@ -1,15 +1,16 @@
-hydro_flag = 2                # read in mode for hydro medium
+hydro_flag = 1                # read in mode for hydro medium
                               # 0: read in hdf5 file
                               # 1: read in binary file output from MUSIC
-                              # 2: read in binary file output from new MUSIC
+                              # 2: read in binary file output from new MUSIC (no grid)
+                              # 3: read in binary file output from new MUSIC (on grid)
 hydro_nskip_tau = 1           # read in hydro slice every hydro_nskip_tau 
                               # steps from the medium file
                               # (only works for hydro_flag = 1)
 #
 Xmin = -15.0                  # minimum points along x direction
-dx = 0.5                      # lattice spacing along x direction
+dx = 0.3                      # lattice spacing along x direction
 Ymin = -15.0                  # minimum points along y direction
-dy = 0.5                      # lattice spacing along y direction
+dy = 0.3                      # lattice spacing along y direction
 tau_start = 0.4               # emission start time (fm)
 tau_end = 30.0                # emission end time (fm)
 dTau = 0.1                    # lattice spacing along tau direction

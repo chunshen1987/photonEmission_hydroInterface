@@ -112,7 +112,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
              << endl;
     }
 
-    if (whichHydro != 6 && whichHydro != 8 && whichHydro !=10) {
+    if (whichHydro != 6 && whichHydro != 8 && whichHydro != 9 && whichHydro !=10) {
         cout << "Hydroinfo_MUSIC:: This option is obsolete! whichHydro = "
              << whichHydro << endl;
         exit(1);
@@ -329,6 +329,159 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         std::fclose(fin2);
         cout << endl;
         cout << "number of fluid cells: " << lattice_2D->size() << endl;
+    } else if (whichHydro == 9) {
+        // event-by-event (2+1)-d MUSIC hydro
+        // the output medium is at middle rapidity
+        boost_invariant = true;
+        cout << "Reading event-by-event hydro evolution data from (2+1)D MUSIC ..."
+             << endl;
+
+        ietamax = 1;
+
+        hydroDx *= nskip_x;
+        hydroDtau *= nskip_tau;
+        hydroDeta *= nskip_eta;
+
+        nskip_tau = nskip_tau_in;
+        ixmax = static_cast<int>(2.*hydroXmax/hydroDx + 0.001);
+
+        int n_eta = 1;
+        // number of fluid cell in the transverse plane
+        int num_fluid_cell_trans = ixmax*ixmax;
+
+        // read in hydro evolution
+        string evolution_name = "results/evolution_xyeta.dat";
+        string evolution_name_Wmunu =
+                "results/evolution_Wmunu_over_epsilon_plus_P_xyeta.dat";
+        string evolution_name_Pi = "results/evolution_bulk_pressure_xyeta.dat";
+
+        std::FILE *fin;
+        string evolution_file_name = evolution_name;
+        cout << "Evolution file name = " << evolution_file_name << endl;
+        fin = std::fopen(evolution_file_name.c_str(), "rb");
+
+        if (fin == NULL) {
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_file_name << endl;
+            exit(1);
+        }
+
+        std::FILE *fin1;
+        fin1 = std::fopen(evolution_name_Wmunu.c_str(), "rb");
+        if (fin1 == NULL) {
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name_Wmunu << endl;
+            exit(1);
+        }
+
+        std::FILE *fin2;
+        fin2 = std::fopen(evolution_name_Pi.c_str(), "rb");
+        if (fin2 == NULL) {
+            cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                 << "Unable to open file: " << evolution_name_Pi << endl;
+            exit(1);
+        }
+
+        int ik = 0;
+        fluidCell_2D newCell;
+        double T, QGPfrac, vx, vy, vz;
+        double pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33;
+        double bulkPi, e_plus_P, cs2;
+        int size = sizeof(double);
+        while (true) {
+            int status = 0;
+            status = std::fread(&T, size, 1, fin);
+            status += std::fread(&QGPfrac, size, 1, fin);
+            status += std::fread(&vx, size, 1, fin);
+            status += std::fread(&vy, size, 1, fin);
+            status += std::fread(&vz, size, 1, fin);
+            vz = 0.0;
+
+            if (status != 5) {  // this is the end of file
+                break;
+            }
+            
+            int status_pi = 0;
+            status_pi = std::fread(&pi00, size, 1, fin1);
+            status_pi += std::fread(&pi01, size, 1, fin1);
+            status_pi += std::fread(&pi02, size, 1, fin1);
+            status_pi += std::fread(&pi03, size, 1, fin1);
+            status_pi += std::fread(&pi11, size, 1, fin1);
+            status_pi += std::fread(&pi12, size, 1, fin1);
+            status_pi += std::fread(&pi13, size, 1, fin1);
+            status_pi += std::fread(&pi22, size, 1, fin1);
+            status_pi += std::fread(&pi23, size, 1, fin1);
+            status_pi += std::fread(&pi33, size, 1, fin1);
+            
+            if (status_pi != 10) {
+                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                     << "Wmunu file does not have the same number of "
+                     << "fluid cells as the ideal file!" << endl;
+                exit(1);
+            }
+
+            int status_bulkPi = 0;
+            status_bulkPi = std::fread(&bulkPi, size, 1, fin2);
+            status_bulkPi += std::fread(&e_plus_P, size, 1, fin2);
+            status_bulkPi += std::fread(&cs2, size, 1, fin2);
+            
+            if (status_bulkPi != 3) {
+                cout << "Error:Hydroinfo_MUSIC::readHydroData: "
+                     << "bulkPi file does not have the same number of "
+                     << "fluid cells as the ideal file!" << endl;
+                exit(1);
+            }
+
+            int ieta_idx = static_cast<int>(ik/num_fluid_cell_trans) % n_eta;
+            int itau_idx = static_cast<int>(ik/(num_fluid_cell_trans*n_eta));
+            ik++;
+            if (itau_idx%nskip_tau != 0)  // skip in tau
+                continue;
+
+            // print out tau information
+            double tau_local = hydroTau0 + itau_idx*hydroDtau/nskip_tau;
+            if ((ik-1)%(num_fluid_cell_trans*n_eta) == 0) {
+                cout << "read in tau frame: " << itau_idx
+                     << " tau_local = " << setprecision(3) << tau_local
+                     << " fm ..."<< endl;
+            }
+
+            if (ieta_idx == (n_eta-1)) {
+                // store the hydro medium at eta_s = 0.0
+                // vz = 0 at eta_s = 0
+                double gamma_L = 1./sqrt(1. - vz*vz);
+                if (gamma_L > 1.01) {
+                    cout << "gamma_L :" << gamma_L << endl;
+                }
+                newCell.temperature = T;
+                // convert vx and vy to longitudinal co-moving frame
+                newCell.vx = vx*gamma_L;
+                newCell.vy = vy*gamma_L;
+
+                // pi^\mu\nu tensor
+                newCell.pi00 = pi00;
+                newCell.pi01 = pi01;
+                newCell.pi02 = pi02;
+                newCell.pi11 = pi11;
+                newCell.pi12 = pi12;
+                newCell.pi22 = pi22;
+                newCell.pi33 = pi33;
+
+                // bulk pressure
+                if (T > 0.18) {
+                    // QGP phase prefactor is divided out here
+                    newCell.bulkPi = bulkPi/(15.*(1./3. - cs2)*e_plus_P);
+                } else {
+                    newCell.bulkPi = bulkPi;   // [1/fm^4]
+                }
+                lattice_2D->push_back(newCell);
+            }
+        }
+        std::fclose(fin);
+        std::fclose(fin1);
+        std::fclose(fin2);
+        cout << endl;
+        cout << "number of fluid cells: " << lattice_2D->size() << endl;
     } else if (whichHydro == 10) {
         // new 3+1D MUSIC hydro (Schenke, Jeon, Gale, Shen)
         cout << "Using 3+1D new MUSIC hydro reading data ..." << endl;
@@ -450,7 +603,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
                         *2.*(hydro_eta_max/hydroDeta))));
         itaumax = static_cast<int>((hydroTauMax-hydroTau0)/hydroDtau+0.001);
     }
-    if (whichHydro == 8) {
+    if (whichHydro == 8 || whichHydro == 9) {
         hydroTauMax = (
             hydroTau0 + hydroDtau*static_cast<int>(
                         static_cast<double>(lattice_2D->size())
