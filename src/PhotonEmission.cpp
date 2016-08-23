@@ -319,7 +319,7 @@ void PhotonEmission::calPhotonemission(
         cos_phiq[m] = cos(phi_q[m]);
     }
 
-    double e_local, p_local, temp_local, vx_local, vy_local;
+    double e_local, p_local, temp_local, vx_local, vy_local, vz_local;
     double bulkPi_local;
     double tau_local;
     double eta_local;
@@ -363,6 +363,8 @@ void PhotonEmission::calPhotonemission(
                     hydroinfo_h5_ptr->getHydroinfo(
                         tau_local, x_local, y_local, fluidCellptr);
                 } else if (hydro_flag == 1 || hydro_flag == 3) {
+                    // for boost-invariant calculations
+                    // only get medium at eta = 0
                     hydroinfo_MUSIC_ptr->getHydroValues(
                         x_local, y_local, 0.0, tau_local, fluidCellptr);
                 }
@@ -383,6 +385,7 @@ void PhotonEmission::calPhotonemission(
                 } else {
                     vx_local = fluidCellptr->vx;
                     vy_local = fluidCellptr->vy;
+                    vz_local = fluidCellptr->vz;
                 }
 
                 for (int mu = 0; mu < 4; mu++) {
@@ -392,7 +395,8 @@ void PhotonEmission::calPhotonemission(
                 }
                 bulkPi_local = fluidCellptr->bulkPi;
 
-                getTransverseflow_u_mu_low(flow_u_mu_low, vx_local, vy_local);
+                getTransverseflow_u_mu_low(flow_u_mu_low,
+                                           vx_local, vy_local, vz_local);
                 double prefactor_pimunu = 1./(2.*(e_local + p_local));
                 for (int jj = 0; jj < neta; jj++) {
                     eta_local = eta_ptr[jj];

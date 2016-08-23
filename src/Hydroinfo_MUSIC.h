@@ -15,7 +15,7 @@
 
 struct fluidCell_2D {
     double temperature;
-    double vx, vy;
+    double ux, uy, ueta;
     // the shear stress tensor are already divided by e+P
     double pi00, pi01, pi02;
     double pi11, pi12;

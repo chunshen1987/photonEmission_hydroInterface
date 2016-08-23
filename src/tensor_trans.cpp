@@ -46,16 +46,18 @@ void boost_matrix(double** lambda_munu, double vx, double vy, double vz)
       lambda_munu[3][3] = 1+(gamma-1)*beta_3*beta_3/beta/beta;
 }
 
-void getTransverseflow_u_mu_low(double* flow_u_mu_low, double vx, double vy) {
-      double gamma;
-      double eps = 1e-100;
-      
-      gamma = 1./sqrt(1. - vx*vx - vy*vy + eps);
-      
-      flow_u_mu_low[0] = gamma;
-      flow_u_mu_low[1] = - gamma*vx;
-      flow_u_mu_low[2] = - gamma*vy;
-      flow_u_mu_low[3] = 0.0;
+void getTransverseflow_u_mu_low(double* flow_u_mu_low,
+                                double vx, double vy, double vz) {
+    // this function compute flow velocity u_mu
+    double gamma;
+    double eps = 1e-100;
+    
+    gamma = 1./sqrt(1. - vx*vx - vy*vy - vz*vz + eps);
+    
+    flow_u_mu_low[0] = gamma;
+    flow_u_mu_low[1] = - gamma*vx;
+    flow_u_mu_low[2] = - gamma*vy;
+    flow_u_mu_low[3] = - gamma*vz;
 }
 
 void boost_vec_trans(double* p, double* p_prime, double** lambda)

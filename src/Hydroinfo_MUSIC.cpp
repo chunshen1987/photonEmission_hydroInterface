@@ -233,6 +233,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         int ik = 0;
         fluidCell_2D newCell;
         float T, QGPfrac, vx, vy, vz;
+        double ux, uy, ueta;
         float pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33;
         float bulkPi, e_plus_P, cs2;
         int size = sizeof(float);
@@ -247,6 +248,19 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             if (status != 5) {  // this is the end of file
                 break;
             }
+
+            double v2 = vx*vx + vy*vy + vz*vz;
+            if (v2 > 1.0) {
+                cerr << "[Hydroinfo_MUSIC::readHydroData:] Error: "
+                     << "v > 1! vx = " << vx << ", vy = " << vy
+                     << ", vz = " << vz << endl;
+                exit(1);
+            }
+            double gamma = 1./sqrt(1. - v2);
+            ux = gamma*vx;
+            uy = gamma*vy;
+            ueta = gamma*vz;  // assuming eta = 0
+
             
             int status_pi = 0;
             status_pi = std::fread(&pi00, size, 1, fin1);
@@ -295,15 +309,11 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
             if (ieta_idx == (n_eta-1)) {
                 // store the hydro medium at eta_s = 0.0
-                // vz = 0 at eta_s = 0
-                double gamma_L = 1./sqrt(1. - vz*vz);
-                if (gamma_L > 1.01) {
-                    cout << "gamma_L :" << gamma_L << endl;
-                }
                 newCell.temperature = T;
                 // convert vx and vy to longitudinal co-moving frame
-                newCell.vx = vx*gamma_L;
-                newCell.vy = vy*gamma_L;
+                newCell.ux = ux;
+                newCell.uy = uy;
+                newCell.ueta = ueta;
 
                 // pi^\mu\nu tensor
                 newCell.pi00 = pi00;
@@ -333,8 +343,8 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         // event-by-event (2+1)-d MUSIC hydro
         // the output medium is at middle rapidity
         boost_invariant = true;
-        cout << "Reading event-by-event hydro evolution data from (2+1)D MUSIC ..."
-             << endl;
+        cout << "Reading event-by-event hydro evolution data "
+             << "from (2+1)D MUSIC ..." << endl;
 
         ietamax = 1;
 
@@ -384,7 +394,8 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
         int ik = 0;
         fluidCell_2D newCell;
-        double T, QGPfrac, vx, vy, vz;
+        double T, QGPfrac, ux, uy, ueta;
+        double vx, vy, vz;
         double pi00, pi01, pi02, pi03, pi11, pi12, pi13, pi22, pi23, pi33;
         double bulkPi, e_plus_P, cs2;
         int size = sizeof(double);
@@ -395,11 +406,21 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             status += std::fread(&vx, size, 1, fin);
             status += std::fread(&vy, size, 1, fin);
             status += std::fread(&vz, size, 1, fin);
-            vz = 0.0;
-
             if (status != 5) {  // this is the end of file
                 break;
             }
+
+            double v2 = vx*vx + vy*vy + vz*vz;
+            if (v2 > 1.) {
+                cerr << "[Hydroinfo_MUSIC::readHydroData]: ERROR: "
+                     << "v > 1! vx = " << vx << ", vy = " << vy
+                     << ", vz = " << vz << endl;
+                exit(1);
+            }
+            double gamma = 1./sqrt(1. - v2);
+            ux = vx*gamma;
+            uy = vy*gamma;
+            ueta = vz*gamma;  // assuming at the eta = 0
             
             int status_pi = 0;
             status_pi = std::fread(&pi00, size, 1, fin1);
@@ -447,16 +468,10 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             }
 
             if (ieta_idx == (n_eta-1)) {
-                // store the hydro medium at eta_s = 0.0
-                // vz = 0 at eta_s = 0
-                double gamma_L = 1./sqrt(1. - vz*vz);
-                if (gamma_L > 1.01) {
-                    cout << "gamma_L :" << gamma_L << endl;
-                }
                 newCell.temperature = T;
-                // convert vx and vy to longitudinal co-moving frame
-                newCell.vx = vx*gamma_L;
-                newCell.vy = vy*gamma_L;
+                newCell.ux = ux;
+                newCell.uy = uy;
+                newCell.ueta = ueta;
 
                 // pi^\mu\nu tensor
                 newCell.pi00 = pi00;
@@ -608,7 +623,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             hydroTau0 + hydroDtau*static_cast<int>(
                         static_cast<double>(lattice_2D->size())
                         /((2.*hydroXmax/hydroDx)*(2.*hydroXmax/hydroDx)) - 1));
-        itaumax = static_cast<int>((hydroTauMax-hydroTau0)/hydroDtau+0.001);
+        itaumax = static_cast<int>((hydroTauMax - hydroTau0)/hydroDtau);
     }
 
     cout << "hydro_tau0 = " << hydroTau0 << " fm"<< endl;
@@ -705,7 +720,7 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
         info->vz = 0.0;
         return;
     }
-    if (itau < 0 || itau >= itaumax) {
+    if (itau < 0 || itau > itaumax) {
         cout << "[MARTINI:Hydroinfo_MUSIC::getHydroValues]: WARNING - "
              << "tau out of range, itau=" << itau << ", itaumax=" << itaumax
              << endl;
@@ -768,6 +783,9 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
     double vx = 0.0;
     double vy = 0.0;
     double vz = 0.0;
+    double ux = 0.0;
+    double uy = 0.0;
+    double ueta = 0.0;
     double pi00 = 0.0;
     double pi01 = 0.0;
     double pi02 = 0.0;
@@ -810,10 +828,12 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
                             &(*lattice_2D)[position[1][ipy][ipeta][iptau]]);
                     T += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->temperature
                                   + xfrac*HydroCell_2D_ptr2->temperature);
-                    vx += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->vx
-                                    + xfrac*HydroCell_2D_ptr2->vx);
-                    vy += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->vy
-                                    + xfrac*HydroCell_2D_ptr2->vy);
+                    ux += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->ux
+                                    + xfrac*HydroCell_2D_ptr2->ux);
+                    uy += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->uy
+                                    + xfrac*HydroCell_2D_ptr2->uy);
+                    ueta += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->ueta
+                                    + xfrac*HydroCell_2D_ptr2->ueta);
                     pi00 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi00
                                     + xfrac*HydroCell_2D_ptr2->pi00);
                     pi01 += prefrac*((1. - xfrac)*HydroCell_2D_ptr1->pi01
@@ -871,10 +891,23 @@ void Hydroinfo_MUSIC::getHydroValues(double x, double y,
     }
 
     if (boost_invariant) {      // for boost invariant medium
-        vz = z/t;               // Bjorken flow in the lab frame
-        double gamma_L_inv = sqrt(1. - vz*vz);
-        vx = vx*gamma_L_inv;    // convert vx and vy to lab frame
-        vy = vy*gamma_L_inv;
+        double eta_local = 0.5*log((t + z)/(t - z));
+        double sinh_eta, cosh_eta;
+        if (fabs(eta_local) < 1e-6) {
+            // use Taylor expansion for small eta_s to speed up
+            // avoiding to evaluate sinh and cosh
+            sinh_eta = eta_local;
+            cosh_eta = 1.0 + 0.5*eta_local*eta_local;
+        } else {
+            sinh_eta = sinh(eta_local);
+            cosh_eta = cosh(eta_local);
+        }
+        double utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
+        double uz = utau*sinh_eta + ueta*cosh_eta;
+        double ut = utau*cosh_eta + ueta*sinh_eta;
+        vx = ux/ut;
+        vy = uy/ut;
+        vz = uz/ut;
     }
 
     info->temperature = T;
