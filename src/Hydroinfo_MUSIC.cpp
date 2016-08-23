@@ -249,19 +249,6 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
                 break;
             }
 
-            double v2 = vx*vx + vy*vy + vz*vz;
-            if (v2 > 1.0) {
-                cerr << "[Hydroinfo_MUSIC::readHydroData:] Error: "
-                     << "v > 1! vx = " << vx << ", vy = " << vy
-                     << ", vz = " << vz << endl;
-                exit(1);
-            }
-            double gamma = 1./sqrt(1. - v2);
-            ux = gamma*vx;
-            uy = gamma*vy;
-            ueta = gamma*vz;  // assuming eta = 0
-
-            
             int status_pi = 0;
             status_pi = std::fread(&pi00, size, 1, fin1);
             status_pi += std::fread(&pi01, size, 1, fin1);
@@ -309,6 +296,20 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
 
             if (ieta_idx == (n_eta-1)) {
                 // store the hydro medium at eta_s = 0.0
+                double v2 = vx*vx + vy*vy + vz*vz;
+                if (v2 > 1.0) {
+                    cerr << "[Hydroinfo_MUSIC::readHydroData:] Error: "
+                         << "v > 1! vx = " << vx << ", vy = " << vy
+                         << ", vz = " << vz << ", T = " << T << endl;
+                    if (T > 0.01) {
+                        exit(1);
+                    }
+                }
+                double gamma = 1./sqrt(1. - v2);
+                ux = gamma*vx;
+                uy = gamma*vy;
+                ueta = gamma*vz;  // assuming eta = 0
+
                 newCell.temperature = T;
                 // convert vx and vy to longitudinal co-moving frame
                 newCell.ux = ux;
