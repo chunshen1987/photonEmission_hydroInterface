@@ -1157,14 +1157,14 @@ void ThermalPhoton::calPhoton_SpvnpT() {
         vn_sin_vis_deltaf_restricted[order] = (
                 vn_sin_vis_deltaf_restricted[order]
                 /(dNdy_vis_deltaf_restricted + eps));
-        vn_cos_bulkvis[order] = vn_cos_bulkvis[order]/(dNdy_vis + eps);
-        vn_sin_bulkvis[order] = vn_sin_bulkvis[order]/(dNdy_vis + eps);
+        vn_cos_bulkvis[order] = vn_cos_bulkvis[order]/(dNdy_bulkvis + eps);
+        vn_sin_bulkvis[order] = vn_sin_bulkvis[order]/(dNdy_bulkvis + eps);
         vn_cos_bulkvis_deltaf_restricted[order] = (
                 vn_cos_bulkvis_deltaf_restricted[order]
-                /(dNdy_vis_deltaf_restricted + eps));
+                /(dNdy_bulkvis_deltaf_restricted + eps));
         vn_sin_bulkvis_deltaf_restricted[order] = (
                 vn_sin_bulkvis_deltaf_restricted[order]
-                /(dNdy_vis_deltaf_restricted + eps));
+                /(dNdy_bulkvis_deltaf_restricted + eps));
         vn_cos_tot[order] = vn_cos_tot[order]/(dNdy_tot + eps);
         vn_sin_tot[order] = vn_sin_tot[order]/(dNdy_tot + eps);
     }
