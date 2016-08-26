@@ -303,6 +303,11 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
                          << ", vz = " << vz << ", T = " << T << endl;
                     if (T > 0.01) {
                         exit(1);
+                    } else {
+                        v2 = 0.0;
+                        vx = 0.0;
+                        vy = 0.0;
+                        vz = 0.0;
                     }
                 }
                 double gamma = 1./sqrt(1. - v2);
