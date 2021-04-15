@@ -85,12 +85,11 @@ PhotonEmission::PhotonEmission(ParameterReader* paraRdr_in) {
 
     dNdy_eq = 0.0;
     dNdy_tot = 0.0;
-    vn_cos_eq = new double[norder];
+    vn_cos_eq.resize(norder, 0.);
     vn_sin_eq = new double[norder];
     vn_cos_tot = new double[norder];
     vn_sin_tot = new double[norder];
     for (int order = 0; order < norder; order++) {
-        vn_cos_eq[order] = 0.0;
         vn_sin_eq[order] = 0.0;
         vn_cos_tot[order] = 0.0;
         vn_sin_tot[order] = 0.0;
@@ -124,7 +123,6 @@ PhotonEmission::~PhotonEmission() {
     delete[] vnpT_cos;
     delete[] vnpT_sin;
 
-    delete [] vn_cos_eq;
     delete [] vn_sin_eq;
     delete [] vn_cos_tot;
     delete [] vn_sin_tot;

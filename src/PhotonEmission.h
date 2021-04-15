@@ -49,7 +49,8 @@ class PhotonEmission {
     double **vnpT_cos, **vnpT_sin;
 
     double dNdy_eq, dNdy_tot;
-    double *vn_cos_eq, *vn_sin_eq;
+    double *vn_sin_eq;
+    std::vector<double> vn_cos_eq;
     double *vn_cos_tot, *vn_sin_tot;
 
     //photon production processes
