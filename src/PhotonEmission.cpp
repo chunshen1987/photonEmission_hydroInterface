@@ -90,10 +90,6 @@ PhotonEmission::PhotonEmission(ParameterReader* paraRdr_in) {
     vn_cos_tot.resize(norder, 0.);
     vn_sin_tot.resize(norder, 0.);
 
-    for (int order = 0; order < norder; order++) {
-
-    }
-
     return;
 }
 
