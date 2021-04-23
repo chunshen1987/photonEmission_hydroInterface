@@ -152,8 +152,8 @@ ThermalPhoton::ThermalPhoton(ParameterReader* paraRdr_in) {
     vn_sin_eq.resize(norder,0.);
     vn_cos_vis.resize(norder,0.);
     vn_sin_vis.resize(norder,0.);
-    vn_cos_vis_deltaf_restricted = new double [norder];
-    vn_sin_vis_deltaf_restricted = new double [norder];
+    vn_cos_vis_deltaf_restricted.resize(norder, 0.);
+    vn_sin_vis_deltaf_restricted.resize(norder, 0.);
     vn_cos_bulkvis = new double [norder];
     vn_sin_bulkvis = new double [norder];
     vn_cos_bulkvis_deltaf_restricted = new double [norder];
@@ -162,8 +162,6 @@ ThermalPhoton::ThermalPhoton(ParameterReader* paraRdr_in) {
     vn_sin_tot = new double [norder];
     for(int i = 0; i < norder; i++)
     {
-       vn_cos_vis_deltaf_restricted[i] = 0.0;
-       vn_sin_vis_deltaf_restricted[i] = 0.0;
        vn_cos_bulkvis[i] = 0.0;
        vn_sin_bulkvis[i] = 0.0;
        vn_cos_bulkvis_deltaf_restricted[i] = 0.0;
@@ -469,8 +467,6 @@ ThermalPhoton::~ThermalPhoton() {
     delete [] vnpT_cos_tot;
     delete [] vnpT_sin_tot;
 
-    delete [] vn_cos_vis_deltaf_restricted;
-    delete [] vn_sin_vis_deltaf_restricted;
     delete [] vn_cos_bulkvis;
     delete [] vn_sin_bulkvis;
     delete [] vn_cos_bulkvis_deltaf_restricted;

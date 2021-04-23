@@ -65,8 +65,8 @@ class ThermalPhoton {
     std::vector<double> vn_sin_eq;
     std::vector<double> vn_cos_vis;
     std::vector<double> vn_sin_vis;
-    double *vn_cos_vis_deltaf_restricted, *vn_sin_vis_deltaf_restricted;
-
+    std::vector<double> vn_cos_vis_deltaf_restricted;
+    std::vector<double> vn_sin_vis_deltaf_restricted;
     double *vn_cos_bulkvis, *vn_sin_bulkvis;
     double *vn_cos_bulkvis_deltaf_restricted;
     double *vn_sin_bulkvis_deltaf_restricted;
