@@ -71,7 +71,8 @@ class ThermalPhoton {
     std::vector<double> vn_sin_bulkvis;
     std::vector<double> vn_cos_bulkvis_deltaf_restricted;
     std::vector<double> vn_sin_bulkvis_deltaf_restricted;
-    double *vn_cos_tot, *vn_sin_tot;
+    std::vector<double> vn_cos_tot;
+    std::vector<double> vn_sin_tot;
 
     // matrix for cuts on temperature and proper time
     int nTcut, nTaucut;

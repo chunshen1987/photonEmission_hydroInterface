@@ -158,12 +158,12 @@ ThermalPhoton::ThermalPhoton(ParameterReader* paraRdr_in) {
     vn_sin_bulkvis.resize(norder,0.);
     vn_cos_bulkvis_deltaf_restricted.resize(norder, 0.);
     vn_sin_bulkvis_deltaf_restricted.resize(norder, 0.);
-    vn_cos_tot = new double [norder];
-    vn_sin_tot = new double [norder];
+    vn_cos_tot.resize(norder,0.);
+    vn_sin_tot.resize(norder,0.);
+
     for(int i = 0; i < norder; i++)
     {
-       vn_cos_tot[i] = 0.0;
-       vn_sin_tot[i] = 0.0;
+  
     }
 
 
@@ -463,8 +463,6 @@ ThermalPhoton::~ThermalPhoton() {
     delete [] vnpT_cos_tot;
     delete [] vnpT_sin_tot;
 
-    delete [] vn_cos_tot;
-    delete [] vn_sin_tot;
 
     int diff_flag = paraRdr->getVal("differential_flag");
     if (diff_flag == 1 or diff_flag > 10) {
