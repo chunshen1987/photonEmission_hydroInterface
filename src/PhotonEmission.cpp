@@ -131,7 +131,6 @@ PhotonEmission::~PhotonEmission() {
     delete [] pi_photon_Tb;
     delete [] bulkPi_Tb;
 
-    delete photon_QGP_2_to_2;
     delete photon_QGP_collinear;
     delete photon_HG_meson;
     delete photon_HG_omega;
@@ -219,7 +218,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     double photonrate_tb_dE = paraRdr->getVal("PhotonemRatetableInfo_dE");
     double photonrate_tb_dT = paraRdr->getVal("PhotonemRatetableInfo_dT");
 
-    photon_QGP_2_to_2 = new ThermalPhoton(paraRdr);
+    photon_QGP_2_to_2 = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
     photon_QGP_2_to_2->setupEmissionrate(
         "QGP_2to2_total", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
