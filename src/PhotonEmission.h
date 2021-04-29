@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <string>
 #include <fstream>
+#include <memory>
 
 #include "Hydroinfo_h5.h"
 #include "Hydroinfo_MUSIC.h"
@@ -55,7 +56,7 @@ class PhotonEmission {
     std::vector<double> vn_sin_tot;
 
     //photon production processes
-    ThermalPhoton* photon_QGP_2_to_2;
+    std::unique_ptr<ThermalPhoton> photon_QGP_2_to_2;
     ThermalPhoton* photon_QGP_collinear;
     ThermalPhoton* photon_HG_meson;
     ThermalPhoton* photon_HG_omega;
