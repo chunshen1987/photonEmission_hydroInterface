@@ -63,14 +63,15 @@ class PhotonEmission {
     std::unique_ptr<ThermalPhoton> photon_HG_rho_spectralfun;
     std::unique_ptr<ThermalPhoton> photon_HG_pipiBremsstrahlung;
 
-    ThermalPhoton* photon_pirho;
-    ThermalPhoton* photon_KstarK;
-    ThermalPhoton* photon_piK;
-    ThermalPhoton* photon_piKstar;
-    ThermalPhoton* photon_pipi;
-    ThermalPhoton* photon_rhoK;
-    ThermalPhoton* photon_rho;
-    ThermalPhoton* photon_pirho_omegat;
+    std::unique_ptr<ThermalPhoton> photon_pirho;
+    std::unique_ptr<ThermalPhoton> photon_KstarK;
+    std::unique_ptr<ThermalPhoton> photon_piK;
+    std::unique_ptr<ThermalPhoton> photon_piKstar;
+    std::unique_ptr<ThermalPhoton> photon_pipi;
+    std::unique_ptr<ThermalPhoton> photon_rhoK;
+    std::unique_ptr<ThermalPhoton> photon_rho;
+    std::unique_ptr<ThermalPhoton> photon_pirho_omegat;
+   
 
  public:
     PhotonEmission(ParameterReader* paraRdr_in);
