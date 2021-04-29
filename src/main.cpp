@@ -17,6 +17,7 @@
 #include <cmath>
 #include <iomanip>
 #include <cstdlib>
+#include <memory>
 
 #include "./PhotonEmission.h"
 #include "./Hydroinfo_h5.h"
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
     Stopwatch sw;
 
     sw.tic();
-    ParameterReader* paraRdr = new ParameterReader();
+    std::shared_ptr<ParameterReader> paraRdr(new ParameterReader());
     paraRdr->readFromFile("parameters.dat");
     paraRdr->readFromArguments(argc, argv);
 

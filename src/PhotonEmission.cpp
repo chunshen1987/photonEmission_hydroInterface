@@ -14,7 +14,7 @@
 
 using namespace std;
 
-PhotonEmission::PhotonEmission(ParameterReader* paraRdr_in) {
+PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;
     output_path = "results/";
 

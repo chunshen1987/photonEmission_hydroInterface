@@ -19,7 +19,7 @@ using namespace std;
 
 class PhotonEmission {
  private:
-    ParameterReader *paraRdr;
+    std::shared_ptr<ParameterReader> paraRdr;
     string output_path;
 
     int neta;
@@ -71,10 +71,10 @@ class PhotonEmission {
     std::unique_ptr<ThermalPhoton> photon_rhoK;
     std::unique_ptr<ThermalPhoton> photon_rho;
     std::unique_ptr<ThermalPhoton> photon_pirho_omegat;
-   
+
 
  public:
-    PhotonEmission(ParameterReader* paraRdr_in);
+    PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in);
     ~PhotonEmission();
 
     void set_hydroGridinfo();
