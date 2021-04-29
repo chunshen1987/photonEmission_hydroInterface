@@ -203,7 +203,8 @@ void HydroinfoH5::writeHydroBlock(int Time_id, double **ed_in, double **sd_in, d
 
    herr_t status;
    hid_t groupFrameid;
-   const hsize_t dims[2] = {dimensionX, dimensionY};
+   const hsize_t dims[2] = {static_cast<hsize_t>(dimensionX),
+                            static_cast<hsize_t>(dimensionY)};
       
    int Frame_id = (int) Time_id/grid_LST;
    ostringstream frameName;
