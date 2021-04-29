@@ -127,11 +127,6 @@ PhotonEmission::~PhotonEmission() {
     delete [] pi_photon_Tb;
     delete [] bulkPi_Tb;
 
-    delete photon_QGP_collinear;
-    delete photon_HG_meson;
-    delete photon_HG_omega;
-    delete photon_HG_rho_spectralfun;
-    delete photon_HG_pipiBremsstrahlung;
     if (calHGIdFlag == 1) {
         delete photon_pirho;
         delete photon_pirho_omegat;
@@ -218,7 +213,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     photon_QGP_2_to_2->setupEmissionrate(
         "QGP_2to2_total", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
-    photon_QGP_collinear = new ThermalPhoton(paraRdr);
+    photon_QGP_collinear = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
     photon_QGP_collinear->setupEmissionrate(
         "QGP_AMYcollinear", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
@@ -226,19 +221,19 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
         photon_QGP_2_to_2->update_rates_with_polyakov_suppression();
         photon_QGP_collinear->update_rates_with_polyakov_suppression();
     }
-    photon_HG_meson = new ThermalPhoton(paraRdr);
+    photon_HG_meson = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
     photon_HG_meson->setupEmissionrate(
         "HG_2to2_meson_total", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
-    photon_HG_rho_spectralfun = new ThermalPhoton(paraRdr);
+    photon_HG_rho_spectralfun = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
     photon_HG_rho_spectralfun->setupEmissionrate(
         "HG_rho_spectralfun", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
-    photon_HG_omega = new ThermalPhoton(paraRdr);
+    photon_HG_omega = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
     photon_HG_omega->setupEmissionrate(
         "HG_omega", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
-    photon_HG_pipiBremsstrahlung = new ThermalPhoton(paraRdr);
+    photon_HG_pipiBremsstrahlung = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
     photon_HG_pipiBremsstrahlung->setupEmissionrate(
         "HG_pipi_bremsstrahlung", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);

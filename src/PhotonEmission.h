@@ -57,11 +57,11 @@ class PhotonEmission {
 
     //photon production processes
     std::unique_ptr<ThermalPhoton> photon_QGP_2_to_2;
-    ThermalPhoton* photon_QGP_collinear;
-    ThermalPhoton* photon_HG_meson;
-    ThermalPhoton* photon_HG_omega;
-    ThermalPhoton* photon_HG_rho_spectralfun;
-    ThermalPhoton* photon_HG_pipiBremsstrahlung;
+    std::unique_ptr<ThermalPhoton> photon_QGP_collinear;
+    std::unique_ptr<ThermalPhoton> photon_HG_meson;
+    std::unique_ptr<ThermalPhoton> photon_HG_omega;
+    std::unique_ptr<ThermalPhoton> photon_HG_rho_spectralfun;
+    std::unique_ptr<ThermalPhoton> photon_HG_pipiBremsstrahlung;
 
     ThermalPhoton* photon_pirho;
     ThermalPhoton* photon_KstarK;
