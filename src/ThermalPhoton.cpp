@@ -18,7 +18,7 @@
 
 using namespace std;
 
-ThermalPhoton::ThermalPhoton(ParameterReader* paraRdr_in) {
+ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;
 
     neta = paraRdr->getVal("neta");

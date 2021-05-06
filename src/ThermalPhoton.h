@@ -7,12 +7,13 @@
 #include "./Arsenal.h"
 #include "./Table2D.h"
 #include "./ParameterReader.h"
+#include <memory>
 
 using namespace std;
 
 class ThermalPhoton {
  private:
-    ParameterReader* paraRdr;
+    std::shared_ptr<ParameterReader> paraRdr;
 
     int np, nphi, nrapidity;
     int norder;
@@ -102,7 +103,8 @@ class ThermalPhoton {
     double ***vndxperpdtau_cos_tot, ***vndxperpdtau_sin_tot;
 
  public:
-    ThermalPhoton(ParameterReader* paraRdr_in);
+    ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in);
+
     ~ThermalPhoton();
 
     void setupEmissionrate(string emissionProcess, double Xmin, double dX,
