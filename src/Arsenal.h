@@ -33,4 +33,8 @@ string toLower(string str);
 string trim(string str);
 double stringToDouble(string str);
 
+void createA2DMatrix(double **mat, const int n1, const int n2,
+                     const double init);
+void deleteA2DMatrix(double **mat, const int n1);
+
 #endif

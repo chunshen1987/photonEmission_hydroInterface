@@ -11,6 +11,7 @@
 #include "./tensor_trans.h"
 #include "./PhotonEmission.h"
 #include "./ParameterReader.h"
+#include "Arsenal.h"
 
 using namespace std;
 
@@ -66,17 +67,15 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
         }
     }
 
-    vnpT_cos_eq = new double* [norder];
+    createA2DMatrix(vnpT_cos_eq, norder, np, 0.);
     vnpT_sin_eq = new double* [norder];
     vnpT_cos = new double* [norder];
     vnpT_sin = new double* [norder];
     for (int order = 0; order < norder; order++) {
-        vnpT_cos_eq[order] = new double[np];
         vnpT_sin_eq[order] = new double[np];
         vnpT_cos[order] = new double[np];
         vnpT_sin[order] = new double[np];
         for (int i = 0; i < np; i++) {
-            vnpT_cos_eq[order][i] = 0.0e0;
             vnpT_cos[order][i] = 0.0e0;
             vnpT_sin_eq[order][i] = 0.0e0;
             vnpT_sin[order][i] = 0.0e0;
@@ -107,13 +106,12 @@ PhotonEmission::~PhotonEmission() {
     delete[] dNd2pT_eq;
     delete[] dNd2pT;
 
+    deleteA2DMatrix(vnpT_cos_eq, norder);
     for (int i = 0; i < norder; i++) {
-       delete[] vnpT_cos_eq[i];
        delete[] vnpT_sin_eq[i];
        delete[] vnpT_cos[i];
        delete[] vnpT_sin[i];
     }
-    delete[] vnpT_cos_eq;
     delete[] vnpT_sin_eq;
     delete[] vnpT_cos;
     delete[] vnpT_sin;

@@ -531,3 +531,22 @@ double stringToDouble(string str)
   return val;
 }
 
+
+void createA2DMatrix(double **mat, const int n1, const int n2,
+                     const double init) {
+    mat = new double* [n1];
+    for (int i = 0; i < n1; i++) {
+        mat[i] = new double [n2];
+        for (int j = 0; j < n2; j++) {
+            mat[i][j] = init;
+        }
+    }
+}
+
+
+void deleteA2DMatrix(double **mat, const int n1) {
+    for (int i = 0; i < n1; i++) {
+        delete[] mat[i];
+    }
+    delete[] mat;
+}

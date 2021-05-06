@@ -161,12 +161,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     vn_cos_tot.resize(norder,0.);
     vn_sin_tot.resize(norder,0.);
 
-    for(int i = 0; i < norder; i++)
-    {
-  
-    }
-
-
     int diff_flag = paraRdr->getVal("differential_flag");
 
     if (diff_flag == 1 or diff_flag > 10) {
