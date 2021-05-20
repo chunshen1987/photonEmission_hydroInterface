@@ -195,19 +195,19 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        dNd2pTdphidydxperpdtau_bulkvis = new double**** [n_xperp_cut];
        dNd2pTdphidydxperpdtau_tot = new double**** [n_xperp_cut];
 
-       dNdydxperpdtau_eq = new double* [n_xperp_cut];
-       dNdydxperpdtau_vis = new double* [n_xperp_cut];
-       dNdydxperpdtau_bulkvis = new double* [n_xperp_cut];
-       dNdydxperpdtau_tot = new double* [n_xperp_cut];
+       createA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, 0.);
+       createA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, 0.);
+       createA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, 0.);
+       createA2DMatrix(dNdydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, 0.); 
 
-       vndxperpdtau_cos_eq = new double** [n_xperp_cut];
-       vndxperpdtau_sin_eq = new double** [n_xperp_cut];
-       vndxperpdtau_cos_vis = new double** [n_xperp_cut];
-       vndxperpdtau_sin_vis = new double** [n_xperp_cut];
-       vndxperpdtau_cos_bulkvis = new double** [n_xperp_cut];
-       vndxperpdtau_sin_bulkvis = new double** [n_xperp_cut];
-       vndxperpdtau_cos_tot = new double** [n_xperp_cut];
-       vndxperpdtau_sin_tot = new double** [n_xperp_cut];
+       createA3DMatrix(vndxperpdtau_cos_eq, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_sin_eq, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_cos_vis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_sin_vis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_cos_bulkvis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_sin_bulkvis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
 
        for(int i = 0; i < n_xperp_cut; i++)
        {
@@ -216,20 +216,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
           dNd2pTdphidydxperpdtau_bulkvis[i] = new double*** [n_tau_cut_xtau];
           dNd2pTdphidydxperpdtau_tot[i] = new double*** [n_tau_cut_xtau];
 
-          dNdydxperpdtau_eq[i] = new double [n_tau_cut_xtau];
-          dNdydxperpdtau_vis[i] = new double [n_tau_cut_xtau];
-          dNdydxperpdtau_bulkvis[i] = new double [n_tau_cut_xtau];
-          dNdydxperpdtau_tot[i] = new double [n_tau_cut_xtau];
-
-          vndxperpdtau_cos_eq[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_sin_eq[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_cos_vis[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_sin_vis[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_cos_bulkvis[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_sin_bulkvis[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_cos_tot[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_sin_tot[i] = new double* [n_tau_cut_xtau];
-
           for(int j = 0; j < n_tau_cut_xtau; j++)
           {
              dNd2pTdphidydxperpdtau_eq[i][j] = new double** [np];
@@ -237,31 +223,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
              dNd2pTdphidydxperpdtau_bulkvis[i][j] = new double** [np];
              dNd2pTdphidydxperpdtau_tot[i][j] = new double** [np];
 
-             vndxperpdtau_cos_eq[i][j] = new double [norder];
-             vndxperpdtau_sin_eq[i][j] = new double [norder];
-             vndxperpdtau_cos_vis[i][j] = new double [norder];
-             vndxperpdtau_sin_vis[i][j] = new double [norder];
-             vndxperpdtau_cos_bulkvis[i][j] = new double [norder];
-             vndxperpdtau_sin_bulkvis[i][j] = new double [norder];
-             vndxperpdtau_cos_tot[i][j] = new double [norder];
-             vndxperpdtau_sin_tot[i][j] = new double [norder];
-
-             dNdydxperpdtau_eq[i][j] = 0.0;
-             dNdydxperpdtau_vis[i][j] = 0.0;
-             dNdydxperpdtau_bulkvis[i][j] = 0.0;
-             dNdydxperpdtau_tot[i][j] = 0.0;
-
-             for(int jj = 0; jj < norder; jj++)
-             {
-                vndxperpdtau_cos_eq[i][j][jj] = 0.0;
-                vndxperpdtau_sin_eq[i][j][jj] = 0.0;
-                vndxperpdtau_cos_vis[i][j][jj] = 0.0;
-                vndxperpdtau_sin_vis[i][j][jj] = 0.0;
-                vndxperpdtau_cos_bulkvis[i][j][jj] = 0.0;
-                vndxperpdtau_sin_bulkvis[i][j][jj] = 0.0;
-                vndxperpdtau_cos_tot[i][j][jj] = 0.0;
-                vndxperpdtau_sin_tot[i][j][jj] = 0.0;
-             }
              for(int k = 0; k < np; k++)
              {
                 dNd2pTdphidydxperpdtau_eq[i][j][k] = new double* [nphi];
@@ -350,6 +311,7 @@ ThermalPhoton::~ThermalPhoton() {
     deleteA3DMatrix(vndTdtau_sin_bulkvis, nTcut, nTaucut);
     deleteA3DMatrix(vndTdtau_cos_tot, nTcut, nTaucut);
     deleteA3DMatrix(vndTdtau_sin_tot, nTcut, nTaucut);
+
     int diff_flag = paraRdr->getVal("differential_flag");
     if (diff_flag == 1 or diff_flag > 10) {
        for(int i = 0; i < nTcut; i++)
@@ -386,6 +348,20 @@ ThermalPhoton::~ThermalPhoton() {
        delete[] dNd2pTdphidydTdtau_tot;
     }
 
+    deleteA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut);
+    deleteA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut);
+    deleteA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut);
+    deleteA2DMatrix(dNdydxperpdtau_tot, n_xperp_cut); 
+
+    deleteA3DMatrix(vndxperpdtau_cos_eq, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_sin_eq, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_cos_vis, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_sin_vis, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_cos_bulkvis, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_sin_bulkvis, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau);
+    
     if (diff_flag == 2 or diff_flag > 10) {
        for(int i = 0; i < n_xperp_cut; i++)
        {
@@ -409,50 +385,16 @@ ThermalPhoton::~ThermalPhoton() {
              delete[] dNd2pTdphidydxperpdtau_vis[i][j];
              delete[] dNd2pTdphidydxperpdtau_bulkvis[i][j];
              delete[] dNd2pTdphidydxperpdtau_tot[i][j];
-             delete[] vndxperpdtau_cos_eq[i][j];
-             delete[] vndxperpdtau_sin_eq[i][j];
-             delete[] vndxperpdtau_cos_vis[i][j];
-             delete[] vndxperpdtau_sin_vis[i][j];
-             delete[] vndxperpdtau_cos_bulkvis[i][j];
-             delete[] vndxperpdtau_sin_bulkvis[i][j];
-             delete[] vndxperpdtau_cos_tot[i][j];
-             delete[] vndxperpdtau_sin_tot[i][j];
           }
           delete[] dNd2pTdphidydxperpdtau_eq[i];
           delete[] dNd2pTdphidydxperpdtau_vis[i];
           delete[] dNd2pTdphidydxperpdtau_bulkvis[i];
           delete[] dNd2pTdphidydxperpdtau_tot[i];
-
-          delete[] dNdydxperpdtau_eq[i];
-          delete[] dNdydxperpdtau_vis[i];
-          delete[] dNdydxperpdtau_bulkvis[i];
-          delete[] dNdydxperpdtau_tot[i];
-
-          delete[] vndxperpdtau_cos_eq[i];
-          delete[] vndxperpdtau_sin_eq[i];
-          delete[] vndxperpdtau_cos_vis[i];
-          delete[] vndxperpdtau_sin_bulkvis[i];
-          delete[] vndxperpdtau_cos_tot[i];
-          delete[] vndxperpdtau_sin_tot[i];
        }
        delete[] dNd2pTdphidydxperpdtau_eq;
        delete[] dNd2pTdphidydxperpdtau_vis;
        delete[] dNd2pTdphidydxperpdtau_bulkvis;
        delete[] dNd2pTdphidydxperpdtau_tot;
-
-       delete[] dNdydxperpdtau_eq;
-       delete[] dNdydxperpdtau_vis;
-       delete[] dNdydxperpdtau_bulkvis;
-       delete[] dNdydxperpdtau_tot;
-
-       delete[] vndxperpdtau_cos_eq;
-       delete[] vndxperpdtau_sin_eq;
-       delete[] vndxperpdtau_cos_vis;
-       delete[] vndxperpdtau_sin_vis;
-       delete[] vndxperpdtau_cos_bulkvis;
-       delete[] vndxperpdtau_sin_bulkvis;
-       delete[] vndxperpdtau_cos_tot;
-       delete[] vndxperpdtau_sin_tot;
     }
 }
 
