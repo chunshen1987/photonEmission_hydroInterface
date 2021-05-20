@@ -48,23 +48,14 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
         bulkPi_Tb[i] = 0.0;
     }
 
-    dNd2pTdphidy_eq = new double** [np];
-    dNd2pTdphidy = new double** [np];
+    
+    createA3DMatrix(dNd2pTdphidy_eq, np, nphi, nrapidity, 0.);
+    createA3DMatrix(dNd2pTdphidy, np, nphi, nrapidity, 0.);
     dNd2pT_eq = new double[np];
     dNd2pT = new double[np];
     for (int i = 0; i < np; i++) {
         dNd2pT_eq[i] = 0.0e0;
         dNd2pT[i] = 0.0e0;
-        dNd2pTdphidy_eq[i] = new double* [nphi];
-        dNd2pTdphidy[i] = new double* [nphi];
-        for (int j = 0; j < nphi; j++) {
-            dNd2pTdphidy_eq[i][j] = new double[nrapidity];
-            dNd2pTdphidy[i][j] = new double[nrapidity];
-            for (int k=0; k < nrapidity; k++) {
-                dNd2pTdphidy_eq[i][j][k] = 0.0e0;
-                dNd2pTdphidy[i][j][k] = 0.0e0;
-            }
-        }
     }
 
     createA2DMatrix(vnpT_cos_eq, norder, np, 0.);
@@ -83,16 +74,9 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
 }
 
 PhotonEmission::~PhotonEmission() {
-    for (int i = 0; i < np; i++) {
-        for (int j = 0; j < nphi; j++) {
-            delete[] dNd2pTdphidy_eq[i][j];
-            delete[] dNd2pTdphidy[i][j];
-        }
-        delete[] dNd2pTdphidy_eq[i];
-        delete[] dNd2pTdphidy[i];
-    }
-    delete[] dNd2pTdphidy_eq;
-    delete[] dNd2pTdphidy;
+    
+    deleteA3DMatrix(dNd2pTdphidy_eq, np, nphi);
+    deleteA3DMatrix(dNd2pTdphidy, np, nphi);
     delete[] dNd2pT_eq;
     delete[] dNd2pT;
 
