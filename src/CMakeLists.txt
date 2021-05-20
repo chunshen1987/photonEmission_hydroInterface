@@ -18,6 +18,8 @@ else (link_with_lib)
 endif (link_with_lib)
 target_link_libraries(${exename} ${libname})
 
+target_link_libraries(${exename} ${HDF5_INCLUDE_DIRS} ${HDF5_LIBRARIES})
+
 install(TARGETS ${exename} ${libname}
         RUNTIME DESTINATION ${CMAKE_HOME_DIRECTORY}
         LIBRARY DESTINATION lib

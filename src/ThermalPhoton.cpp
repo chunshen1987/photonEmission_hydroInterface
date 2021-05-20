@@ -15,6 +15,7 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 #include "gauss_quadrature.h"
+#include "Arsenal.h"
 
 using namespace std;
 
@@ -99,10 +100,11 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
             }
         }
     }
-    vnpT_cos_eq = new double* [norder];
-    vnpT_sin_eq = new double* [norder];
-    vnpT_cos_vis = new double* [norder];
-    vnpT_sin_vis = new double* [norder];
+    
+    createA2DMatrix(vnpT_cos_eq, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_eq, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_vis, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_vis, norder, np, 0.);
     vnpT_cos_vis_deltaf_restricted = new double* [norder];
     vnpT_sin_vis_deltaf_restricted = new double* [norder];
     vnpT_cos_bulkvis = new double* [norder];
@@ -113,10 +115,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     vnpT_sin_tot = new double* [norder];
     for(int order=0; order<norder; order++)
     {
-      vnpT_cos_eq[order] = new double [np];
-      vnpT_sin_eq[order] = new double [np];
-      vnpT_cos_vis[order] = new double [np];
-      vnpT_sin_vis[order] = new double [np];
       vnpT_cos_vis_deltaf_restricted[order] = new double [np];
       vnpT_sin_vis_deltaf_restricted[order] = new double [np];
       vnpT_cos_bulkvis[order] = new double [np];
@@ -127,14 +125,10 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
       vnpT_sin_tot[order] = new double [np];
       for(int i =0; i < np; i++)
       {
-         vnpT_cos_eq[order][i] = 0.0;
-         vnpT_cos_vis[order][i] = 0.0;
          vnpT_cos_vis_deltaf_restricted[order][i] = 0.0;
          vnpT_cos_bulkvis[order][i] = 0.0;
          vnpT_cos_bulkvis_deltaf_restricted[order][i] = 0.0;
          vnpT_cos_tot[order][i] = 0.0;
-         vnpT_sin_eq[order][i] = 0.0;
-         vnpT_sin_vis[order][i] = 0.0;
          vnpT_sin_vis_deltaf_restricted[order][i] = 0.0;
          vnpT_sin_bulkvis[order][i] = 0.0;
          vnpT_sin_bulkvis_deltaf_restricted[order][i] = 0.0;
@@ -430,11 +424,11 @@ ThermalPhoton::~ThermalPhoton() {
     delete [] dNd2pTdphidy_bulkvis_deltaf_restricted;
     delete [] dNd2pTdphidy_tot;
 
+    deleteA2DMatrix(vnpT_cos_eq, norder);
+    deleteA2DMatrix(vnpT_sin_eq, norder);
+    deleteA2DMatrix(vnpT_cos_vis, norder);
+    deleteA2DMatrix(vnpT_sin_vis, norder);
     for (int i = 0; i < norder; i++) {
-       delete [] vnpT_cos_eq[i];
-       delete [] vnpT_sin_eq[i];
-       delete [] vnpT_cos_vis[i];
-       delete [] vnpT_sin_vis[i];
        delete [] vnpT_cos_vis_deltaf_restricted[i];
        delete [] vnpT_sin_vis_deltaf_restricted[i];
        delete [] vnpT_cos_bulkvis[i];
@@ -444,8 +438,6 @@ ThermalPhoton::~ThermalPhoton() {
        delete [] vnpT_cos_tot[i];
        delete [] vnpT_sin_tot[i];
     }
-    delete [] vnpT_cos_eq;
-    delete [] vnpT_sin_eq;
     delete [] vnpT_cos_vis;
     delete [] vnpT_sin_vis;
     delete [] vnpT_cos_vis_deltaf_restricted;

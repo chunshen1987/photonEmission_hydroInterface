@@ -68,19 +68,9 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     }
 
     createA2DMatrix(vnpT_cos_eq, norder, np, 0.);
-    vnpT_sin_eq = new double* [norder];
-    vnpT_cos = new double* [norder];
-    vnpT_sin = new double* [norder];
-    for (int order = 0; order < norder; order++) {
-        vnpT_sin_eq[order] = new double[np];
-        vnpT_cos[order] = new double[np];
-        vnpT_sin[order] = new double[np];
-        for (int i = 0; i < np; i++) {
-            vnpT_cos[order][i] = 0.0e0;
-            vnpT_sin_eq[order][i] = 0.0e0;
-            vnpT_sin[order][i] = 0.0e0;
-        }
-    }
+    createA2DMatrix(vnpT_sin_eq, norder, np, 0.);
+    createA2DMatrix(vnpT_cos, norder, np, 0.);
+    createA2DMatrix(vnpT_sin, norder, np, 0.);
 
     dNdy_eq = 0.0;
     dNdy_tot = 0.0;
@@ -107,15 +97,9 @@ PhotonEmission::~PhotonEmission() {
     delete[] dNd2pT;
 
     deleteA2DMatrix(vnpT_cos_eq, norder);
-    for (int i = 0; i < norder; i++) {
-       delete[] vnpT_sin_eq[i];
-       delete[] vnpT_cos[i];
-       delete[] vnpT_sin[i];
-    }
-    delete[] vnpT_sin_eq;
-    delete[] vnpT_cos;
-    delete[] vnpT_sin;
-
+    deleteA2DMatrix(vnpT_sin_eq, norder);
+    deleteA2DMatrix(vnpT_cos, norder);
+    deleteA2DMatrix(vnpT_sin, norder);
 
     for (int i = 0; i < 4; i++) {
        delete [] lambda[i];
