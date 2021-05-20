@@ -105,36 +105,14 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     createA2DMatrix(vnpT_sin_eq, norder, np, 0.);
     createA2DMatrix(vnpT_cos_vis, norder, np, 0.);
     createA2DMatrix(vnpT_sin_vis, norder, np, 0.);
-    vnpT_cos_vis_deltaf_restricted = new double* [norder];
-    vnpT_sin_vis_deltaf_restricted = new double* [norder];
-    vnpT_cos_bulkvis = new double* [norder];
-    vnpT_sin_bulkvis = new double* [norder];
-    vnpT_cos_bulkvis_deltaf_restricted = new double* [norder];
-    vnpT_sin_bulkvis_deltaf_restricted = new double* [norder];
-    vnpT_cos_tot = new double* [norder];
-    vnpT_sin_tot = new double* [norder];
-    for(int order=0; order<norder; order++)
-    {
-      vnpT_cos_vis_deltaf_restricted[order] = new double [np];
-      vnpT_sin_vis_deltaf_restricted[order] = new double [np];
-      vnpT_cos_bulkvis[order] = new double [np];
-      vnpT_sin_bulkvis[order] = new double [np];
-      vnpT_cos_bulkvis_deltaf_restricted[order] = new double [np];
-      vnpT_sin_bulkvis_deltaf_restricted[order] = new double [np];
-      vnpT_cos_tot[order] = new double [np];
-      vnpT_sin_tot[order] = new double [np];
-      for(int i =0; i < np; i++)
-      {
-         vnpT_cos_vis_deltaf_restricted[order][i] = 0.0;
-         vnpT_cos_bulkvis[order][i] = 0.0;
-         vnpT_cos_bulkvis_deltaf_restricted[order][i] = 0.0;
-         vnpT_cos_tot[order][i] = 0.0;
-         vnpT_sin_vis_deltaf_restricted[order][i] = 0.0;
-         vnpT_sin_bulkvis[order][i] = 0.0;
-         vnpT_sin_bulkvis_deltaf_restricted[order][i] = 0.0;
-         vnpT_sin_tot[order][i] = 0.0;
-      }
-    }
+    createA2DMatrix(vnpT_cos_vis_deltaf_restricted, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_vis_deltaf_restricted, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_bulkvis, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_bulkvis, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_bulkvis_deltaf_restricted, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_bulkvis_deltaf_restricted, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_tot, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_tot, norder, np, 0.);
 
     dNdy_eq = 0.0;
     dNdy_vis = 0.0;
@@ -428,27 +406,14 @@ ThermalPhoton::~ThermalPhoton() {
     deleteA2DMatrix(vnpT_sin_eq, norder);
     deleteA2DMatrix(vnpT_cos_vis, norder);
     deleteA2DMatrix(vnpT_sin_vis, norder);
-    for (int i = 0; i < norder; i++) {
-       delete [] vnpT_cos_vis_deltaf_restricted[i];
-       delete [] vnpT_sin_vis_deltaf_restricted[i];
-       delete [] vnpT_cos_bulkvis[i];
-       delete [] vnpT_sin_bulkvis[i];
-       delete [] vnpT_cos_bulkvis_deltaf_restricted[i];
-       delete [] vnpT_sin_bulkvis_deltaf_restricted[i];
-       delete [] vnpT_cos_tot[i];
-       delete [] vnpT_sin_tot[i];
-    }
-    delete [] vnpT_cos_vis;
-    delete [] vnpT_sin_vis;
-    delete [] vnpT_cos_vis_deltaf_restricted;
-    delete [] vnpT_sin_vis_deltaf_restricted;
-    delete [] vnpT_cos_bulkvis;
-    delete [] vnpT_sin_bulkvis;
-    delete [] vnpT_cos_bulkvis_deltaf_restricted;
-    delete [] vnpT_sin_bulkvis_deltaf_restricted;
-    delete [] vnpT_cos_tot;
-    delete [] vnpT_sin_tot;
-
+    deleteA2DMatrix(vnpT_cos_vis_deltaf_restricted, norder);
+    deleteA2DMatrix(vnpT_sin_vis_deltaf_restricted, norder);
+    deleteA2DMatrix(vnpT_cos_bulkvis, norder);
+    deleteA2DMatrix(vnpT_sin_bulkvis, norder);
+    deleteA2DMatrix(vnpT_cos_bulkvis_deltaf_restricted, norder);
+    deleteA2DMatrix(vnpT_sin_bulkvis_deltaf_restricted, norder);
+    deleteA2DMatrix(vnpT_cos_tot, norder);
+    deleteA2DMatrix(vnpT_sin_tot, norder);
 
     int diff_flag = paraRdr->getVal("differential_flag");
     if (diff_flag == 1 or diff_flag > 10) {

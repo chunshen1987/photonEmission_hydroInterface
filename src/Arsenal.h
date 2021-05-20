@@ -37,4 +37,8 @@ void createA2DMatrix(double **mat, const int n1, const int n2,
                      const double init);
 void deleteA2DMatrix(double **mat, const int n1);
 
+void createA3DMatrix(double ***mat, const int n1, const int n2, const int n3, 
+                     const double init);
+void deleteA3DMatrix(double ***mat, const int n1, const int n2);
+
 #endif
