@@ -79,7 +79,7 @@ int main(int argc, char** argv) {
         delete hydroinfo_ptr;
     } else if (hydro_flag == 2) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
-        int hydro_mode = 10;
+        int hydro_mode = 12;
         int nskip_tau = 1;
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium

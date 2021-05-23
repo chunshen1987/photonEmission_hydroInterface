@@ -1,4 +1,4 @@
-hydro_flag = 1                # read in mode for hydro medium
+hydro_flag = 2                # read in mode for hydro medium
                               # 0: read in hdf5 file
                               # 1: read in binary file output from MUSIC
                               # 2: read in binary file output from new MUSIC (no grid)

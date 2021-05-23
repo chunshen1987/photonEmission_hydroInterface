@@ -676,7 +676,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
     double tau_now = 0.0;
     double flow_u_mu_low[4];
-    fluidCell_3D_new *fluidCellptr = new fluidCell_3D_new;
+    fluidCell_3D_new fluidCellptr;
 
     // main loop begins ...
     // loop over all fluid cells
@@ -686,7 +686,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     for (long int cell_id = 0; cell_id < number_of_cells; cell_id++) {
         hydroinfo_MUSIC_ptr->get_hydro_cell_info_3d(cell_id, fluidCellptr);
 
-        double tau_local = tau0 + fluidCellptr->itau*dtau;
+        double tau_local = tau0 + fluidCellptr.itau*dtau;
         if (fabs(tau_now - tau_local) > 1e-10) {
             tau_now = tau_local;
             cout << "Calculating tau = " << setw(4) << setprecision(3)
@@ -697,31 +697,30 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         double volume = tau_local*volume_base;
 
         int idx_Tb = 0;
-        double temp_local = fluidCellptr->temperature;
+        double temp_local = fluidCellptr.temperature;
 
         if (temp_local < T_dec ||
             temp_local > T_cuthigh || temp_local < T_cutlow) {
             // fluid cell is out of interest
             continue;
         }
-        
         double ux, uy, ueta;
         if (turn_off_transverse_flow == 1) {
             ux = 0.0;
             uy = 0.0;
             ueta = 0.0;
         } else {
-            ux = fluidCellptr->ux;
-            uy = fluidCellptr->uy;
-            ueta = fluidCellptr->ueta;
+            ux = fluidCellptr.ux;
+            uy = fluidCellptr.uy;
+            ueta = fluidCellptr.ueta;
         }
         double utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
 
-        double pi11 = fluidCellptr->pi11;
-        double pi12 = fluidCellptr->pi12;
-        double pi13 = fluidCellptr->pi13;
-        double pi22 = fluidCellptr->pi22;
-        double pi23 = fluidCellptr->pi23;
+        double pi11 = fluidCellptr.pi11;
+        double pi12 = fluidCellptr.pi12;
+        double pi13 = fluidCellptr.pi13;
+        double pi22 = fluidCellptr.pi22;
+        double pi23 = fluidCellptr.pi23;
         // reconstruct all other components of the shear stress tensor
         double pi01 = (ux*pi11 + uy*pi12 + ueta*pi13)/utau;
         double pi02 = (ux*pi12 + uy*pi22 + ueta*pi23)/utau;
@@ -730,7 +729,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         double pi00 = pi11 + pi22 + pi33;
         double pi03 = (ux*pi13 + uy*pi23 + ueta*pi33)/utau;
 
-        double bulkPi_local = fluidCellptr->bulkPi;
+        double bulkPi_local = fluidCellptr.bulkPi;
 
         flow_u_mu_low[0] = utau;
         flow_u_mu_low[1] = -ux;
@@ -738,8 +737,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         flow_u_mu_low[3] = -ueta;
 
         double prefactor_pimunu = 1./2.;
-        double eta_local = -eta_max + fluidCellptr->ieta*deta;
-        double x_local = -X_max + fluidCellptr->ix*dx;
+        double eta_local = -eta_max + fluidCellptr.ieta*deta;
+        double x_local = -X_max + fluidCellptr.ix*dx;
 
         // photon momentum loops
         for (int k = 0; k < nrapidity; k++) {
@@ -983,9 +982,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             }
         }
     }
-    delete fluidCellptr;
     return;
 }
+
 
 void PhotonEmission::calPhoton_total_SpMatrix() {
     for (int k = 0; k < nrapidity; k++) {
