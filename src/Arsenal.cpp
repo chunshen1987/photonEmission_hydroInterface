@@ -532,6 +532,19 @@ double stringToDouble(string str)
 }
 
 
+void createA3DMatrix(double ***mat, const int n1, const int n2, const int n3, const double init) {
+    mat = new double** [n1];
+    for (int i = 0; i < n1; i++) {
+        mat[i] = new double* [n2];
+        for (int j = 0; j < n2; j++) {
+            mat[i][j] = new double [n3];
+            for (int k = 0; k < n3; k++) {
+                mat[i][j][k] = init;
+            }
+        }
+    }
+}
+
 void createA2DMatrix(double **mat, const int n1, const int n2,
                      const double init) {
     mat = new double* [n1];
@@ -543,6 +556,16 @@ void createA2DMatrix(double **mat, const int n1, const int n2,
     }
 }
 
+
+void deleteA3DMatrix(double ***mat, const int n1, const int n2) {
+    for (int i = 0; i < n1; i++) {
+        delete[] mat[i]; 
+        for (int j = 0; j < n2; j++) {
+            delete[] mat[i][j];
+        }
+    }
+    delete[] mat;
+}
 
 void deleteA2DMatrix(double **mat, const int n1) {
     for (int i = 0; i < n1; i++) {

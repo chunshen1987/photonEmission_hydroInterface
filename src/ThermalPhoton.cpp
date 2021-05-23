@@ -15,6 +15,7 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 #include "gauss_quadrature.h"
+#include "Arsenal.h"
 
 using namespace std;
 
@@ -62,12 +63,12 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     dNd2pT_bulkvis = new double[np];
     dNd2pT_bulkvis_deltaf_restricted = new double[np];
     dNd2pT_tot = new double[np];
-    dNd2pTdphidy_eq = new double** [np];
-    dNd2pTdphidy_vis = new double** [np];
-    dNd2pTdphidy_vis_deltaf_restricted = new double** [np];
-    dNd2pTdphidy_bulkvis = new double** [np];
-    dNd2pTdphidy_bulkvis_deltaf_restricted = new double** [np];
-    dNd2pTdphidy_tot = new double** [np];
+    createA3DMatrix(dNd2pTdphidy_eq, np, nphi, nrapidity, 0.);
+    createA3DMatrix(dNd2pTdphidy_vis, np, nphi, nrapidity, 0.);
+    createA3DMatrix(dNd2pTdphidy_vis_deltaf_restricted, np, nphi, nrapidity, 0.);
+    createA3DMatrix(dNd2pTdphidy_bulkvis, np, nphi, nrapidity, 0.);
+    createA3DMatrix(dNd2pTdphidy_bulkvis_deltaf_restricted, np, nphi, nrapidity, 0.);
+    createA3DMatrix(dNd2pTdphidy_tot, np, nphi, nrapidity, 0.);
     for (int i = 0; i < np; i++) {
         dNd2pT_eq[i] = 0.0;
         dNd2pT_vis[i] = 0.0;
@@ -75,72 +76,20 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
         dNd2pT_bulkvis[i] = 0.0;
         dNd2pT_bulkvis_deltaf_restricted[i] = 0.0;
         dNd2pT_tot[i] = 0.0;
-        dNd2pTdphidy_eq[i] = new double* [nphi];
-        dNd2pTdphidy_vis[i] = new double* [nphi];
-        dNd2pTdphidy_vis_deltaf_restricted[i] = new double* [nphi];
-        dNd2pTdphidy_bulkvis[i] = new double* [nphi];
-        dNd2pTdphidy_bulkvis_deltaf_restricted[i] = new double* [nphi];
-        dNd2pTdphidy_tot[i] = new double* [nphi];
-        for (int j = 0; j < nphi; j++) {
-            dNd2pTdphidy_eq[i][j] = new double[nrapidity];
-            dNd2pTdphidy_vis[i][j] = new double[nrapidity];
-            dNd2pTdphidy_vis_deltaf_restricted[i][j] = new double[nrapidity];
-            dNd2pTdphidy_bulkvis[i][j] = new double[nrapidity];
-            dNd2pTdphidy_bulkvis_deltaf_restricted[i][j] = (
-                                                    new double[nrapidity]);
-            dNd2pTdphidy_tot[i][j] = new double[nrapidity];
-            for (int k = 0; k < nrapidity; k++) {
-                dNd2pTdphidy_eq[i][j][k] = 0.0;
-                dNd2pTdphidy_vis[i][j][k] = 0.0;
-                dNd2pTdphidy_vis_deltaf_restricted[i][j][k] = 0.0;
-                dNd2pTdphidy_bulkvis[i][j][k] = 0.0;
-                dNd2pTdphidy_bulkvis_deltaf_restricted[i][j][k] = 0.0;
-                dNd2pTdphidy_tot[i][j][k] = 0.0;
-            }
-        }
     }
-    vnpT_cos_eq = new double* [norder];
-    vnpT_sin_eq = new double* [norder];
-    vnpT_cos_vis = new double* [norder];
-    vnpT_sin_vis = new double* [norder];
-    vnpT_cos_vis_deltaf_restricted = new double* [norder];
-    vnpT_sin_vis_deltaf_restricted = new double* [norder];
-    vnpT_cos_bulkvis = new double* [norder];
-    vnpT_sin_bulkvis = new double* [norder];
-    vnpT_cos_bulkvis_deltaf_restricted = new double* [norder];
-    vnpT_sin_bulkvis_deltaf_restricted = new double* [norder];
-    vnpT_cos_tot = new double* [norder];
-    vnpT_sin_tot = new double* [norder];
-    for(int order=0; order<norder; order++)
-    {
-      vnpT_cos_eq[order] = new double [np];
-      vnpT_sin_eq[order] = new double [np];
-      vnpT_cos_vis[order] = new double [np];
-      vnpT_sin_vis[order] = new double [np];
-      vnpT_cos_vis_deltaf_restricted[order] = new double [np];
-      vnpT_sin_vis_deltaf_restricted[order] = new double [np];
-      vnpT_cos_bulkvis[order] = new double [np];
-      vnpT_sin_bulkvis[order] = new double [np];
-      vnpT_cos_bulkvis_deltaf_restricted[order] = new double [np];
-      vnpT_sin_bulkvis_deltaf_restricted[order] = new double [np];
-      vnpT_cos_tot[order] = new double [np];
-      vnpT_sin_tot[order] = new double [np];
-      for(int i =0; i < np; i++)
-      {
-         vnpT_cos_eq[order][i] = 0.0;
-         vnpT_cos_vis[order][i] = 0.0;
-         vnpT_cos_vis_deltaf_restricted[order][i] = 0.0;
-         vnpT_cos_bulkvis[order][i] = 0.0;
-         vnpT_cos_bulkvis_deltaf_restricted[order][i] = 0.0;
-         vnpT_cos_tot[order][i] = 0.0;
-         vnpT_sin_eq[order][i] = 0.0;
-         vnpT_sin_vis[order][i] = 0.0;
-         vnpT_sin_vis_deltaf_restricted[order][i] = 0.0;
-         vnpT_sin_bulkvis[order][i] = 0.0;
-         vnpT_sin_bulkvis_deltaf_restricted[order][i] = 0.0;
-         vnpT_sin_tot[order][i] = 0.0;
-      }
-    }
+    
+    createA2DMatrix(vnpT_cos_eq, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_eq, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_vis, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_vis, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_vis_deltaf_restricted, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_vis_deltaf_restricted, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_bulkvis, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_bulkvis, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_bulkvis_deltaf_restricted, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_bulkvis_deltaf_restricted, norder, np, 0.);
+    createA2DMatrix(vnpT_cos_tot, norder, np, 0.);
+    createA2DMatrix(vnpT_sin_tot, norder, np, 0.);
 
     dNdy_eq = 0.0;
     dNdy_vis = 0.0;
@@ -177,40 +126,26 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        dNd2pTdphidydTdtau_bulkvis = new double**** [nTcut];
        dNd2pTdphidydTdtau_tot = new double**** [nTcut];
 
-       dNdydTdtau_eq = new double* [nTcut];
-       dNdydTdtau_vis = new double* [nTcut];
-       dNdydTdtau_bulkvis = new double* [nTcut];
-       dNdydTdtau_tot = new double* [nTcut];
-
-       vndTdtau_cos_eq = new double** [nTcut];
-       vndTdtau_sin_eq = new double** [nTcut];
-       vndTdtau_cos_vis = new double** [nTcut];
-       vndTdtau_sin_vis = new double** [nTcut];
-       vndTdtau_cos_bulkvis = new double** [nTcut];
-       vndTdtau_sin_bulkvis = new double** [nTcut];
-       vndTdtau_cos_tot = new double** [nTcut];
-       vndTdtau_sin_tot = new double** [nTcut];
-
+       createA2DMatrix(dNdydTdtau_eq, nTcut, nTaucut, 0.);
+       createA2DMatrix(dNdydTdtau_vis, nTcut, nTaucut, 0.);
+       createA2DMatrix(dNdydTdtau_bulkvis, nTcut, nTaucut, 0.);
+       createA2DMatrix(dNdydTdtau_tot, nTcut, nTaucut, 0.);
+       
+       createA3DMatrix(vndTdtau_cos_eq, nTcut, nTaucut, norder, 0.);
+       createA3DMatrix(vndTdtau_sin_eq, nTcut, nTaucut, norder, 0.);
+       createA3DMatrix(vndTdtau_cos_vis, nTcut, nTaucut, norder, 0.);
+       createA3DMatrix(vndTdtau_sin_vis, nTcut, nTaucut, norder, 0.);
+       createA3DMatrix(vndTdtau_cos_bulkvis, nTcut, nTaucut, norder, 0.);
+       createA3DMatrix(vndTdtau_sin_bulkvis, nTcut, nTaucut, norder, 0.);
+       createA3DMatrix(vndTdtau_cos_tot, nTcut, nTaucut, norder, 0.);
+       createA3DMatrix(vndTdtau_sin_tot, nTcut, nTaucut, norder, 0.);
+       
        for(int i = 0; i < nTcut; i++)
        {
           dNd2pTdphidydTdtau_eq[i] = new double*** [nTaucut];
           dNd2pTdphidydTdtau_vis[i] = new double*** [nTaucut];
           dNd2pTdphidydTdtau_bulkvis[i] = new double*** [nTaucut];
           dNd2pTdphidydTdtau_tot[i] = new double*** [nTaucut];
-
-          dNdydTdtau_eq[i] = new double [nTaucut];
-          dNdydTdtau_vis[i] = new double [nTaucut];
-          dNdydTdtau_bulkvis[i] = new double [nTaucut];
-          dNdydTdtau_tot[i] = new double [nTaucut];
-
-          vndTdtau_cos_eq[i] = new double* [nTaucut];
-          vndTdtau_sin_eq[i] = new double* [nTaucut];
-          vndTdtau_cos_vis[i] = new double* [nTaucut];
-          vndTdtau_sin_vis[i] = new double* [nTaucut];
-          vndTdtau_cos_bulkvis[i] = new double* [nTaucut];
-          vndTdtau_sin_bulkvis[i] = new double* [nTaucut];
-          vndTdtau_cos_tot[i] = new double* [nTaucut];
-          vndTdtau_sin_tot[i] = new double* [nTaucut];
 
           for(int j = 0; j < nTaucut; j++)
           {
@@ -219,31 +154,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
              dNd2pTdphidydTdtau_bulkvis[i][j] = new double** [np];
              dNd2pTdphidydTdtau_tot[i][j] = new double** [np];
 
-             vndTdtau_cos_eq[i][j] = new double [norder];
-             vndTdtau_sin_eq[i][j] = new double [norder];
-             vndTdtau_cos_vis[i][j] = new double [norder];
-             vndTdtau_sin_vis[i][j] = new double [norder];
-             vndTdtau_cos_bulkvis[i][j] = new double [norder];
-             vndTdtau_sin_bulkvis[i][j] = new double [norder];
-             vndTdtau_cos_tot[i][j] = new double [norder];
-             vndTdtau_sin_tot[i][j] = new double [norder];
-
-             dNdydTdtau_eq[i][j] = 0.0;
-             dNdydTdtau_vis[i][j] = 0.0;
-             dNdydTdtau_bulkvis[i][j] = 0.0;
-             dNdydTdtau_tot[i][j] = 0.0;
-
-             for(int jj = 0; jj < norder; jj++)
-             {
-                vndTdtau_cos_eq[i][j][jj] = 0.0;
-                vndTdtau_sin_eq[i][j][jj] = 0.0;
-                vndTdtau_cos_vis[i][j][jj] = 0.0;
-                vndTdtau_sin_vis[i][j][jj] = 0.0;
-                vndTdtau_cos_bulkvis[i][j][jj] = 0.0;
-                vndTdtau_sin_bulkvis[i][j][jj] = 0.0;
-                vndTdtau_cos_tot[i][j][jj] = 0.0;
-                vndTdtau_sin_tot[i][j][jj] = 0.0;
-             }
              for(int k = 0; k < np; k++)
              {
                 dNd2pTdphidydTdtau_eq[i][j][k] = new double* [nphi];
@@ -285,19 +195,19 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        dNd2pTdphidydxperpdtau_bulkvis = new double**** [n_xperp_cut];
        dNd2pTdphidydxperpdtau_tot = new double**** [n_xperp_cut];
 
-       dNdydxperpdtau_eq = new double* [n_xperp_cut];
-       dNdydxperpdtau_vis = new double* [n_xperp_cut];
-       dNdydxperpdtau_bulkvis = new double* [n_xperp_cut];
-       dNdydxperpdtau_tot = new double* [n_xperp_cut];
+       createA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, 0.);
+       createA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, 0.);
+       createA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, 0.);
+       createA2DMatrix(dNdydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, 0.); 
 
-       vndxperpdtau_cos_eq = new double** [n_xperp_cut];
-       vndxperpdtau_sin_eq = new double** [n_xperp_cut];
-       vndxperpdtau_cos_vis = new double** [n_xperp_cut];
-       vndxperpdtau_sin_vis = new double** [n_xperp_cut];
-       vndxperpdtau_cos_bulkvis = new double** [n_xperp_cut];
-       vndxperpdtau_sin_bulkvis = new double** [n_xperp_cut];
-       vndxperpdtau_cos_tot = new double** [n_xperp_cut];
-       vndxperpdtau_sin_tot = new double** [n_xperp_cut];
+       createA3DMatrix(vndxperpdtau_cos_eq, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_sin_eq, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_cos_vis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_sin_vis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_cos_bulkvis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_sin_bulkvis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       createA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
 
        for(int i = 0; i < n_xperp_cut; i++)
        {
@@ -306,20 +216,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
           dNd2pTdphidydxperpdtau_bulkvis[i] = new double*** [n_tau_cut_xtau];
           dNd2pTdphidydxperpdtau_tot[i] = new double*** [n_tau_cut_xtau];
 
-          dNdydxperpdtau_eq[i] = new double [n_tau_cut_xtau];
-          dNdydxperpdtau_vis[i] = new double [n_tau_cut_xtau];
-          dNdydxperpdtau_bulkvis[i] = new double [n_tau_cut_xtau];
-          dNdydxperpdtau_tot[i] = new double [n_tau_cut_xtau];
-
-          vndxperpdtau_cos_eq[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_sin_eq[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_cos_vis[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_sin_vis[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_cos_bulkvis[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_sin_bulkvis[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_cos_tot[i] = new double* [n_tau_cut_xtau];
-          vndxperpdtau_sin_tot[i] = new double* [n_tau_cut_xtau];
-
           for(int j = 0; j < n_tau_cut_xtau; j++)
           {
              dNd2pTdphidydxperpdtau_eq[i][j] = new double** [np];
@@ -327,31 +223,6 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
              dNd2pTdphidydxperpdtau_bulkvis[i][j] = new double** [np];
              dNd2pTdphidydxperpdtau_tot[i][j] = new double** [np];
 
-             vndxperpdtau_cos_eq[i][j] = new double [norder];
-             vndxperpdtau_sin_eq[i][j] = new double [norder];
-             vndxperpdtau_cos_vis[i][j] = new double [norder];
-             vndxperpdtau_sin_vis[i][j] = new double [norder];
-             vndxperpdtau_cos_bulkvis[i][j] = new double [norder];
-             vndxperpdtau_sin_bulkvis[i][j] = new double [norder];
-             vndxperpdtau_cos_tot[i][j] = new double [norder];
-             vndxperpdtau_sin_tot[i][j] = new double [norder];
-
-             dNdydxperpdtau_eq[i][j] = 0.0;
-             dNdydxperpdtau_vis[i][j] = 0.0;
-             dNdydxperpdtau_bulkvis[i][j] = 0.0;
-             dNdydxperpdtau_tot[i][j] = 0.0;
-
-             for(int jj = 0; jj < norder; jj++)
-             {
-                vndxperpdtau_cos_eq[i][j][jj] = 0.0;
-                vndxperpdtau_sin_eq[i][j][jj] = 0.0;
-                vndxperpdtau_cos_vis[i][j][jj] = 0.0;
-                vndxperpdtau_sin_vis[i][j][jj] = 0.0;
-                vndxperpdtau_cos_bulkvis[i][j][jj] = 0.0;
-                vndxperpdtau_sin_bulkvis[i][j][jj] = 0.0;
-                vndxperpdtau_cos_tot[i][j][jj] = 0.0;
-                vndxperpdtau_sin_tot[i][j][jj] = 0.0;
-             }
              for(int k = 0; k < np; k++)
              {
                 dNd2pTdphidydxperpdtau_eq[i][j][k] = new double* [nphi];
@@ -407,56 +278,39 @@ ThermalPhoton::~ThermalPhoton() {
     delete [] dNd2pT_bulkvis_deltaf_restricted;
     delete [] dNd2pT_tot;
 
-    for (int i = 0; i < np; i++) {
-       for (int j = 0; j < nphi; j++) {
-          delete [] dNd2pTdphidy_eq[i][j];
-          delete [] dNd2pTdphidy_vis[i][j];
-          delete [] dNd2pTdphidy_vis_deltaf_restricted[i][j];
-          delete [] dNd2pTdphidy_bulkvis[i][j];
-          delete [] dNd2pTdphidy_bulkvis_deltaf_restricted[i][j];
-          delete [] dNd2pTdphidy_tot[i][j];
-       }
-       delete [] dNd2pTdphidy_eq[i];
-       delete [] dNd2pTdphidy_vis[i];
-       delete [] dNd2pTdphidy_vis_deltaf_restricted[i];
-       delete [] dNd2pTdphidy_bulkvis[i];
-       delete [] dNd2pTdphidy_bulkvis_deltaf_restricted[i];
-       delete [] dNd2pTdphidy_tot[i];
-    }
-    delete [] dNd2pTdphidy_eq;
-    delete [] dNd2pTdphidy_vis;
-    delete [] dNd2pTdphidy_vis_deltaf_restricted;
-    delete [] dNd2pTdphidy_bulkvis;
-    delete [] dNd2pTdphidy_bulkvis_deltaf_restricted;
-    delete [] dNd2pTdphidy_tot;
+    deleteA3DMatrix(dNd2pTdphidy_eq, np, nphi);
+    deleteA3DMatrix(dNd2pTdphidy_vis, np, nphi);
+    deleteA3DMatrix(dNd2pTdphidy_vis_deltaf_restricted, np, nphi);
+    deleteA3DMatrix(dNd2pTdphidy_bulkvis, np, nphi);
+    deleteA3DMatrix(dNd2pTdphidy_bulkvis_deltaf_restricted, np, nphi);
+    deleteA3DMatrix(dNd2pTdphidy_tot, np, nphi);
 
-    for (int i = 0; i < norder; i++) {
-       delete [] vnpT_cos_eq[i];
-       delete [] vnpT_sin_eq[i];
-       delete [] vnpT_cos_vis[i];
-       delete [] vnpT_sin_vis[i];
-       delete [] vnpT_cos_vis_deltaf_restricted[i];
-       delete [] vnpT_sin_vis_deltaf_restricted[i];
-       delete [] vnpT_cos_bulkvis[i];
-       delete [] vnpT_sin_bulkvis[i];
-       delete [] vnpT_cos_bulkvis_deltaf_restricted[i];
-       delete [] vnpT_sin_bulkvis_deltaf_restricted[i];
-       delete [] vnpT_cos_tot[i];
-       delete [] vnpT_sin_tot[i];
-    }
-    delete [] vnpT_cos_eq;
-    delete [] vnpT_sin_eq;
-    delete [] vnpT_cos_vis;
-    delete [] vnpT_sin_vis;
-    delete [] vnpT_cos_vis_deltaf_restricted;
-    delete [] vnpT_sin_vis_deltaf_restricted;
-    delete [] vnpT_cos_bulkvis;
-    delete [] vnpT_sin_bulkvis;
-    delete [] vnpT_cos_bulkvis_deltaf_restricted;
-    delete [] vnpT_sin_bulkvis_deltaf_restricted;
-    delete [] vnpT_cos_tot;
-    delete [] vnpT_sin_tot;
+    deleteA2DMatrix(vnpT_cos_eq, norder);
+    deleteA2DMatrix(vnpT_sin_eq, norder);
+    deleteA2DMatrix(vnpT_cos_vis, norder);
+    deleteA2DMatrix(vnpT_sin_vis, norder);
+    deleteA2DMatrix(vnpT_cos_vis_deltaf_restricted, norder);
+    deleteA2DMatrix(vnpT_sin_vis_deltaf_restricted, norder);
+    deleteA2DMatrix(vnpT_cos_bulkvis, norder);
+    deleteA2DMatrix(vnpT_sin_bulkvis, norder);
+    deleteA2DMatrix(vnpT_cos_bulkvis_deltaf_restricted, norder);
+    deleteA2DMatrix(vnpT_sin_bulkvis_deltaf_restricted, norder);
+    deleteA2DMatrix(vnpT_cos_tot, norder);
+    deleteA2DMatrix(vnpT_sin_tot, norder);
 
+    deleteA2DMatrix(dNdydTdtau_eq, nTcut);
+    deleteA2DMatrix(dNdydTdtau_vis, nTcut);
+    deleteA2DMatrix(dNdydTdtau_bulkvis, nTcut);
+    deleteA2DMatrix(dNdydTdtau_tot, nTcut);
+
+    deleteA3DMatrix(vndTdtau_cos_eq, nTcut, nTaucut);
+    deleteA3DMatrix(vndTdtau_sin_eq, nTcut, nTaucut);
+    deleteA3DMatrix(vndTdtau_cos_vis, nTcut, nTaucut);
+    deleteA3DMatrix(vndTdtau_sin_vis, nTcut, nTaucut);
+    deleteA3DMatrix(vndTdtau_cos_bulkvis, nTcut, nTaucut);
+    deleteA3DMatrix(vndTdtau_sin_bulkvis, nTcut, nTaucut);
+    deleteA3DMatrix(vndTdtau_cos_tot, nTcut, nTaucut);
+    deleteA3DMatrix(vndTdtau_sin_tot, nTcut, nTaucut);
 
     int diff_flag = paraRdr->getVal("differential_flag");
     if (diff_flag == 1 or diff_flag > 10) {
@@ -482,52 +336,32 @@ ThermalPhoton::~ThermalPhoton() {
              delete[] dNd2pTdphidydTdtau_vis[i][j];
              delete[] dNd2pTdphidydTdtau_bulkvis[i][j];
              delete[] dNd2pTdphidydTdtau_tot[i][j];
-             delete[] vndTdtau_cos_eq[i][j];
-             delete[] vndTdtau_sin_eq[i][j];
-             delete[] vndTdtau_cos_vis[i][j];
-             delete[] vndTdtau_sin_vis[i][j];
-             delete[] vndTdtau_cos_bulkvis[i][j];
-             delete[] vndTdtau_sin_bulkvis[i][j];
-             delete[] vndTdtau_cos_tot[i][j];
-             delete[] vndTdtau_sin_tot[i][j];
           }
           delete[] dNd2pTdphidydTdtau_eq[i];
           delete[] dNd2pTdphidydTdtau_vis[i];
           delete[] dNd2pTdphidydTdtau_bulkvis[i];
           delete[] dNd2pTdphidydTdtau_tot[i];
-
-          delete[] dNdydTdtau_eq[i];
-          delete[] dNdydTdtau_vis[i];
-          delete[] dNdydTdtau_bulkvis[i];
-          delete[] dNdydTdtau_tot[i];
-
-          delete[] vndTdtau_cos_eq[i];
-          delete[] vndTdtau_sin_eq[i];
-          delete[] vndTdtau_cos_vis[i];
-          delete[] vndTdtau_sin_bulkvis[i];
-          delete[] vndTdtau_cos_tot[i];
-          delete[] vndTdtau_sin_tot[i];
        }
        delete[] dNd2pTdphidydTdtau_eq;
        delete[] dNd2pTdphidydTdtau_vis;
        delete[] dNd2pTdphidydTdtau_bulkvis;
        delete[] dNd2pTdphidydTdtau_tot;
-
-       delete[] dNdydTdtau_eq;
-       delete[] dNdydTdtau_vis;
-       delete[] dNdydTdtau_bulkvis;
-       delete[] dNdydTdtau_tot;
-
-       delete[] vndTdtau_cos_eq;
-       delete[] vndTdtau_sin_eq;
-       delete[] vndTdtau_cos_vis;
-       delete[] vndTdtau_sin_vis;
-       delete[] vndTdtau_cos_bulkvis;
-       delete[] vndTdtau_sin_bulkvis;
-       delete[] vndTdtau_cos_tot;
-       delete[] vndTdtau_sin_tot;
     }
 
+    deleteA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut);
+    deleteA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut);
+    deleteA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut);
+    deleteA2DMatrix(dNdydxperpdtau_tot, n_xperp_cut); 
+
+    deleteA3DMatrix(vndxperpdtau_cos_eq, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_sin_eq, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_cos_vis, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_sin_vis, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_cos_bulkvis, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_sin_bulkvis, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau);
+    deleteA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau);
+    
     if (diff_flag == 2 or diff_flag > 10) {
        for(int i = 0; i < n_xperp_cut; i++)
        {
@@ -551,50 +385,16 @@ ThermalPhoton::~ThermalPhoton() {
              delete[] dNd2pTdphidydxperpdtau_vis[i][j];
              delete[] dNd2pTdphidydxperpdtau_bulkvis[i][j];
              delete[] dNd2pTdphidydxperpdtau_tot[i][j];
-             delete[] vndxperpdtau_cos_eq[i][j];
-             delete[] vndxperpdtau_sin_eq[i][j];
-             delete[] vndxperpdtau_cos_vis[i][j];
-             delete[] vndxperpdtau_sin_vis[i][j];
-             delete[] vndxperpdtau_cos_bulkvis[i][j];
-             delete[] vndxperpdtau_sin_bulkvis[i][j];
-             delete[] vndxperpdtau_cos_tot[i][j];
-             delete[] vndxperpdtau_sin_tot[i][j];
           }
           delete[] dNd2pTdphidydxperpdtau_eq[i];
           delete[] dNd2pTdphidydxperpdtau_vis[i];
           delete[] dNd2pTdphidydxperpdtau_bulkvis[i];
           delete[] dNd2pTdphidydxperpdtau_tot[i];
-
-          delete[] dNdydxperpdtau_eq[i];
-          delete[] dNdydxperpdtau_vis[i];
-          delete[] dNdydxperpdtau_bulkvis[i];
-          delete[] dNdydxperpdtau_tot[i];
-
-          delete[] vndxperpdtau_cos_eq[i];
-          delete[] vndxperpdtau_sin_eq[i];
-          delete[] vndxperpdtau_cos_vis[i];
-          delete[] vndxperpdtau_sin_bulkvis[i];
-          delete[] vndxperpdtau_cos_tot[i];
-          delete[] vndxperpdtau_sin_tot[i];
        }
        delete[] dNd2pTdphidydxperpdtau_eq;
        delete[] dNd2pTdphidydxperpdtau_vis;
        delete[] dNd2pTdphidydxperpdtau_bulkvis;
        delete[] dNd2pTdphidydxperpdtau_tot;
-
-       delete[] dNdydxperpdtau_eq;
-       delete[] dNdydxperpdtau_vis;
-       delete[] dNdydxperpdtau_bulkvis;
-       delete[] dNdydxperpdtau_tot;
-
-       delete[] vndxperpdtau_cos_eq;
-       delete[] vndxperpdtau_sin_eq;
-       delete[] vndxperpdtau_cos_vis;
-       delete[] vndxperpdtau_sin_vis;
-       delete[] vndxperpdtau_cos_bulkvis;
-       delete[] vndxperpdtau_sin_bulkvis;
-       delete[] vndxperpdtau_cos_tot;
-       delete[] vndxperpdtau_sin_tot;
     }
 }
 

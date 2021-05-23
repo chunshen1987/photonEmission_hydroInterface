@@ -1,5 +1,6 @@
 cmake_minimum_required (VERSION 3.4)
 project (PhotonEmission LANGUAGES CXX)
+ENABLE_LANGUAGE(C)
 
 set(libname "hydro_photonEmission")
 set(exename "hydro_photonEmission.e")
@@ -8,6 +9,9 @@ set(exename "hydro_photonEmission.e")
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
+
+find_package(HDF5 REQUIRED)
+include_directories(${HDF5_INCLUDE_DIRS})
 
 if ("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU")
     if (CMAKE_CXX_COMPILER_VERSION VERSION_LESS 6.0)
