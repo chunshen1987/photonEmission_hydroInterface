@@ -29,15 +29,9 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     // read the photon emission rate tables
     InitializePhotonEmissionRateTables();
 
-    lambda = new double* [4];
-    for (int i = 0; i < 4; i++) {
-       lambda[i] = new double[4];
-    }
-    for (int i = 0; i < 4; i++) {   // initial by 0
-        for (int j = 0; j < 4; j++) {
-          lambda[i][j] = 0.0e0;
-        }
-    }
+    
+    createA2DMatrix(lambda, 4, 4, 0.);
+
     int Eqtb_length = neta*nrapidity*np*nphi;
     Eq_localrest_Tb = new double[Eqtb_length];
     pi_photon_Tb = new double[Eqtb_length];
@@ -85,10 +79,8 @@ PhotonEmission::~PhotonEmission() {
     deleteA2DMatrix(vnpT_cos, norder);
     deleteA2DMatrix(vnpT_sin, norder);
 
-    for (int i = 0; i < 4; i++) {
-       delete [] lambda[i];
-    }
-    delete [] lambda;
+    deleteA2DMatrix(lambda, 4);
+    
     delete [] Eq_localrest_Tb;
     delete [] pi_photon_Tb;
     delete [] bulkPi_Tb;
