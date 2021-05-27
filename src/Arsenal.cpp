@@ -532,6 +532,25 @@ double stringToDouble(string str)
 }
 
 
+void createA5DMatrix(double *****mat, const int n1, const int n2, const int n3, const int n4, const int n5, const double init) {
+    mat = new double**** [n1];
+    for (int i = 0; i < n1; i++) {
+        mat[i] = new double*** [n2];
+        for (int j = 0; j < n2; j++) {
+            mat[i][j] = new double** [n3];
+            for (int k = 0; k < n3; k++) {
+                mat[i][j][k] = new double* [n4];
+                for (int l = 0; l < n4; l++) {
+                    mat[i][j][k][l] = new double [n5];
+                    for (int m = 0; m < n5; m++) {
+                        mat[i][j][k][l][m] = init;
+                    }
+                }
+            }
+        }
+    }
+}
+
 void createA3DMatrix(double ***mat, const int n1, const int n2, const int n3, const double init) {
     mat = new double** [n1];
     for (int i = 0; i < n1; i++) {
@@ -556,6 +575,21 @@ void createA2DMatrix(double **mat, const int n1, const int n2,
     }
 }
 
+void deleteA5DMatrix(double *****mat, const int n1, const int n2, const int n3, const int n4) {
+    for (int i = 0; i < n1; i++) {
+        delete[] mat[i]; 
+        for (int j = 0; j < n2; j++) {
+            delete[] mat[i][j];
+            for (int k = 0; k < n3; k++) {
+                delete[] mat[i][j][k];
+                for (int l = 0; l < n4; l++) {
+                    delete[] mat[i][j][k][l];
+                }
+            }
+        }
+    }
+    delete[] mat;
+}
 
 void deleteA3DMatrix(double ***mat, const int n1, const int n2) {
     for (int i = 0; i < n1; i++) {
