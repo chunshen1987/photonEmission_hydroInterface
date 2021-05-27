@@ -9,6 +9,7 @@
 #include <string>
 #include <fstream>
 #include <memory>
+#include <vector>
 
 #include "Hydroinfo_h5.h"
 #include "Hydroinfo_MUSIC.h"

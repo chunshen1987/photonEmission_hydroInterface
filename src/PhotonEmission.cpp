@@ -78,7 +78,6 @@ PhotonEmission::~PhotonEmission() {
     deleteA2DMatrix(vnpT_sin_eq, norder);
     deleteA2DMatrix(vnpT_cos, norder);
     deleteA2DMatrix(vnpT_sin, norder);
-
     deleteA2DMatrix(lambda, 4);
     
     delete [] Eq_localrest_Tb;
