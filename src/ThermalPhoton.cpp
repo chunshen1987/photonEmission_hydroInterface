@@ -41,7 +41,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     } else {
         dy = 1.0;
     }
-    
+
     p = new double [np];
     p_weight = new double [np];
     phi = new double [nphi];
@@ -56,7 +56,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
         y[i] = y_i + i*dy;
         theta[i] = acos(tanh(y[i]));  //rapidity's corresponding polar angle
     }
-    
+
     dNd2pT_eq = new double[np];
     dNd2pT_vis = new double[np];
     dNd2pT_vis_deltaf_restricted = new double[np];
@@ -77,7 +77,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
         dNd2pT_bulkvis_deltaf_restricted[i] = 0.0;
         dNd2pT_tot[i] = 0.0;
     }
-    
+
     createA2DMatrix(vnpT_cos_eq, norder, np, 0.);
     createA2DMatrix(vnpT_sin_eq, norder, np, 0.);
     createA2DMatrix(vnpT_cos_vis, norder, np, 0.);
@@ -368,13 +368,13 @@ void ThermalPhoton::calThermalPhotonemission_3d(
                 double temp_eq_sum = local_eq*volume*fraction;
                 double temp_vis_sum = local_vis*volume*fraction;
                 double temp_bulkvis_sum = local_bulk*volume*fraction;
-             
+
                 double ratio = fabs(local_vis + local_bulk)/(local_eq + 1e-20);
                 if (ratio > 1.0) {
                     local_vis = local_vis/ratio;
                     local_bulk = local_bulk/ratio;
                 }
-             
+
                 double temp_vis_deltaf_restricted_sum = (
                                                 local_vis*volume*fraction);
                 double temp_bulkvis_deltaf_restricted_sum = (
@@ -413,7 +413,7 @@ void ThermalPhoton::calThermalPhotonemission(
                           em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
-    
+
     double temp_eq_sum, temp_vis_sum, temp_bulkvis_sum;
     double temp_vis_deltaf_restricted_sum, temp_bulkvis_deltaf_restricted_sum;
     int idx = 0;
@@ -433,14 +433,14 @@ void ThermalPhoton::calThermalPhotonemission(
                     temp_eq_sum += local_eq*volume[i]*fraction;
                     temp_vis_sum += local_vis*volume[i]*fraction;
                     temp_bulkvis_sum += local_bulk*volume[i]*fraction;
-             
+
                     double ratio = (fabs(local_vis + local_bulk)
                                     /(local_eq + 1e-20));
                     if (ratio > 1.0) {
                         local_vis = local_vis/ratio;
                         local_bulk = local_bulk/ratio;
                     }
-             
+
                     temp_vis_deltaf_restricted_sum +=
                                             local_vis*volume[i]*fraction;
                     temp_bulkvis_deltaf_restricted_sum +=
