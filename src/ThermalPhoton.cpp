@@ -130,7 +130,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        dNdydTdtau_vis = createA2DMatrix(nTcut, nTaucut, 0.);
        dNdydTdtau_bulkvis = createA2DMatrix(nTcut, nTaucut, 0.);
        dNdydTdtau_tot = createA2DMatrix(nTcut, nTaucut, 0.);
-       
+
        vndTdtau_cos_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
        vndTdtau_sin_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
        vndTdtau_cos_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
@@ -141,7 +141,7 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        vndTdtau_sin_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
 
     }
-    
+
     if(diff_flag == 2 or diff_flag > 10)
     {
        n_xperp_cut = paraRdr->getVal("n_xperp_cut");
@@ -223,33 +223,34 @@ ThermalPhoton::~ThermalPhoton() {
     deleteA2DMatrix(vnpT_cos_tot, norder);
     deleteA2DMatrix(vnpT_sin_tot, norder);
 
-    deleteA2DMatrix(dNdydTdtau_eq, nTcut);
-    deleteA2DMatrix(dNdydTdtau_vis, nTcut);
-    deleteA2DMatrix(dNdydTdtau_bulkvis, nTcut);
-    deleteA2DMatrix(dNdydTdtau_tot, nTcut);
-
-    deleteA3DMatrix(vndTdtau_cos_eq, nTcut, nTaucut);
-    deleteA3DMatrix(vndTdtau_sin_eq, nTcut, nTaucut);
-    deleteA3DMatrix(vndTdtau_cos_vis, nTcut, nTaucut);
-    deleteA3DMatrix(vndTdtau_sin_vis, nTcut, nTaucut);
-    deleteA3DMatrix(vndTdtau_cos_bulkvis, nTcut, nTaucut);
-    deleteA3DMatrix(vndTdtau_sin_bulkvis, nTcut, nTaucut);
-    deleteA3DMatrix(vndTdtau_cos_tot, nTcut, nTaucut);
-    deleteA3DMatrix(vndTdtau_sin_tot, nTcut, nTaucut);
-
-    deleteA5DMatrix(dNd2pTdphidydTdtau_eq, nTcut, nTaucut, np, nphi);
-    deleteA5DMatrix(dNd2pTdphidydTdtau_vis, nTcut, nTaucut, np, nphi);
-    deleteA5DMatrix(dNd2pTdphidydTdtau_bulkvis, nTcut, nTaucut, np, nphi);
-    deleteA5DMatrix(dNd2pTdphidydTdtau_tot, nTcut, nTaucut, np, nphi);
-
     int diff_flag = paraRdr->getVal("differential_flag");
+    if (diff_flag == 1 or diff_flag > 10) {
+        deleteA2DMatrix(dNdydTdtau_eq, nTcut);
+        deleteA2DMatrix(dNdydTdtau_vis, nTcut);
+        deleteA2DMatrix(dNdydTdtau_bulkvis, nTcut);
+        deleteA2DMatrix(dNdydTdtau_tot, nTcut);
+
+        deleteA3DMatrix(vndTdtau_cos_eq, nTcut, nTaucut);
+        deleteA3DMatrix(vndTdtau_sin_eq, nTcut, nTaucut);
+        deleteA3DMatrix(vndTdtau_cos_vis, nTcut, nTaucut);
+        deleteA3DMatrix(vndTdtau_sin_vis, nTcut, nTaucut);
+        deleteA3DMatrix(vndTdtau_cos_bulkvis, nTcut, nTaucut);
+        deleteA3DMatrix(vndTdtau_sin_bulkvis, nTcut, nTaucut);
+        deleteA3DMatrix(vndTdtau_cos_tot, nTcut, nTaucut);
+        deleteA3DMatrix(vndTdtau_sin_tot, nTcut, nTaucut);
+
+        deleteA5DMatrix(dNd2pTdphidydTdtau_eq, nTcut, nTaucut, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydTdtau_vis, nTcut, nTaucut, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydTdtau_bulkvis, nTcut, nTaucut, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydTdtau_tot, nTcut, nTaucut, np, nphi);
+    }
 
     if(diff_flag == 2 or diff_flag > 10) {
         deleteA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut);
         deleteA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut);
         deleteA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut);
         deleteA2DMatrix(dNdydxperpdtau_tot, n_xperp_cut); 
-    
+
         deleteA3DMatrix(vndxperpdtau_cos_eq, n_xperp_cut, n_tau_cut_xtau);
         deleteA3DMatrix(vndxperpdtau_sin_eq, n_xperp_cut, n_tau_cut_xtau);
         deleteA3DMatrix(vndxperpdtau_cos_vis, n_xperp_cut, n_tau_cut_xtau);
@@ -258,13 +259,13 @@ ThermalPhoton::~ThermalPhoton() {
         deleteA3DMatrix(vndxperpdtau_sin_bulkvis, n_xperp_cut, n_tau_cut_xtau);
         deleteA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau);
         deleteA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau);
-        
+
         deleteA5DMatrix(dNd2pTdphidydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, np, nphi);
         deleteA5DMatrix(dNd2pTdphidydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
         deleteA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
         deleteA5DMatrix(dNd2pTdphidydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, np, nphi);
     }
-    
+
 }
 
 void ThermalPhoton::setupEmissionrate(string emissionProcess,

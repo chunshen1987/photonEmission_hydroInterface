@@ -68,9 +68,8 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
 }
 
 PhotonEmission::~PhotonEmission() {
-    
+
     deleteA3DMatrix(dNd2pTdphidy_eq, np, nphi);
-    cout << "check" << endl;
     deleteA3DMatrix(dNd2pTdphidy, np, nphi);
     delete[] dNd2pT_eq;
     delete[] dNd2pT;
@@ -80,7 +79,7 @@ PhotonEmission::~PhotonEmission() {
     deleteA2DMatrix(vnpT_cos, norder);
     deleteA2DMatrix(vnpT_sin, norder);
     deleteA2DMatrix(lambda, 4);
-    
+
     delete [] Eq_localrest_Tb;
     delete [] pi_photon_Tb;
     delete [] bulkPi_Tb;
