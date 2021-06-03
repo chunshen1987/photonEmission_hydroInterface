@@ -164,8 +164,8 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        vndxperpdtau_sin_tot = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
 
     }
-    return;
 }
+
 
 ThermalPhoton::~ThermalPhoton() {
     int TbsizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
@@ -243,7 +243,6 @@ ThermalPhoton::~ThermalPhoton() {
         deleteA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
         deleteA5DMatrix(dNd2pTdphidydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, np, nphi);
     }
-
 }
 
 void ThermalPhoton::setupEmissionrate(string emissionProcess,
@@ -255,6 +254,7 @@ void ThermalPhoton::setupEmissionrate(string emissionProcess,
      EmissionrateTb_dY = dY;
      readEmissionrate(emissionProcess);
 }
+
 
 void ThermalPhoton::readEmissionrate(string emissionProcess) {
     emissionProcess_name = emissionProcess;
@@ -302,8 +302,8 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
                 /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
         }
     }
-    return;
 }
+
 
 void ThermalPhoton::getPhotonemissionRate(
     double* Eq, double* pi_zz, double* bulkPi, int Eq_length, double T,
@@ -322,8 +322,8 @@ void ThermalPhoton::getPhotonemissionRate(
         visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i];
         bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i];
     }
-    return;
 }
+
 
 void ThermalPhoton::calThermalPhotonemission_3d(
         double* Eq, double* pi_zz, double* bulkPi, int Tb_length, double T,
@@ -378,8 +378,8 @@ void ThermalPhoton::calThermalPhotonemission_3d(
     delete[] em_eqrate;
     delete[] em_visrate;
     delete[] em_bulkvis;
-    return;
 }
+
 
 void ThermalPhoton::calThermalPhotonemission(
         double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
@@ -444,8 +444,8 @@ void ThermalPhoton::calThermalPhotonemission(
     delete[] em_eqrate;
     delete[] em_visrate;
     delete[] em_bulkvis;
-    return;
 }
+
 
 void ThermalPhoton::calThermalPhotonemissiondTdtau(
     double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
@@ -497,8 +497,8 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau(
     delete[] em_eqrate;
     delete[] em_visrate;
     delete[] em_bulkvis;
-    return;
 }
+
 
 void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
     double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
@@ -539,8 +539,8 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
     delete[] em_eqrate;
     delete[] em_visrate;
     delete[] em_bulkvis;
-    return;
 }
+
 
 void ThermalPhoton::calThermalPhotonemissiondxperpdtau(
     double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
@@ -594,8 +594,8 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau(
     delete[] em_eqrate;
     delete[] em_visrate;
     delete[] em_bulkvis;
-    return;
 }
+
 
 void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
     double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
@@ -638,7 +638,6 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
     delete[] em_eqrate;
     delete[] em_visrate;
     delete[] em_bulkvis;
-    return;
 }
 
 
@@ -786,8 +785,8 @@ void ThermalPhoton::calPhoton_SpvnpT() {
         vn_cos_tot[order] = vn_cos_tot[order]/(dNdy_tot + eps);
         vn_sin_tot[order] = vn_sin_tot[order]/(dNdy_tot + eps);
     }
-    return;
 }
+
 
 void ThermalPhoton::output_photon_spectra_dTdtau(string path) {
     // calculate the inverse slope of the photon spectra at T-tau interval
@@ -860,8 +859,8 @@ void ThermalPhoton::output_photon_spectra_dTdtau(string path) {
     ofvis.close();
     ofbulkvis.close();
     oftot.close();
-    return;
 }
+
 
 void ThermalPhoton::calPhoton_SpvnpT_dTdtau() {
     // calculate the photon spectra and differential vn at mid-rapidity
@@ -939,8 +938,8 @@ void ThermalPhoton::calPhoton_SpvnpT_dTdtau() {
             }
        }
    }
-   return;
 }
+
 
 void ThermalPhoton::calPhoton_SpvnpT_dxperpdtau() {
     // calculate the photon spectra and differential vn at mid-rapidity
@@ -1020,8 +1019,8 @@ void ThermalPhoton::calPhoton_SpvnpT_dxperpdtau() {
             }
         }
     }
-    return;
 }
+
 
 void ThermalPhoton::outputPhoton_SpvnpT(string path) {
     ostringstream filename_stream_SpMatrix_eq;
@@ -1268,11 +1267,9 @@ void ThermalPhoton::outputPhoton_SpvnpT(string path) {
     fphotoninteSpvn_bulkvis.close();
     fphotoninteSpvn_bulkvis_deltaf_restricted.close();
     fphotoninteSpvn_tot.close();
-    return;
 }
 
-void ThermalPhoton::outputPhoton_SpvnpTdTdtau(string path)
-{
+void ThermalPhoton::outputPhoton_SpvnpTdTdtau(string path) {
     double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
     double dtau = (Taucut_high - Taucut_low)/(nTaucut - 1);
     ostringstream filename_stream_dNdydTdtau_eq;
@@ -1367,12 +1364,10 @@ void ThermalPhoton::outputPhoton_SpvnpTdTdtau(string path)
        fphotonvncos_tot.close();
        fphotonvnsin_tot.close();
     }
-
-    return;
 }
 
-void ThermalPhoton::outputPhoton_SpvnpTdxperpdtau(string path)
-{
+
+void ThermalPhoton::outputPhoton_SpvnpTdxperpdtau(string path) {
     double dxperp = (xperp_high - xperp_low)/(n_xperp_cut - 1);
     double dtau = (tau_cut_high - tau_cut_low)/(n_tau_cut_xtau - 1);
     ostringstream filename_stream_dNdydxperpdtau_eq;
@@ -1467,8 +1462,6 @@ void ThermalPhoton::outputPhoton_SpvnpTdxperpdtau(string path)
        fphotonvncos_tot.close();
        fphotonvnsin_tot.close();
     }
-
-    return;
 }
 
 void ThermalPhoton::interpolation2D_bilinear(double varX, double* varY, int Y_length, double** Table2D_ptr, double* results)
@@ -1488,7 +1481,7 @@ void ThermalPhoton::interpolation2D_bilinear(double varX, double* varY, int Y_le
      double f00, f10, f01, f11;
      double ddy;
      double dYhigh;
-     
+
      int idx_X;
      double ddx;
      double dXhigh;
@@ -1513,7 +1506,7 @@ void ThermalPhoton::interpolation2D_bilinear(double varX, double* varY, int Y_le
         if(idx_X < 0) idx_X = 0;
         if(idx_X >= tb_sizeX-1) idx_X = tb_sizeX - 1;
      }*/
-     
+
         /*if(Iwarning == 1)
         {
            cout<<"interpolation2D_bilinear: varY out of bounds!"<<endl;
@@ -1521,7 +1514,7 @@ void ThermalPhoton::interpolation2D_bilinear(double varX, double* varY, int Y_le
         }*/
         if(idx_Y < 0) idx_Y = 0;
         if(idx_Y >= tb_sizeY-1) idx_Y = tb_sizeY - 2;
-       
+
         ddy = varY[ii] - EmissionrateTb_Yidxptr[idx_Y];
         dYhigh = dY - ddy;
 
@@ -1529,15 +1522,13 @@ void ThermalPhoton::interpolation2D_bilinear(double varX, double* varY, int Y_le
         f10 = Table2D_ptr[idx_X+1][idx_Y];
         f01 = Table2D_ptr[idx_X][idx_Y+1];
         f11 = Table2D_ptr[idx_X+1][idx_Y+1];
-       
+
         results[ii] = ((f00*dYhigh + f01*ddy)*dXhigh + (f10*dYhigh + f11*ddy)*ddx);
      }
-
-     return;
 }
 
-void ThermalPhoton::update_rates_with_polyakov_suppression()
-{
+
+void ThermalPhoton::update_rates_with_polyakov_suppression() {
      for(int i=0; i<EmissionrateTb_sizeX; i++)
      {
          double T_local = EmissionrateTb_Xmin + i*EmissionrateTb_dX;
@@ -1549,8 +1540,8 @@ void ThermalPhoton::update_rates_with_polyakov_suppression()
     }
 }
 
-double ThermalPhoton::get_polyakov_suppression_factor(double T_in_GeV)
-{
+
+double ThermalPhoton::get_polyakov_suppression_factor(double T_in_GeV) {
     double T_in_MeV=T_in_GeV*1e3;
     const double a = 1.49201e-9;
     const double b = -7.48088e-7;
