@@ -531,10 +531,9 @@ double stringToDouble(string str)
   return val;
 }
 
-
-void createA5DMatrix(double *****mat, const int n1, const int n2, const int n3, const int n4, const int n5, const double init) {
-    mat = new double**** [n1];
-    for (int i = 0; i < n1; i++) {
+double***** createA5DMatrix(const int n1, const int n2, const int n3, const int n4, const int n5, const double init) {
+    double *****mat = new double**** [n1];
+      for (int i = 0; i < n1; i++) {
         mat[i] = new double*** [n2];
         for (int j = 0; j < n2; j++) {
             mat[i][j] = new double** [n3];
@@ -549,10 +548,11 @@ void createA5DMatrix(double *****mat, const int n1, const int n2, const int n3, 
             }
         }
     }
+    return(mat);
 }
 
-void createA3DMatrix(double ***mat, const int n1, const int n2, const int n3, const double init) {
-    mat = new double** [n1];
+double*** createA3DMatrix(const int n1, const int n2, const int n3, const double init) {
+    double ***mat = new double** [n1];
     for (int i = 0; i < n1; i++) {
         mat[i] = new double* [n2];
         for (int j = 0; j < n2; j++) {
@@ -562,17 +562,18 @@ void createA3DMatrix(double ***mat, const int n1, const int n2, const int n3, co
             }
         }
     }
+    return(mat);
 }
 
-void createA2DMatrix(double **mat, const int n1, const int n2,
-                     const double init) {
-    mat = new double* [n1];
+double** createA2DMatrix(const int n1, const int n2, const double init) {
+    double **mat = new double* [n1];
     for (int i = 0; i < n1; i++) {
         mat[i] = new double [n2];
         for (int j = 0; j < n2; j++) {
             mat[i][j] = init;
         }
     }
+    return(mat);
 }
 
 void deleteA5DMatrix(double *****mat, const int n1, const int n2, const int n3, const int n4) {

@@ -63,12 +63,12 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     dNd2pT_bulkvis = new double[np];
     dNd2pT_bulkvis_deltaf_restricted = new double[np];
     dNd2pT_tot = new double[np];
-    createA3DMatrix(dNd2pTdphidy_eq, np, nphi, nrapidity, 0.);
-    createA3DMatrix(dNd2pTdphidy_vis, np, nphi, nrapidity, 0.);
-    createA3DMatrix(dNd2pTdphidy_vis_deltaf_restricted, np, nphi, nrapidity, 0.);
-    createA3DMatrix(dNd2pTdphidy_bulkvis, np, nphi, nrapidity, 0.);
-    createA3DMatrix(dNd2pTdphidy_bulkvis_deltaf_restricted, np, nphi, nrapidity, 0.);
-    createA3DMatrix(dNd2pTdphidy_tot, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_eq = createA3DMatrix(np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_vis = createA3DMatrix(np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_vis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_bulkvis = createA3DMatrix(np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_bulkvis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_tot = createA3DMatrix(np, nphi, nrapidity, 0.);
     for (int i = 0; i < np; i++) {
         dNd2pT_eq[i] = 0.0;
         dNd2pT_vis[i] = 0.0;
@@ -78,18 +78,18 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
         dNd2pT_tot[i] = 0.0;
     }
 
-    createA2DMatrix(vnpT_cos_eq, norder, np, 0.);
-    createA2DMatrix(vnpT_sin_eq, norder, np, 0.);
-    createA2DMatrix(vnpT_cos_vis, norder, np, 0.);
-    createA2DMatrix(vnpT_sin_vis, norder, np, 0.);
-    createA2DMatrix(vnpT_cos_vis_deltaf_restricted, norder, np, 0.);
-    createA2DMatrix(vnpT_sin_vis_deltaf_restricted, norder, np, 0.);
-    createA2DMatrix(vnpT_cos_bulkvis, norder, np, 0.);
-    createA2DMatrix(vnpT_sin_bulkvis, norder, np, 0.);
-    createA2DMatrix(vnpT_cos_bulkvis_deltaf_restricted, norder, np, 0.);
-    createA2DMatrix(vnpT_sin_bulkvis_deltaf_restricted, norder, np, 0.);
-    createA2DMatrix(vnpT_cos_tot, norder, np, 0.);
-    createA2DMatrix(vnpT_sin_tot, norder, np, 0.);
+    vnpT_cos_eq = createA2DMatrix(norder, np, 0.);
+    vnpT_sin_eq = createA2DMatrix(norder, np, 0.);
+    vnpT_cos_vis = createA2DMatrix(norder, np, 0.);
+    vnpT_sin_vis = createA2DMatrix(norder, np, 0.);
+    vnpT_cos_vis_deltaf_restricted = createA2DMatrix(norder, np, 0.);
+    vnpT_sin_vis_deltaf_restricted = createA2DMatrix(norder, np, 0.);
+    vnpT_cos_bulkvis = createA2DMatrix(norder, np, 0.);
+    vnpT_sin_bulkvis = createA2DMatrix(norder, np, 0.);
+    vnpT_cos_bulkvis_deltaf_restricted = createA2DMatrix(norder, np, 0.);
+    vnpT_sin_bulkvis_deltaf_restricted = createA2DMatrix(norder, np, 0.);
+    vnpT_cos_tot = createA2DMatrix(norder, np, 0.);
+    vnpT_sin_tot = createA2DMatrix(norder, np, 0.);
 
     dNdy_eq = 0.0;
     dNdy_vis = 0.0;
@@ -121,24 +121,24 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        Taucut_high = paraRdr->getVal("tau_end");
        Taucut_low = paraRdr->getVal("tau_start");
 
-       createA5DMatrix(dNd2pTdphidydTdtau_eq, nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       createA5DMatrix(dNd2pTdphidydTdtau_vis, nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       createA5DMatrix(dNd2pTdphidydTdtau_bulkvis, nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       createA5DMatrix(dNd2pTdphidydTdtau_tot, nTcut, nTaucut, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydTdtau_eq = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydTdtau_vis = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydTdtau_bulkvis = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydTdtau_tot = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
 
-       createA2DMatrix(dNdydTdtau_eq, nTcut, nTaucut, 0.);
-       createA2DMatrix(dNdydTdtau_vis, nTcut, nTaucut, 0.);
-       createA2DMatrix(dNdydTdtau_bulkvis, nTcut, nTaucut, 0.);
-       createA2DMatrix(dNdydTdtau_tot, nTcut, nTaucut, 0.);
+       dNdydTdtau_eq = createA2DMatrix(nTcut, nTaucut, 0.);
+       dNdydTdtau_vis = createA2DMatrix(nTcut, nTaucut, 0.);
+       dNdydTdtau_bulkvis = createA2DMatrix(nTcut, nTaucut, 0.);
+       dNdydTdtau_tot = createA2DMatrix(nTcut, nTaucut, 0.);
        
-       createA3DMatrix(vndTdtau_cos_eq, nTcut, nTaucut, norder, 0.);
-       createA3DMatrix(vndTdtau_sin_eq, nTcut, nTaucut, norder, 0.);
-       createA3DMatrix(vndTdtau_cos_vis, nTcut, nTaucut, norder, 0.);
-       createA3DMatrix(vndTdtau_sin_vis, nTcut, nTaucut, norder, 0.);
-       createA3DMatrix(vndTdtau_cos_bulkvis, nTcut, nTaucut, norder, 0.);
-       createA3DMatrix(vndTdtau_sin_bulkvis, nTcut, nTaucut, norder, 0.);
-       createA3DMatrix(vndTdtau_cos_tot, nTcut, nTaucut, norder, 0.);
-       createA3DMatrix(vndTdtau_sin_tot, nTcut, nTaucut, norder, 0.);
+       vndTdtau_cos_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+       vndTdtau_sin_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+       vndTdtau_cos_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+       vndTdtau_sin_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+       vndTdtau_cos_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+       vndTdtau_sin_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+       vndTdtau_cos_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+       vndTdtau_sin_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
 
     }
     
@@ -152,24 +152,24 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        tau_cut_high = paraRdr->getVal("tau_end");
        tau_cut_low = paraRdr->getVal("tau_start");
 
-       createA5DMatrix(dNd2pTdphidydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       createA5DMatrix(dNd2pTdphidydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       createA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       createA5DMatrix(dNd2pTdphidydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_eq = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_vis = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_bulkvis = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_tot = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
 
-       createA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, 0.);
-       createA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, 0.);
-       createA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, 0.);
-       createA2DMatrix(dNdydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, 0.); 
+       dNdydxperpdtau_eq = createA2DMatrix(n_xperp_cut, n_tau_cut_xtau, 0.);
+       dNdydxperpdtau_vis = createA2DMatrix(n_xperp_cut, n_tau_cut_xtau, 0.);
+       dNdydxperpdtau_bulkvis = createA2DMatrix(n_xperp_cut, n_tau_cut_xtau, 0.);
+       dNdydxperpdtau_tot = createA2DMatrix(n_xperp_cut, n_tau_cut_xtau, 0.); 
 
-       createA3DMatrix(vndxperpdtau_cos_eq, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-       createA3DMatrix(vndxperpdtau_sin_eq, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-       createA3DMatrix(vndxperpdtau_cos_vis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-       createA3DMatrix(vndxperpdtau_sin_vis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-       createA3DMatrix(vndxperpdtau_cos_bulkvis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-       createA3DMatrix(vndxperpdtau_sin_bulkvis, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-       createA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-       createA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       vndxperpdtau_cos_eq = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       vndxperpdtau_sin_eq = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       vndxperpdtau_cos_vis = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       vndxperpdtau_sin_vis = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       vndxperpdtau_cos_bulkvis = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       vndxperpdtau_sin_bulkvis = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       vndxperpdtau_cos_tot = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
+       vndxperpdtau_sin_tot = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
 
     }
     return;

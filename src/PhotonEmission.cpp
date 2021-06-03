@@ -30,7 +30,7 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     InitializePhotonEmissionRateTables();
 
     
-    createA2DMatrix(lambda, 4, 4, 0.);
+    lambda = createA2DMatrix(4, 4, 0.);
 
     int Eqtb_length = neta*nrapidity*np*nphi;
     Eq_localrest_Tb = new double[Eqtb_length];
@@ -43,8 +43,8 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     }
 
     
-    createA3DMatrix(dNd2pTdphidy_eq, np, nphi, nrapidity, 0.);
-    createA3DMatrix(dNd2pTdphidy, np, nphi, nrapidity, 0.);
+    dNd2pTdphidy_eq = createA3DMatrix(np, nphi, nrapidity, 0.);
+    dNd2pTdphidy = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pT_eq = new double[np];
     dNd2pT = new double[np];
     for (int i = 0; i < np; i++) {
@@ -52,10 +52,10 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
         dNd2pT[i] = 0.0e0;
     }
 
-    createA2DMatrix(vnpT_cos_eq, norder, np, 0.);
-    createA2DMatrix(vnpT_sin_eq, norder, np, 0.);
-    createA2DMatrix(vnpT_cos, norder, np, 0.);
-    createA2DMatrix(vnpT_sin, norder, np, 0.);
+    vnpT_cos_eq = createA2DMatrix(norder, np, 0.);
+    vnpT_sin_eq = createA2DMatrix(norder, np, 0.);
+    vnpT_cos = createA2DMatrix(norder, np, 0.);
+    vnpT_sin = createA2DMatrix(norder, np, 0.);
 
     dNdy_eq = 0.0;
     dNdy_tot = 0.0;
