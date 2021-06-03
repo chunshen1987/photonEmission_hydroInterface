@@ -8,8 +8,9 @@
 #include "./Table2D.h"
 #include "./ParameterReader.h"
 #include <memory>
+#include <vector>
 
-using namespace std;
+//using namespace std;
 
 class ThermalPhoton {
  private:
@@ -18,7 +19,7 @@ class ThermalPhoton {
     int np, nphi, nrapidity;
     int norder;
     int neta;
-    string rate_path;
+    std::string rate_path;
 
     double dy;
 
@@ -26,11 +27,11 @@ class ThermalPhoton {
     Table2D* Photonemission_eqrateTable_ptr;
     Table2D* Photonemission_viscous_rateTable_ptr;
     Table2D* Photonemission_bulkvis_rateTable_ptr;
-      
+
     double** Emission_eqrateTb_ptr;
     double** Emission_viscous_rateTb_ptr;
     double** Emission_bulkvis_rateTb_ptr;
-    double* EmissionrateTb_Yidxptr;
+    std::vector<double> EmissionrateTb_Yidxptr;
     double EmissionrateTb_Xmin;
     double EmissionrateTb_Ymin;
     int EmissionrateTb_sizeX;
@@ -39,25 +40,31 @@ class ThermalPhoton {
     double EmissionrateTb_dY;
 
     // photon spectra parameters
-    string emissionProcess_name;
+    std::string emissionProcess_name;
     double *p, *p_weight;
     double *phi, *phi_weight;
-    double *y;
-    double *theta;
+    std::vector<double> y;
+    std::vector<double> theta;
 
     double ***dNd2pTdphidy_eq, ***dNd2pTdphidy_vis, ***dNd2pTdphidy_tot;
     double ***dNd2pTdphidy_bulkvis;
     double ***dNd2pTdphidy_vis_deltaf_restricted;
     double ***dNd2pTdphidy_bulkvis_deltaf_restricted;
-    double *dNd2pT_eq, **vnpT_cos_eq, **vnpT_sin_eq;
-    double *dNd2pT_vis, **vnpT_cos_vis, **vnpT_sin_vis;
-    double *dNd2pT_vis_deltaf_restricted, **vnpT_cos_vis_deltaf_restricted;
+
+    std::vector<double> dNd2pT_eq;
+    double **vnpT_cos_eq, **vnpT_sin_eq;
+    std::vector<double> dNd2pT_vis;
+    double **vnpT_cos_vis, **vnpT_sin_vis;
+    std::vector<double> dNd2pT_vis_deltaf_restricted;
+    double **vnpT_cos_vis_deltaf_restricted;
     double **vnpT_sin_vis_deltaf_restricted;
-    double *dNd2pT_bulkvis, **vnpT_cos_bulkvis, **vnpT_sin_bulkvis;
-    double *dNd2pT_bulkvis_deltaf_restricted;
+    std::vector<double> dNd2pT_bulkvis;
+    double **vnpT_cos_bulkvis, **vnpT_sin_bulkvis;
+    std::vector<double> dNd2pT_bulkvis_deltaf_restricted;
     double **vnpT_cos_bulkvis_deltaf_restricted;
     double **vnpT_sin_bulkvis_deltaf_restricted;
-    double *dNd2pT_tot, **vnpT_cos_tot, **vnpT_sin_tot;
+    std::vector<double> dNd2pT_tot;
+    double **vnpT_cos_tot, **vnpT_sin_tot;
 
     double dNdy_eq, dNdy_vis, dNdy_tot, dNdy_bulkvis;
     double dNdy_vis_deltaf_restricted, dNdy_bulkvis_deltaf_restricted;
@@ -107,9 +114,9 @@ class ThermalPhoton {
 
     ~ThermalPhoton();
 
-    void setupEmissionrate(string emissionProcess, double Xmin, double dX,
+    void setupEmissionrate(std::string emissionProcess, double Xmin, double dX,
                            double Ymin, double dY);
-    void readEmissionrate(string);
+    void readEmissionrate(std::string);
 
     double get_dy() {return(dy);}
 
@@ -157,10 +164,10 @@ class ThermalPhoton {
     void calPhoton_SpvnpT();
     void calPhoton_SpvnpT_dTdtau();
     void calPhoton_SpvnpT_dxperpdtau();
-    void outputPhoton_SpvnpT(string path);
-    void outputPhoton_SpvnpTdTdtau(string path);
-    void outputPhoton_SpvnpTdxperpdtau(string path);
-    void output_photon_spectra_dTdtau(string path);
+    void outputPhoton_SpvnpT(std::string path);
+    void outputPhoton_SpvnpTdTdtau(std::string path);
+    void outputPhoton_SpvnpTdxperpdtau(std::string path);
+    void output_photon_spectra_dTdtau(std::string path);
     void interpolation2D_bilinear(double varX, double* varY, int Y_length,
                                   double** Table2D_ptr, double* results);
 

@@ -29,7 +29,6 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     // read the photon emission rate tables
     InitializePhotonEmissionRateTables();
 
-    
     lambda = createA2DMatrix(4, 4, 0.);
 
     int Eqtb_length = neta*nrapidity*np*nphi;
@@ -42,15 +41,10 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
         bulkPi_Tb[i] = 0.0;
     }
 
-    
     dNd2pTdphidy_eq = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy = createA3DMatrix(np, nphi, nrapidity, 0.);
-    dNd2pT_eq = new double[np];
-    dNd2pT = new double[np];
-    for (int i = 0; i < np; i++) {
-        dNd2pT_eq[i] = 0.0e0;
-        dNd2pT[i] = 0.0e0;
-    }
+    dNd2pT_eq.resize(np, 0);
+    dNd2pT.resize(np, 0);
 
     vnpT_cos_eq = createA2DMatrix(norder, np, 0.);
     vnpT_sin_eq = createA2DMatrix(norder, np, 0.);
@@ -63,16 +57,12 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     vn_sin_eq.resize(norder, 0.);
     vn_cos_tot.resize(norder, 0.);
     vn_sin_tot.resize(norder, 0.);
-
-    return;
 }
 
-PhotonEmission::~PhotonEmission() {
 
+PhotonEmission::~PhotonEmission() {
     deleteA3DMatrix(dNd2pTdphidy_eq, np, nphi);
     deleteA3DMatrix(dNd2pTdphidy, np, nphi);
-    delete[] dNd2pT_eq;
-    delete[] dNd2pT;
 
     deleteA2DMatrix(vnpT_cos_eq, norder);
     deleteA2DMatrix(vnpT_sin_eq, norder);
@@ -83,9 +73,8 @@ PhotonEmission::~PhotonEmission() {
     delete [] Eq_localrest_Tb;
     delete [] pi_photon_Tb;
     delete [] bulkPi_Tb;
-
-    return;
 }
+
 
 void PhotonEmission::set_hydroGridinfo() {
     gridX0 = paraRdr->getVal("Xmin");
@@ -112,6 +101,7 @@ void PhotonEmission::set_hydroGridinfo() {
     T_cutlow = paraRdr->getVal("T_cutlow");
     calHGIdFlag = paraRdr->getVal("CalHGIdFlag");
 }
+
 
 void PhotonEmission::print_hydroGridinfo() {
     cout << "----------------------------------------" << endl;
@@ -147,8 +137,8 @@ void PhotonEmission::print_hydroGridinfo() {
     }
 
     cout << "******************************************" << endl;
-    return;
 }
+
 
 void PhotonEmission::InitializePhotonEmissionRateTables() {
     double photonrate_tb_Emin = paraRdr->getVal("PhotonemRatetableInfo_Emin");
@@ -219,13 +209,12 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
             "pion_rho_to_omega_to_pion_gamma", photonrate_tb_Tmin,
             photonrate_tb_dT, photonrate_tb_Emin, photonrate_tb_dE);
     }
-    return;
 }
 
 void PhotonEmission::calPhotonemission(
         void *hydroinfo_ptr_in, double *eta_ptr, double *etaweight_ptr) {
-    HydroinfoH5 *hydroinfo_h5_ptr;
-    Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr;
+    HydroinfoH5 *hydroinfo_h5_ptr = nullptr;
+    Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr = nullptr;
     if (hydro_flag == 0) {
         hydroinfo_h5_ptr = reinterpret_cast<HydroinfoH5*>(hydroinfo_ptr_in);
     } else if (hydro_flag == 1 || hydro_flag == 3) {
@@ -250,10 +239,11 @@ void PhotonEmission::calPhotonemission(
         cos_phiq[m] = cos(phi_q[m]);
     }
 
-    double e_local, p_local, temp_local, vx_local, vy_local, vz_local;
-    double bulkPi_local;
-    double tau_local;
-    double eta_local;
+    double e_local, p_local, temp_local, vx_local, vy_local;
+    double vz_local = 0.;
+    double bulkPi_local = 0.;
+    double tau_local = 1.;
+    double eta_local = 0.;
     double* volume = new double[neta];
     double** pi_tensor_lab = new double* [4];
     for (int i = 0; i < 4; i++) {
@@ -596,9 +586,8 @@ void PhotonEmission::calPhotonemission(
         delete [] pi_tensor_lab[i];
     }
     delete [] pi_tensor_lab;
-
-    return;
 }
+
 
 void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr;
@@ -941,7 +930,6 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             }
         }
     }
-    return;
 }
 
 
@@ -969,8 +957,8 @@ void PhotonEmission::calPhoton_total_SpMatrix() {
             }
         }
     }
-    return;
 }
+
 
 void PhotonEmission::calPhoton_SpvnpT_individualchannel() {
     photon_QGP_2_to_2->calPhoton_SpvnpT();
@@ -1005,9 +993,8 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel() {
         photon_rho->calPhoton_SpvnpT();
         photon_pirho_omegat->calPhoton_SpvnpT();
     }
-
-    return;
 }
+
 
 void PhotonEmission::outputPhotonSpvn() {
     photon_QGP_2_to_2->outputPhoton_SpvnpT(output_path);
@@ -1050,7 +1037,6 @@ void PhotonEmission::outputPhotonSpvn() {
     }
 
     outputPhoton_total_SpvnpT("photon_total");
-    return;
 }
 
 void PhotonEmission::calPhoton_total_Spvn() {
@@ -1100,8 +1086,8 @@ void PhotonEmission::calPhoton_total_Spvn() {
         vn_cos_tot[order] = vn_cos_tot[order]/dNdy_tot;
         vn_sin_tot[order] = vn_sin_tot[order]/dNdy_tot;
     }
-    return;
 }
+
 
 void PhotonEmission::outputPhoton_total_SpvnpT(string filename) {
     ostringstream filename_stream_eq_SpMatrix;
@@ -1181,5 +1167,4 @@ void PhotonEmission::outputPhoton_total_SpvnpT(string filename) {
                         << sqrt(pow(vn_cos_tot[order], 2)
                                 + pow(vn_sin_tot[order], 2)) << endl;
     }
-    return;
 }

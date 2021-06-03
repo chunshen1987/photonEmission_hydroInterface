@@ -50,33 +50,25 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     gauss_quadrature(np, 1, 0.0, 0.0, p_i, p_f, p, p_weight);
     gauss_quadrature(nphi, 1, 0.0, 0.0, phi_i, phi_f, phi, phi_weight);
 
-    y = new double [nrapidity];
-    theta = new double [nrapidity];
+    y.resize(nrapidity, 0);
+    theta.resize(nrapidity, 0);
     for (int i=0;i<nrapidity;i++) {
         y[i] = y_i + i*dy;
         theta[i] = acos(tanh(y[i]));  //rapidity's corresponding polar angle
     }
 
-    dNd2pT_eq = new double[np];
-    dNd2pT_vis = new double[np];
-    dNd2pT_vis_deltaf_restricted = new double[np];
-    dNd2pT_bulkvis = new double[np];
-    dNd2pT_bulkvis_deltaf_restricted = new double[np];
-    dNd2pT_tot = new double[np];
+    dNd2pT_eq.resize(np, 0);
+    dNd2pT_vis.resize(np, 0);
+    dNd2pT_vis_deltaf_restricted.resize(np, 0);
+    dNd2pT_bulkvis.resize(np, 0);
+    dNd2pT_bulkvis_deltaf_restricted.resize(np, 0);
+    dNd2pT_tot.resize(np, 0);
     dNd2pTdphidy_eq = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy_vis = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy_vis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy_bulkvis = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy_bulkvis_deltaf_restricted = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy_tot = createA3DMatrix(np, nphi, nrapidity, 0.);
-    for (int i = 0; i < np; i++) {
-        dNd2pT_eq[i] = 0.0;
-        dNd2pT_vis[i] = 0.0;
-        dNd2pT_vis_deltaf_restricted[i] = 0.0;
-        dNd2pT_bulkvis[i] = 0.0;
-        dNd2pT_bulkvis_deltaf_restricted[i] = 0.0;
-        dNd2pT_tot[i] = 0.0;
-    }
 
     vnpT_cos_eq = createA2DMatrix(norder, np, 0.);
     vnpT_sin_eq = createA2DMatrix(norder, np, 0.);
@@ -177,15 +169,10 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
 
 ThermalPhoton::~ThermalPhoton() {
     int TbsizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
-    for (int i=0; i<TbsizeX; i++) {
-       delete [] Emission_eqrateTb_ptr[i];
-       delete [] Emission_viscous_rateTb_ptr[i];
-       delete [] Emission_bulkvis_rateTb_ptr[i];
-    }
-    delete [] Emission_eqrateTb_ptr;
-    delete [] Emission_viscous_rateTb_ptr;
-    delete [] Emission_bulkvis_rateTb_ptr;
-    delete [] EmissionrateTb_Yidxptr;
+    deleteA2DMatrix(Emission_eqrateTb_ptr, TbsizeX);
+    deleteA2DMatrix(Emission_viscous_rateTb_ptr, TbsizeX);
+    deleteA2DMatrix(Emission_bulkvis_rateTb_ptr, TbsizeX);
+
     delete Photonemission_eqrateTable_ptr;
     delete Photonemission_viscous_rateTable_ptr;
 
@@ -193,15 +180,6 @@ ThermalPhoton::~ThermalPhoton() {
     delete [] p_weight;
     delete [] phi;
     delete [] phi_weight;
-    delete [] y;
-    delete [] theta;
-
-    delete [] dNd2pT_eq;
-    delete [] dNd2pT_vis;
-    delete [] dNd2pT_vis_deltaf_restricted;
-    delete [] dNd2pT_bulkvis;
-    delete [] dNd2pT_bulkvis_deltaf_restricted;
-    delete [] dNd2pT_tot;
 
     deleteA3DMatrix(dNd2pTdphidy_eq, np, nphi);
     deleteA3DMatrix(dNd2pTdphidy_vis, np, nphi);
@@ -298,18 +276,16 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
 
     EmissionrateTb_sizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
     EmissionrateTb_sizeY = Photonemission_eqrateTable_ptr->getTbsizeY();
-    Emission_eqrateTb_ptr = new double* [EmissionrateTb_sizeX];
-    Emission_viscous_rateTb_ptr = new double* [EmissionrateTb_sizeX];
-    Emission_bulkvis_rateTb_ptr = new double* [EmissionrateTb_sizeX];
-    for (int i = 0; i < EmissionrateTb_sizeX; i++) {
-       Emission_eqrateTb_ptr[i] = new double [EmissionrateTb_sizeY];
-       Emission_viscous_rateTb_ptr[i] = new double [EmissionrateTb_sizeY];
-       Emission_bulkvis_rateTb_ptr[i] = new double [EmissionrateTb_sizeY];
-    }
+    Emission_eqrateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                            EmissionrateTb_sizeY, 0);
+    Emission_viscous_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                                  EmissionrateTb_sizeY, 0);
+    Emission_bulkvis_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                                  EmissionrateTb_sizeY, 0);
 
-    EmissionrateTb_Yidxptr = new double [EmissionrateTb_sizeY];
+    EmissionrateTb_Yidxptr.resize(EmissionrateTb_sizeY, 0);
     for (int i = 0; i < EmissionrateTb_sizeY; i++)
-       EmissionrateTb_Yidxptr[i] = EmissionrateTb_Ymin + i*EmissionrateTb_dY;
+        EmissionrateTb_Yidxptr[i] = EmissionrateTb_Ymin + i*EmissionrateTb_dY;
 
     // take log for the equilibrium emission rates for better
     // interpolation precisions; 
@@ -317,7 +293,7 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
     for (int i=0; i<EmissionrateTb_sizeX; i++) {
         for (int j=0; j<EmissionrateTb_sizeY; j++) {
             Emission_eqrateTb_ptr[i][j] =
-                log(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30);  
+                log(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30);
             Emission_viscous_rateTb_ptr[i][j] = (
                 Photonemission_viscous_rateTable_ptr->getTbdata(i,j)
                 /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
@@ -753,7 +729,7 @@ void ThermalPhoton::calPhoton_SpvnpT() {
                     *p_weight_factor);
             vn_cos_tot[order] += vnpT_cos_tot[order][i]*p_weight_factor;
             vn_sin_tot[order] += vnpT_sin_tot[order][i]*p_weight_factor;
-          
+
             // vn(pT)
             vnpT_cos_eq[order][i] = vnpT_cos_eq[order][i]/dNd2pT_eq[i];
             vnpT_cos_vis[order][i] = vnpT_cos_vis[order][i]/dNd2pT_vis[i];
