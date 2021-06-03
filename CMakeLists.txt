@@ -1,6 +1,5 @@
 cmake_minimum_required (VERSION 3.4)
-project (PhotonEmission LANGUAGES CXX)
-ENABLE_LANGUAGE(C)
+project (PhotonEmission LANGUAGES C CXX)
 
 set(libname "hydro_photonEmission")
 set(exename "hydro_photonEmission.e")
@@ -28,7 +27,6 @@ message("rpath = " ${CMAKE_INSTALL_RPATH})
 option (link_with_lib "Link executable with library" ON)
 option (unittest "Build Unit tests" OFF)
 
-set(CMAKE_CXX_COMPILER "h5c++")
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -O3 -Wall -std=c++11")
 
 if (unittest)

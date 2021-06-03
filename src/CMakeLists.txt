@@ -16,9 +16,9 @@ if (link_with_lib)
 else (link_with_lib)
     add_executable(${exename} main.cpp ${SOURCES})
 endif (link_with_lib)
-target_link_libraries(${exename} ${libname})
+target_link_libraries(${libname} ${HDF5_LIBRARIES})
 
-target_link_libraries(${exename} ${HDF5_INCLUDE_DIRS} ${HDF5_LIBRARIES})
+target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES})
 
 install(TARGETS ${exename} ${libname}
         RUNTIME DESTINATION ${CMAKE_HOME_DIRECTORY}
