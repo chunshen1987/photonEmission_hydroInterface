@@ -578,26 +578,26 @@ double** createA2DMatrix(const int n1, const int n2, const double init) {
 
 void deleteA5DMatrix(double *****mat, const int n1, const int n2, const int n3, const int n4) {
     for (int i = 0; i < n1; i++) {
-        delete[] mat[i]; 
         for (int j = 0; j < n2; j++) {
-            delete[] mat[i][j];
             for (int k = 0; k < n3; k++) {
-                delete[] mat[i][j][k];
                 for (int l = 0; l < n4; l++) {
                     delete[] mat[i][j][k][l];
                 }
+                delete[] mat[i][j][k];
             }
+            delete[] mat[i][j];
         }
+        delete[] mat[i]; 
     }
     delete[] mat;
 }
 
 void deleteA3DMatrix(double ***mat, const int n1, const int n2) {
     for (int i = 0; i < n1; i++) {
-        delete[] mat[i]; 
         for (int j = 0; j < n2; j++) {
             delete[] mat[i][j];
         }
+        delete[] mat[i]; 
     }
     delete[] mat;
 }

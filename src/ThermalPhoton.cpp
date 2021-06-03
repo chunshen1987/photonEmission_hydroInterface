@@ -242,24 +242,28 @@ ThermalPhoton::~ThermalPhoton() {
     deleteA5DMatrix(dNd2pTdphidydTdtau_bulkvis, nTcut, nTaucut, np, nphi);
     deleteA5DMatrix(dNd2pTdphidydTdtau_tot, nTcut, nTaucut, np, nphi);
 
-    deleteA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut);
-    deleteA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut);
-    deleteA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut);
-    deleteA2DMatrix(dNdydxperpdtau_tot, n_xperp_cut); 
+    int diff_flag = paraRdr->getVal("differential_flag");
 
-    deleteA3DMatrix(vndxperpdtau_cos_eq, n_xperp_cut, n_tau_cut_xtau);
-    deleteA3DMatrix(vndxperpdtau_sin_eq, n_xperp_cut, n_tau_cut_xtau);
-    deleteA3DMatrix(vndxperpdtau_cos_vis, n_xperp_cut, n_tau_cut_xtau);
-    deleteA3DMatrix(vndxperpdtau_sin_vis, n_xperp_cut, n_tau_cut_xtau);
-    deleteA3DMatrix(vndxperpdtau_cos_bulkvis, n_xperp_cut, n_tau_cut_xtau);
-    deleteA3DMatrix(vndxperpdtau_sin_bulkvis, n_xperp_cut, n_tau_cut_xtau);
-    deleteA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau);
-    deleteA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau);
+    if(diff_flag == 2 or diff_flag > 10) {
+        deleteA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut);
+        deleteA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut);
+        deleteA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut);
+        deleteA2DMatrix(dNdydxperpdtau_tot, n_xperp_cut); 
     
-    deleteA5DMatrix(dNd2pTdphidydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-    deleteA5DMatrix(dNd2pTdphidydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-    deleteA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-    deleteA5DMatrix(dNd2pTdphidydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA3DMatrix(vndxperpdtau_cos_eq, n_xperp_cut, n_tau_cut_xtau);
+        deleteA3DMatrix(vndxperpdtau_sin_eq, n_xperp_cut, n_tau_cut_xtau);
+        deleteA3DMatrix(vndxperpdtau_cos_vis, n_xperp_cut, n_tau_cut_xtau);
+        deleteA3DMatrix(vndxperpdtau_sin_vis, n_xperp_cut, n_tau_cut_xtau);
+        deleteA3DMatrix(vndxperpdtau_cos_bulkvis, n_xperp_cut, n_tau_cut_xtau);
+        deleteA3DMatrix(vndxperpdtau_sin_bulkvis, n_xperp_cut, n_tau_cut_xtau);
+        deleteA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau);
+        deleteA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau);
+        
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, np, nphi);
+    }
     
 }
 

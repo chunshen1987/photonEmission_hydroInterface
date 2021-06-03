@@ -70,6 +70,7 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
 PhotonEmission::~PhotonEmission() {
     
     deleteA3DMatrix(dNd2pTdphidy_eq, np, nphi);
+    cout << "check" << endl;
     deleteA3DMatrix(dNd2pTdphidy, np, nphi);
     delete[] dNd2pT_eq;
     delete[] dNd2pT;
