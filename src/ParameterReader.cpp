@@ -12,6 +12,7 @@ Ver 1.02
 #include "ParameterReader.h"
 
 using namespace std;
+using namespace ARSENAL;
 
 //----------------------------------------------------------------------
 ParameterReader::ParameterReader()

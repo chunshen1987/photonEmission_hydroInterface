@@ -2,13 +2,13 @@
 #define SRC_THERMALPHOTON_H_
 
 #include <string>
-#include<fstream>
-
-#include "./Arsenal.h"
-#include "./Table2D.h"
-#include "./ParameterReader.h"
+#include <fstream>
 #include <memory>
 #include <vector>
+
+#include "Arsenal.h"
+#include "Table2D.h"
+#include "ParameterReader.h"
 
 class ThermalPhoton {
  private:

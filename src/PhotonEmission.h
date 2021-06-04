@@ -16,12 +16,11 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
-using namespace std;
 
 class PhotonEmission {
  private:
     std::shared_ptr<ParameterReader> paraRdr;
-    string output_path;
+    std::string output_path;
 
     int neta;
     int np, nphi, nrapidity;
@@ -88,7 +87,7 @@ class PhotonEmission {
     void calPhoton_total_SpMatrix();
     void calPhoton_SpvnpT_individualchannel();
     void calPhoton_total_Spvn();
-    void outputPhoton_total_SpvnpT(string );
+    void outputPhoton_total_SpvnpT(std::string );
     void outputPhotonSpvn();
 };
 

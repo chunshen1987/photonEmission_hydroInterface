@@ -1,10 +1,17 @@
-#include<iostream>
-#include<sstream>
-#include<fstream>
-#include<cmath>
-#include<cstdlib>
-#include<iomanip>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cmath>
+#include <cstdlib>
+#include <iomanip>
 #include "Arsenal.h"
+
+using std::string;
+using std::vector;
+using std::cout;
+using std::endl;
+
+namespace ARSENAL {
 
 double Simpson_sum(double* array, int num, double h_step)
 {
@@ -16,7 +23,7 @@ double Simpson_sum(double* array, int num, double h_step)
 }
 
 //**********************************************************************
-vector< vector<double>* >* readBlockData(istream &stream_in)
+vector< vector<double>* >* readBlockData(std::istream &stream_in)
 // Return a nested vector of vector<double>* object. Each column of data
 // is stored in a vector<double> array and the collection is the returned
 // object. Data are read from the input stream "stream_in". Each line
@@ -76,20 +83,18 @@ void releaseBlockData(vector< vector<double>* >* data)
 
 
 //**********************************************************************
-vector<double> stringToDoubles(string str)
+vector<double> stringToDoubles(string str) {
 // Return a vector of doubles from the string "str". "str" should
 // be a string containing a line of data.
-{
-  stringstream sst(str+" "); // add a blank at the end so the last data will be read
-  vector<double> valueList;
-  double val;
-  sst >> val;
-  while (sst.eof()==false)
-  {
-    valueList.push_back(val);
+    std::stringstream sst(str+" "); // add a blank at the end so the last data will be read
+    vector<double> valueList;
+    double val;
     sst >> val;
-  }
-  return valueList;
+    while (sst.eof()==false) {
+        valueList.push_back(val);
+        sst >> val;
+    }
+    return valueList;
 }
 
 
@@ -525,10 +530,10 @@ string trim(string str)
 double stringToDouble(string str)
 // Return the 1st doubles number read from the string "str". "str" should be a string containing a line of data.
 {
-  stringstream sst(str+" "); // add a blank at the end so the last data will be read
-  double val;
-  sst >> val;
-  return val;
+    std::stringstream sst(str+" "); // add a blank at the end so the last data will be read
+    double val;
+    sst >> val;
+    return val;
 }
 
 double***** createA5DMatrix(const int n1, const int n2, const int n3, const int n4, const int n5, const double init) {
@@ -607,4 +612,6 @@ void deleteA2DMatrix(double **mat, const int n1) {
         delete[] mat[i];
     }
     delete[] mat;
+}
+
 }

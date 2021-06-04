@@ -3,13 +3,13 @@
 //      change the integration routines into gaussian integration
 /////////////////////////////////////////////////////////////////////////
 
-#include<iostream>
-#include<sstream>
-#include<fstream>
-#include<cmath>
-#include<iomanip>
-#include<string>
-#include<fstream>
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <cmath>
+#include <iomanip>
+#include <string>
+#include <fstream>
 
 #include "Table2D.h"
 #include "ThermalPhoton.h"
@@ -18,6 +18,12 @@
 #include "Arsenal.h"
 
 using namespace std;
+using ARSENAL::createA2DMatrix;
+using ARSENAL::createA3DMatrix;
+using ARSENAL::createA5DMatrix;
+using ARSENAL::deleteA2DMatrix;
+using ARSENAL::deleteA3DMatrix;
+using ARSENAL::deleteA5DMatrix;
 
 ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;

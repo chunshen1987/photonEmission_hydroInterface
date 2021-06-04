@@ -6,14 +6,20 @@
 #include <iomanip>
 #include <string>
 
-#include "./Hydroinfo_h5.h"
-#include "./ThermalPhoton.h"
-#include "./tensor_trans.h"
-#include "./PhotonEmission.h"
-#include "./ParameterReader.h"
+#include "Hydroinfo_h5.h"
+#include "ThermalPhoton.h"
+#include "tensor_trans.h"
+#include "PhotonEmission.h"
+#include "ParameterReader.h"
 #include "Arsenal.h"
 
 using namespace std;
+using ARSENAL::createA2DMatrix;
+using ARSENAL::createA3DMatrix;
+using ARSENAL::createA5DMatrix;
+using ARSENAL::deleteA2DMatrix;
+using ARSENAL::deleteA3DMatrix;
+using ARSENAL::deleteA5DMatrix;
 
 PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;
