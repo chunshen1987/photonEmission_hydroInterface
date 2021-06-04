@@ -10,8 +10,6 @@
 #include <memory>
 #include <vector>
 
-//using namespace std;
-
 class ThermalPhoton {
  private:
     std::shared_ptr<ParameterReader> paraRdr;
@@ -24,9 +22,9 @@ class ThermalPhoton {
     double dy;
 
     // photon emission rate
-    Table2D* Photonemission_eqrateTable_ptr;
-    Table2D* Photonemission_viscous_rateTable_ptr;
-    Table2D* Photonemission_bulkvis_rateTable_ptr;
+    std::unique_ptr<Table2D> Photonemission_eqrateTable_ptr;
+    std::unique_ptr<Table2D> Photonemission_viscous_rateTable_ptr;
+    std::unique_ptr<Table2D> Photonemission_bulkvis_rateTable_ptr;
 
     double** Emission_eqrateTb_ptr;
     double** Emission_viscous_rateTb_ptr;
@@ -120,11 +118,6 @@ class ThermalPhoton {
 
     double get_dy() {return(dy);}
 
-    Table2D* get_eqRatetableptr() {return(Photonemission_eqrateTable_ptr);}
-    Table2D* get_visRatetableptr() {
-        return(Photonemission_viscous_rateTable_ptr);
-    }
-
     double getPhotonp(int i) {return(p[i]);}
     double getPhoton_pweight(int i) {return(p_weight[i]);}
     double getPhotonphi(int i) {return(phi[i]);}
@@ -139,8 +132,10 @@ class ThermalPhoton {
     }
 
     void getPhotonemissionRate(double* Eq, double* pi_zz, double* bulkPi,
-                               int Eq_length, double T, double* eqrate_ptr,
-                               double* visrate_ptr, double* bulkvis_ptr);
+                               int Eq_length, double T,
+                               std::vector<double> &eqrate_ptr,
+                               std::vector<double> &visrate_ptr,
+                               std::vector<double> &bulkvis_ptr);
 
     void calThermalPhotonemission(double* Eq, double* pi_zz, double* bulkPi,
                                   int Tb_length, double T, double* volume,
@@ -169,7 +164,8 @@ class ThermalPhoton {
     void outputPhoton_SpvnpTdxperpdtau(std::string path);
     void output_photon_spectra_dTdtau(std::string path);
     void interpolation2D_bilinear(double varX, double* varY, int Y_length,
-                                  double** Table2D_ptr, double* results);
+                                  double** Table2D_ptr,
+                                  std::vector<double> &results);
 
     void update_rates_with_polyakov_suppression();
     double get_polyakov_suppression_factor(double T_in_GeV);
