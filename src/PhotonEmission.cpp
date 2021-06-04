@@ -20,6 +20,7 @@ using ARSENAL::createA5DMatrix;
 using ARSENAL::deleteA2DMatrix;
 using ARSENAL::deleteA3DMatrix;
 using ARSENAL::deleteA5DMatrix;
+using TENSORTRANSFORM::getTransverseflow_u_mu_low;
 
 PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     paraRdr = paraRdr_in;

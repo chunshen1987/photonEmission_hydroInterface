@@ -133,7 +133,7 @@ class ThermalPhoton {
 
     void getPhotonemissionRate(std::vector<double> &Eq,
                                std::vector<double> &pi_zz,
-                               vector<double> &bulkPi,
+                               std::vector<double> &bulkPi,
                                int Eq_length, double T,
                                std::vector<double> &eqrate_ptr,
                                std::vector<double> &visrate_ptr,

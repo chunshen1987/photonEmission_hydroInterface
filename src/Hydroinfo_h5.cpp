@@ -34,7 +34,7 @@ HydroinfoH5::HydroinfoH5(int XL_in, int XH_in, double DX_in, int LSX_in,
 HydroinfoH5::~HydroinfoH5() {
     if (readinFlag == 1) {
         for (int i=0; i<Buffersize; i++) {
-            for (int j=0; j<dimensionX; j++) {
+            for (unsigned int j=0; j<dimensionX; j++) {
                 delete[] ed[i][j];
                 delete[] sd[i][j];
                 delete[] vx[i][j];
@@ -120,7 +120,6 @@ void HydroinfoH5::setHydroFiles(
             (grid_YH - grid_YL - 2*YShift)/grid_LSY + 1);
 
     filename = filename_in;
-    herr_t status;
     /* Create a new file using default properties. */
     H5file_id = H5Fcreate(filename.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -130,9 +129,9 @@ void HydroinfoH5::setHydroFiles(
     writeGroupattribute(H5groupEventid);
 
     /* Close the group. */
-    status = H5Gclose(H5groupEventid);
+    H5Gclose(H5groupEventid);
     /* Terminate access to the file. */
-    status = H5Fclose(H5file_id); 
+    H5Fclose(H5file_id); 
 }
 
 
@@ -153,7 +152,6 @@ void HydroinfoH5::writeGroupattribute(hid_t H5groupEventid) {
 
 void HydroinfoH5::addGroupattributeInt(hid_t H5groupEventid,
                                        string attName, int attValue) {
-    herr_t status;
     hsize_t dims;
     hid_t attribute_id, dataspace_id;
 
@@ -165,18 +163,17 @@ void HydroinfoH5::addGroupattributeInt(hid_t H5groupEventid,
                               dataspace_id, H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write the attribute data. */
-    status = H5Awrite(attribute_id, H5T_NATIVE_INT, &attValue);
+    H5Awrite(attribute_id, H5T_NATIVE_INT, &attValue);
 
     /* Close the attribute. */
-    status = H5Aclose(attribute_id);
+    H5Aclose(attribute_id);
     /* Close the dataspace. */
-    status = H5Sclose(dataspace_id);
+    H5Sclose(dataspace_id);
 }
 
 
 void HydroinfoH5::addGroupattributeDouble(hid_t H5groupEventid,
                                           string attName, double attValue) {
-    herr_t status;
     hsize_t dims;
     hid_t attribute_id, dataspace_id;
 
@@ -189,12 +186,12 @@ void HydroinfoH5::addGroupattributeDouble(hid_t H5groupEventid,
                               H5P_DEFAULT, H5P_DEFAULT);
 
     /* Write the attribute data. */
-    status = H5Awrite(attribute_id, H5T_NATIVE_DOUBLE, &attValue);
+    H5Awrite(attribute_id, H5T_NATIVE_DOUBLE, &attValue);
 
     /* Close the attribute. */
-    status = H5Aclose(attribute_id);
+    H5Aclose(attribute_id);
     /* Close the dataspace. */
-    status = H5Sclose(dataspace_id);
+    H5Sclose(dataspace_id);
 }
 
 
@@ -211,7 +208,6 @@ void HydroinfoH5::writeHydroBlock(
         LST_cur = grid_LST - 1;
     }
 
-    herr_t status;
     hid_t groupFrameid;
     const hsize_t dims[2] = {dimensionX, dimensionY};
 
@@ -250,23 +246,22 @@ void HydroinfoH5::writeHydroBlock(
        CSH5dumpBlockdata(groupFrameid, dims, "BulkPi", BulkPi_in);
     }
 
-    status = H5Gclose(H5groupEventid);
-    status = H5Fclose(H5file_id);
+    H5Gclose(H5groupEventid);
+    H5Fclose(H5file_id);
 }
 
 
 void HydroinfoH5::CSH5dumpBlockdata(hid_t group_id, const hsize_t * dims,
                                     string DatasetName, double **Dataset) {
     hid_t dataset_id, dataspace_id;
-    herr_t status;
 
     int XShift = abs(grid_XL%grid_LSX);
     int YShift = abs(grid_YL%grid_LSY);
 
     double subDataset[dims[0]][dims[1]];
-    for (int i = 0; i < dims[0]; i++) {
+    for (unsigned int i = 0; i < dims[0]; i++) {
         int idx_x = XShift + i*grid_LSX;
-        for (int j = 0; j < dims[1]; j++) {
+        for (unsigned int j = 0; j < dims[1]; j++) {
             int idx_y = YShift + j*grid_LSY;
             subDataset[i][j] = Dataset[idx_x][idx_y];
         }
@@ -277,13 +272,13 @@ void HydroinfoH5::CSH5dumpBlockdata(hid_t group_id, const hsize_t * dims,
     dataset_id = H5Dcreate(group_id, DatasetName.c_str(), H5T_NATIVE_DOUBLE,
                            dataspace_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-    status = H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
-                      H5P_DEFAULT, subDataset);
+    H5Dwrite(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL,
+             H5P_DEFAULT, subDataset);
 
     /* End access to the dataset and release resources used by it. */
-    status = H5Dclose(dataset_id);
+    H5Dclose(dataset_id);
     /* Terminate access to the data space. */ 
-    status = H5Sclose(dataspace_id);
+    H5Sclose(dataspace_id);
 }
 
 void HydroinfoH5::readHydroinfoH5(string filename_in, int bufferSize_in, int Visflag_in)
@@ -292,7 +287,6 @@ void HydroinfoH5::readHydroinfoH5(string filename_in, int bufferSize_in, int Vis
    // flag to determine whether to read evolutions for viscous variables
    Visflag = Visflag_in;
 
-   herr_t status;
    filename = filename_in;
    const char *fileptr = (char*) filename.c_str();
    H5file_id = H5Fopen(fileptr, H5F_ACC_RDWR, H5P_DEFAULT);
@@ -347,7 +341,7 @@ void HydroinfoH5::readHydroinfoH5(string filename_in, int bufferSize_in, int Vis
       pi23[i] = new double* [dimensionX];
       pi33[i] = new double* [dimensionX];
       BulkPi[i] = new double* [dimensionX];
-      for(int j=0; j<dimensionX; j++)
+      for(unsigned int j=0; j<dimensionX; j++)
       {
          ed[i][j] = new double [dimensionY];
          sd[i][j] = new double [dimensionY];
@@ -371,14 +365,13 @@ void HydroinfoH5::readHydroinfoH5(string filename_in, int bufferSize_in, int Vis
 
    readHydroinfoBuffered_total(); 
 
-   status = H5Gclose(H5groupEventid);
-   status = H5Fclose(H5file_id);
+   H5Gclose(H5groupEventid);
+   H5Fclose(H5file_id);
 }
 
 
 void HydroinfoH5::readHydrogridInfo()
 {
-   herr_t status;
 
    grid_XL = readH5Attribute_int(H5groupEventid, "XL");
    grid_XH = readH5Attribute_int(H5groupEventid, "XH");
@@ -395,7 +388,7 @@ void HydroinfoH5::readHydrogridInfo()
    grid_Ymax = grid_YH * grid_dy;
 
    hsize_t tempFramenum;
-   status = H5Gget_num_objs(H5groupEventid, &tempFramenum);
+   H5Gget_num_objs(H5groupEventid, &tempFramenum);
    grid_Framenum = (int) tempFramenum;
    grid_Taumax = grid_Tau0 + (grid_Framenum - 1)*grid_dTau;
 
@@ -430,26 +423,23 @@ void HydroinfoH5::printHydrogridInfo() {
 int HydroinfoH5::readH5Attribute_int(hid_t id, string attributeName) {
     int attributeValue;
     hid_t attr;
-    herr_t ret;
     attr = H5Aopen_name(id, attributeName.c_str());
-    ret  = H5Aread(attr, H5T_NATIVE_INT, &attributeValue);
-    ret =  H5Aclose(attr);
+    H5Aread(attr, H5T_NATIVE_INT, &attributeValue);
+    H5Aclose(attr);
     return(attributeValue);
 }
 
 double HydroinfoH5::readH5Attribute_double(hid_t id, string attributeName) {
     double attributeValue;
     hid_t attr;
-    herr_t ret;
     attr = H5Aopen_name(id, attributeName.c_str());
-    ret  = H5Aread(attr, H5T_NATIVE_DOUBLE, &attributeValue);
-    ret =  H5Aclose(attr);
+    H5Aread(attr, H5T_NATIVE_DOUBLE, &attributeValue);
+    H5Aclose(attr);
     return(attributeValue);
 }
 
 void HydroinfoH5::readHydroinfoBuffered_total() {
    hid_t group_id;
-   herr_t status;
 
    int frameIdx;
    for (int i=0; i<Buffersize; i++) {
@@ -478,7 +468,7 @@ void HydroinfoH5::readHydroinfoBuffered_total() {
             readH5Dataset_double(group_id, "Pi33", pi33[i]);
             readH5Dataset_double(group_id, "BulkPi", BulkPi[i]);
          }
-         status = H5Gclose(group_id);
+         H5Gclose(group_id);
       }
       else
          break;
@@ -488,7 +478,6 @@ void HydroinfoH5::readHydroinfoBuffered_total() {
 void HydroinfoH5::readHydroinfoSingleframe(int frameIdx)
 {
    hid_t group_id;
-   herr_t status;
 
    if(frameIdx < (int) grid_Framenum)
    {
@@ -518,7 +507,7 @@ void HydroinfoH5::readHydroinfoSingleframe(int frameIdx)
          readH5Dataset_double(group_id, "Pi33", pi33[Idx]);
          readH5Dataset_double(group_id, "BulkPi", BulkPi[Idx]);
       }
-      status = H5Gclose(group_id);
+      H5Gclose(group_id);
    }
    else
    {
@@ -531,16 +520,15 @@ void HydroinfoH5::readHydroinfoSingleframe(int frameIdx)
 
 void HydroinfoH5::readH5Dataset_double(hid_t id, string datasetName, double** dset_data)
 {
-   herr_t status;
    hid_t dataset_id;
 
    double temp_data[dimensionX][dimensionY];
    dataset_id = H5Dopen(id, datasetName.c_str(), H5P_DEFAULT);
-   status = H5Dread(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, temp_data);
-   for(int i=0; i<dimensionX; i++)
-      for(int j=0; j<dimensionY; j++)
+   H5Dread(dataset_id, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, temp_data);
+   for(unsigned int i=0; i<dimensionX; i++)
+      for(unsigned int j=0; j<dimensionY; j++)
          dset_data[i][j] = temp_data[i][j];
-   status = H5Dclose(dataset_id);
+   H5Dclose(dataset_id);
 }
 
 void HydroinfoH5::getHydroinfoOnlattice(int frameIdx, int xIdx, int yIdx, fluidCell* fluidCellptr)

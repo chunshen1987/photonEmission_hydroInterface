@@ -35,9 +35,10 @@ void Table2D::outputTabletoFile(std::string filename) {
     filename_stream << filename << ".dat";
     std::ofstream output(filename_stream.str().c_str());
     for (int i=0; i<tb_sizeX; i++) {
-        for (int j=0; j<tb_sizeY; j++)
+        for (int j=0; j<tb_sizeY; j++) {
             output << std::scientific << std::setw(16) << std::setprecision(6)
                    << (*(*data)[j])[i] << "   ";
-            output << std::endl;
+        }
+        output << std::endl;
     }
 }
