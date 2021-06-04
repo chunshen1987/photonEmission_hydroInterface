@@ -303,7 +303,8 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
 
 
 void ThermalPhoton::getPhotonemissionRate(
-    double* Eq, double* pi_zz, double* bulkPi, int Eq_length, double T,
+    vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
+    int Eq_length, double T,
     vector<double> &eqrate_ptr, vector<double> &visrate_ptr,
     vector<double> &bulkvis_ptr) {
     //interpolate equilibrium rate
@@ -324,8 +325,8 @@ void ThermalPhoton::getPhotonemissionRate(
 
 
 void ThermalPhoton::calThermalPhotonemission_3d(
-        double* Eq, double* pi_zz, double* bulkPi, int Tb_length, double T,
-        double volume, double fraction) {
+        vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
+        int Tb_length, double T, double volume, double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -377,8 +378,8 @@ void ThermalPhoton::calThermalPhotonemission_3d(
 
 
 void ThermalPhoton::calThermalPhotonemission(
-        double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
-        double T, double* volume, double fraction) {
+        vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
+        int Tb_length, double T, vector<double> &volume, double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -441,8 +442,9 @@ void ThermalPhoton::calThermalPhotonemission(
 
 
 void ThermalPhoton::calThermalPhotonemissiondTdtau(
-    double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
-    double T, double tau, double* volume, double fraction) {
+    vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
+    int Tb_length, double T, double tau, vector<double> &volume,
+    double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -492,8 +494,8 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau(
 
 
 void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
-    double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
-    double T, double tau, double volume, double fraction) {
+    vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
+    int Tb_length, double T, double tau, double volume, double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -532,8 +534,9 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
 
 
 void ThermalPhoton::calThermalPhotonemissiondxperpdtau(
-    double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
-    double T, double x_local, double tau, double* volume, double fraction) {
+    vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
+    int Tb_length, double T, double x_local, double tau,
+    vector<double> &volume, double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -583,8 +586,9 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau(
 
 
 void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
-    double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
-    double T, double x_local, double tau, double volume, double fraction) {
+    vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
+    int Tb_length, double T, double x_local, double tau, double volume,
+    double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -1449,7 +1453,7 @@ void ThermalPhoton::outputPhoton_SpvnpTdxperpdtau(string path) {
 //! this function is used the most frequent one,
 //! it needs to be as fast as possible
 void ThermalPhoton::interpolation2D_bilinear(
-        double varX, double* varY, int Y_length,
+        double varX, vector<double> &varY, int Y_length,
         double** Table2D_ptr, vector<double> &results) {
      double varX_min = EmissionrateTb_Xmin;
      double varY_min = EmissionrateTb_Ymin;

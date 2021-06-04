@@ -32,14 +32,9 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     lambda = createA2DMatrix(4, 4, 0.);
 
     int Eqtb_length = neta*nrapidity*np*nphi;
-    Eq_localrest_Tb = new double[Eqtb_length];
-    pi_photon_Tb = new double[Eqtb_length];
-    bulkPi_Tb = new double[Eqtb_length];
-    for (int i = 0; i < Eqtb_length; i++) {
-        Eq_localrest_Tb[i] = 0.0;
-        pi_photon_Tb[i] = 0.0;
-        bulkPi_Tb[i] = 0.0;
-    }
+    Eq_localrest_Tb.resize(Eqtb_length, 0);
+    pi_photon_Tb.resize(Eqtb_length, 0);
+    bulkPi_Tb.resize(Eqtb_length, 0);
 
     dNd2pTdphidy_eq = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy = createA3DMatrix(np, nphi, nrapidity, 0.);
@@ -69,10 +64,6 @@ PhotonEmission::~PhotonEmission() {
     deleteA2DMatrix(vnpT_cos, norder);
     deleteA2DMatrix(vnpT_sin, norder);
     deleteA2DMatrix(lambda, 4);
-
-    delete [] Eq_localrest_Tb;
-    delete [] pi_photon_Tb;
-    delete [] bulkPi_Tb;
 }
 
 
@@ -244,7 +235,7 @@ void PhotonEmission::calPhotonemission(
     double bulkPi_local = 0.;
     double tau_local = 1.;
     double eta_local = 0.;
-    double* volume = new double[neta];
+    std::vector<double> volume(neta, 0);
     double** pi_tensor_lab = new double* [4];
     for (int i = 0; i < 4; i++) {
         pi_tensor_lab[i] = new double[4];
@@ -580,7 +571,6 @@ void PhotonEmission::calPhotonemission(
              << " fm/c done!" << endl;
     }
 
-    delete [] volume;
     delete fluidCellptr;
     for (int i = 0; i < 4; i++) {
         delete [] pi_tensor_lab[i];

@@ -40,9 +40,9 @@ class PhotonEmission {
     int calHGIdFlag;
 
     double **lambda;  // Lorentz boost transverse only
-    double *Eq_localrest_Tb;
-    double *pi_photon_Tb;
-    double *bulkPi_Tb;
+    std::vector<double> Eq_localrest_Tb;
+    std::vector<double> pi_photon_Tb;
+    std::vector<double> bulkPi_Tb;
 
     std::vector<double> dNd2pT_eq;
     std::vector<double> dNd2pT;

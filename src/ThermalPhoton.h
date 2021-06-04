@@ -131,29 +131,38 @@ class ThermalPhoton {
         return(dNd2pTdphidy_tot[i][j][k]);
     }
 
-    void getPhotonemissionRate(double* Eq, double* pi_zz, double* bulkPi,
+    void getPhotonemissionRate(std::vector<double> &Eq,
+                               std::vector<double> &pi_zz,
+                               vector<double> &bulkPi,
                                int Eq_length, double T,
                                std::vector<double> &eqrate_ptr,
                                std::vector<double> &visrate_ptr,
                                std::vector<double> &bulkvis_ptr);
 
-    void calThermalPhotonemission(double* Eq, double* pi_zz, double* bulkPi,
-                                  int Tb_length, double T, double* volume,
-                                  double fraction);
-    void calThermalPhotonemission_3d(double* Eq, double* pi_zz, double* bulkPi,
-                                     int Tb_length, double T, double volume,
-                                     double fraction);
-    void calThermalPhotonemissiondTdtau(double* Eq, double* pi_zz,
-        double* bulkPi, int Tb_length, double T, double tau,
-        double* volume, double fraction);
+    void calThermalPhotonemission(
+        std::vector<double> &Eq, std::vector<double> &pi_zz,
+        std::vector<double> &bulkPi, int Tb_length, double T,
+        std::vector<double> &volume, double fraction);
+    void calThermalPhotonemission_3d(
+        std::vector<double> &Eq, std::vector<double> &pi_zz,
+        std::vector<double> &bulkPi, int Tb_length, double T, double volume,
+        double fraction);
+    void calThermalPhotonemissiondTdtau(
+        std::vector<double> &Eq, std::vector<double> &pi_zz,
+        std::vector<double> &bulkPi, int Tb_length, double T, double tau,
+        std::vector<double> &volume, double fraction);
     void calThermalPhotonemissiondTdtau_3d(
-        double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
+        std::vector<double> &Eq, std::vector<double> &pi_zz,
+        std::vector<double> &bulkPi, int Tb_length,
         double T, double tau, double volume, double fraction);
     void calThermalPhotonemissiondxperpdtau(
-        double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
-        double T, double x_local, double tau, double* volume, double fraction);
+        std::vector<double> &Eq, std::vector<double> &pi_zz,
+        std::vector<double> &bulkPi, int Tb_length,
+        double T, double x_local, double tau,
+        std::vector<double> &volume, double fraction);
     void calThermalPhotonemissiondxperpdtau_3d(
-        double* Eq, double* pi_zz, double* bulkPi, int Tb_length,
+        std::vector<double> &Eq, std::vector<double> &pi_zz,
+        std::vector<double> &bulkPi, int Tb_length,
         double T, double x_local, double tau, double volume, double fraction);
 
     void calPhoton_SpvnpT();
@@ -163,8 +172,8 @@ class ThermalPhoton {
     void outputPhoton_SpvnpTdTdtau(std::string path);
     void outputPhoton_SpvnpTdxperpdtau(std::string path);
     void output_photon_spectra_dTdtau(std::string path);
-    void interpolation2D_bilinear(double varX, double* varY, int Y_length,
-                                  double** Table2D_ptr,
+    void interpolation2D_bilinear(double varX, std::vector<double> &varY,
+                                  int Y_length, double** Table2D_ptr,
                                   std::vector<double> &results);
 
     void update_rates_with_polyakov_suppression();
