@@ -236,10 +236,7 @@ void PhotonEmission::calPhotonemission(
     double tau_local = 1.;
     double eta_local = 0.;
     std::vector<double> volume(neta, 0);
-    double** pi_tensor_lab = new double* [4];
-    for (int i = 0; i < 4; i++) {
-        pi_tensor_lab[i] = new double[4];
-    }
+    double** pi_tensor_lab = createA2DMatrix(4, 4, 0.);
 
     fluidCell *fluidCellptr = new fluidCell;
 
@@ -572,10 +569,7 @@ void PhotonEmission::calPhotonemission(
     }
 
     delete fluidCellptr;
-    for (int i = 0; i < 4; i++) {
-        delete [] pi_tensor_lab[i];
-    }
-    delete [] pi_tensor_lab;
+    deleteA2DMatrix(pi_tensor_lab, 4);
 }
 
 
