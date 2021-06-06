@@ -23,6 +23,9 @@ using namespace std;
 
 Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
     boost_invariant = false;
+    nskip_tau = 1;
+    nskip_x = 1;
+    nskip_eta = 1;
 }
 
 
