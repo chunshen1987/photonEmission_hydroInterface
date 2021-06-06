@@ -32,7 +32,7 @@ class Hydroinfo_MUSIC {
     int hydroWhichHydro;    // choose a hydro evolution model to use
     int use_tau_eta_coordinate;
 
-    bool boost_invariant;
+    bool boost_invariant_;
 
     int itaumax, ixmax, ietamax;
     int turn_on_shear;
@@ -62,6 +62,8 @@ class Hydroinfo_MUSIC {
     int get_hydro_Nskip_x() {return(nskip_x);}
     int get_hydro_Nskip_eta() {return(nskip_eta);}
     int get_number_of_fluid_cells_3d() {return(lattice_new_.size());}
+
+    bool isBoostInvariant() const {return(boost_invariant_);}
 
     void readHydroData(int whichHydro, int nskip_tau_in);
 

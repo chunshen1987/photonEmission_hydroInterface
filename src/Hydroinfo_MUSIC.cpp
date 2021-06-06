@@ -22,7 +22,7 @@ using namespace std;
 
 
 Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
-    boost_invariant = false;
+    boost_invariant_ = false;
     nskip_tau = 1;
     nskip_x = 1;
     nskip_eta = 1;
@@ -30,7 +30,7 @@ Hydroinfo_MUSIC::Hydroinfo_MUSIC() {
 
 
 Hydroinfo_MUSIC::~Hydroinfo_MUSIC() {
-    if (boost_invariant) {
+    if (boost_invariant_) {
         lattice_2D.clear();
     } else {
         lattice_3D.clear();
@@ -118,7 +118,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
     if (whichHydro == 6) {
         // 3+1D MUSIC hydro (Schenke, Jeon, Gale)
         cout << "Using 3+1D Jeon Schenke hydro reading data ..." << endl;
-        boost_invariant = false;
+        boost_invariant_ = false;
 
         hydroDtau = hydroDtau*nskip_tau;
         hydroDx = 2.*hydroXmax/(ixmax - 1.)*nskip_x;
@@ -283,7 +283,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         // there are two slices in medium in eta_s
         // one at eta_s = -15. and the other at eta_s = 0.0
         // only the medium at middle rapidity will be kept in the memory
-        boost_invariant = true;
+        boost_invariant_ = true;
         cout << "Reading event-by-event hydro evolution data from JF ..."
              << endl;
 
@@ -447,7 +447,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
     } else if (whichHydro == 9) {
         // event-by-event (2+1)-d MUSIC hydro
         // the output medium is at middle rapidity
-        boost_invariant = true;
+        boost_invariant_ = true;
         cout << "Reading event-by-event hydro evolution data "
              << "from (2+1)D MUSIC ..." << endl;
 
@@ -607,9 +607,9 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         cout << "Using new MUSIC hydro format (no grid) reading data ..."
              << endl;
         if (whichHydro == 10) {
-            boost_invariant = false;
+            boost_invariant_ = false;
         } else {
-            boost_invariant = true;
+            boost_invariant_ = true;
         }
 
         // read in temperature and flow velocity
@@ -736,9 +736,9 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         hydroXmax = std::abs(header[4]);
         ietamax = static_cast<int>(header[8]);
         if (ietamax == 1) {
-            boost_invariant = false;
+            boost_invariant_ = false;
         } else {
-            boost_invariant = true;
+            boost_invariant_ = true;
         }
         hydroDeta = header[9];
         hydro_eta_max = std::abs(header[10]);
@@ -904,7 +904,7 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
     float etafrac = (eta/hydroDeta - static_cast<float>(ieta)
                      + 0.5*static_cast<float>(ietamax));
 
-    if (boost_invariant) {
+    if (boost_invariant_) {
         ieta = 0;
         etafrac = 0.;
     }
