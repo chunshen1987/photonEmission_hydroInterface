@@ -736,9 +736,9 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         hydroXmax = std::abs(header[4]);
         ietamax = static_cast<int>(header[8]);
         if (ietamax == 1) {
-            boost_invariant_ = false;
-        } else {
             boost_invariant_ = true;
+        } else {
+            boost_invariant_ = false;
         }
         hydroDeta = header[9];
         hydro_eta_max = std::abs(header[10]);
@@ -1048,16 +1048,24 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
                     HydroCell_3D_ideal_ptr2 = (
                         &lattice_3D_ideal[idx_map_[position[1][ipy][ipeta][iptau]]]);
                     HydroCell3DIdealInterp = (HydroCell3DIdealInterp +
-                        (*HydroCell_3D_ideal_ptr1)*(1. - xfrac)
-                        + (*HydroCell_3D_ideal_ptr2)*xfrac)*prefrac;
+                        ( (*HydroCell_3D_ideal_ptr1)*(1. - xfrac)
+                        + (*HydroCell_3D_ideal_ptr2)*xfrac)*prefrac);
                 } else if (hydroWhichHydro == 12) {
                     HydroCell_3D_new_ptr1 = (
                         &lattice_new_[idx_map_[position[0][ipy][ipeta][iptau]]]);
                     HydroCell_3D_new_ptr2 = (
                         &lattice_new_[idx_map_[position[1][ipy][ipeta][iptau]]]);
-                    HydroCell3DnewInterp = (HydroCell3DnewInterp + 
-                        (*HydroCell_3D_new_ptr1)*(1. - xfrac)
-                        + (*HydroCell_3D_new_ptr2)*xfrac)*prefrac;
+                    HydroCell3DnewInterp = (HydroCell3DnewInterp +
+                        ( (*HydroCell_3D_new_ptr1)*(1. - xfrac)
+                        + (*HydroCell_3D_new_ptr2)*xfrac)*prefrac);
+                    //if (HydroCell_3D_new_ptr1->temperature > 0) {
+                    //    cout << "check T1 = " << HydroCell_3D_new_ptr1->temperature
+                    //         << ", T2 = " << HydroCell_3D_new_ptr2->temperature
+                    //         << ", T = " << HydroCell3DnewInterp.temperature
+                    //         << ", xfrac = " << xfrac
+                    //         << ", prefac " << prefrac
+                    //         << endl;
+                    //}
                 }
             }
         }

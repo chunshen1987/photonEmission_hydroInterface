@@ -215,7 +215,7 @@ void PhotonEmission::calPhotonemission(
     Hydroinfo_MUSIC *hydroinfo_MUSIC_ptr = nullptr;
     if (hydro_flag == 0) {
         hydroinfo_h5_ptr = reinterpret_cast<HydroinfoH5*>(hydroinfo_ptr_in);
-    } else if (hydro_flag == 1 || hydro_flag == 3) {
+    } else if (hydro_flag > 0 && hydro_flag < 4) {
         hydroinfo_MUSIC_ptr =
                       reinterpret_cast<Hydroinfo_MUSIC*>(hydroinfo_ptr_in);
     }
@@ -252,7 +252,7 @@ void PhotonEmission::calPhotonemission(
     double hydro_tau_max = 0.0;
     if (hydro_flag == 0) {
         hydro_tau_max = hydroinfo_h5_ptr->getHydrogridTaumax();
-    } else if (hydro_flag == 1 || hydro_flag == 3) {
+    } else if (hydro_flag > 0 && hydro_flag < 4) {
         hydro_tau_max = hydroinfo_MUSIC_ptr->get_hydro_tau_max();
     }
     if (gridTauf > hydro_tau_max) {
@@ -278,7 +278,7 @@ void PhotonEmission::calPhotonemission(
                 if (hydro_flag == 0) {
                     hydroinfo_h5_ptr->getHydroinfo(
                         tau_local, x_local, y_local, fluidCellptr);
-                } else if (hydro_flag == 1 || hydro_flag == 3) {
+                } else if (hydro_flag > 0 && hydro_flag < 4) {
                     // for boost-invariant calculations
                     // only get medium at eta = 0
                     hydroinfo_MUSIC_ptr->getHydroValues(
