@@ -1461,53 +1461,53 @@ void ThermalPhoton::outputPhoton_SpvnpTdxperpdtau(string path) {
 void ThermalPhoton::interpolation2D_bilinear(
         double varX, vector<double> &varY, int Y_length,
         double** Table2D_ptr, vector<double> &results) {
-     double varX_min = EmissionrateTb_Xmin;
-     double varY_min = EmissionrateTb_Ymin;
-     double dX = EmissionrateTb_dX;
-     double dY = EmissionrateTb_dY;
-     //int tb_sizeX = EmissionrateTb_sizeX;
-     int tb_sizeY = EmissionrateTb_sizeY;
+    double varX_min = EmissionrateTb_Xmin;
+    double varY_min = EmissionrateTb_Ymin;
+    double dX = EmissionrateTb_dX;
+    double dY = EmissionrateTb_dY;
+    //int tb_sizeX = EmissionrateTb_sizeX;
+    int tb_sizeY = EmissionrateTb_sizeY;
 
-     double dXdYinverse = 1/(dX*dY);
-     double dYinverse = 1/dY;
+    double dXdYinverse = 1/(dX*dY);
+    double dYinverse = 1/dY;
 
-     int idx_Y;
-     double f00, f10, f01, f11;
-     double ddy;
-     double dYhigh;
+    int idx_Y;
+    double f00, f10, f01, f11;
+    double ddy;
+    double dYhigh;
 
-     int idx_X;
-     double ddx;
-     double dXhigh;
-     idx_X = (int)((varX-varX_min)/dX);
-     ddx = (varX - (varX_min + idx_X*dX));
-     dXhigh = (dX - ddx)*dXdYinverse;
-     ddx = ddx*dXdYinverse;
+    int idx_X;
+    double ddx;
+    double dXhigh;
+    idx_X  = static_cast<int>((varX-varX_min)/dX);
+    ddx    = (varX - (varX_min + idx_X*dX));
+    dXhigh = (dX - ddx)*dXdYinverse;
+    ddx    = ddx*dXdYinverse;
 
+    for (int ii = 0; ii < Y_length; ii++) {
+        idx_Y = static_cast<int>((varY[ii] - varY_min)*dYinverse);
 
-     for(int ii=0; ii<Y_length; ii++)
-     {
-        idx_Y = (int)((varY[ii]-varY_min)*dYinverse);
+        //if it is out the table, doing linear extrapolation
+        //if (idx_X<0 || idx_X>=tb_sizeX-1) {
+        //    if (Iwarning == 1) {
+        //        cout << "interpolation2D_bilinear: varX out of bounds!"
+        //             << endl;
+        //        cout << "varX= " << varX << "idx_X= " << idx_X <<endl;
+        //    }
+        //    if (idx_X < 0)
+        //        idx_X = 0;
+        //    if (idx_X >= tb_sizeX-1)
+        //        idx_X = tb_sizeX - 1;
+        //}
 
-     //if it is out the table, doing linear extrapolation
-    /* if (idx_X<0 || idx_X>=tb_sizeX-1)
-     {
-        if(Iwarning == 1)
-        {
-           cout<<"interpolation2D_bilinear: varX out of bounds!"<<endl;
-           cout<<"varX= " << varX<<"idx_X= "<<idx_X<<endl;
-        }
-        if(idx_X < 0) idx_X = 0;
-        if(idx_X >= tb_sizeX-1) idx_X = tb_sizeX - 1;
-     }*/
-
-        /*if(Iwarning == 1)
-        {
-           cout<<"interpolation2D_bilinear: varY out of bounds!"<<endl;
-           cout<<"varY= " << varY<<"idx_Y= "<<idx_Y<<endl;
-        }*/
-        if(idx_Y < 0) idx_Y = 0;
-        if(idx_Y >= tb_sizeY-1) idx_Y = tb_sizeY - 2;
+        //if (Iwarning == 1) {
+        //    cout << "interpolation2D_bilinear: varY out of bounds!" << endl;
+        //    cout << "varY= " << varY << "idx_Y= "<< idx_Y << endl;
+        //}
+        if (idx_Y < 0)
+            idx_Y = 0;
+        if (idx_Y >= tb_sizeY-1)
+            idx_Y = tb_sizeY - 2;
 
         ddy = varY[ii] - EmissionrateTb_Yidxptr[idx_Y];
         dYhigh = dY - ddy;
@@ -1517,7 +1517,8 @@ void ThermalPhoton::interpolation2D_bilinear(
         f01 = Table2D_ptr[idx_X][idx_Y+1];
         f11 = Table2D_ptr[idx_X+1][idx_Y+1];
 
-        results[ii] = ((f00*dYhigh + f01*ddy)*dXhigh + (f10*dYhigh + f11*ddy)*ddx);
+        results[ii] = (
+            ((f00*dYhigh + f01*ddy)*dXhigh + (f10*dYhigh + f11*ddy)*ddx));
      }
 }
 

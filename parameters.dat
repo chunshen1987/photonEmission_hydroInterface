@@ -35,7 +35,7 @@ norder = 10                   # calculate photon vn to norder
 T_dec = 0.105                 # freeze out temperature (GeV)
 T_sw_high = 0.180             # high end of the switching temperature
 T_sw_low = 0.1795             # low end of the switching temperature
-T_cuthigh = 1.0               # maximum allowed emission T (GeV)
+T_cuthigh = 0.80              # maximum allowed emission T (GeV)
 T_cutlow = 0.10               # minimum allowed emission T (GeV)
 
 calHGIdFlag = 0               # Flag to decide whether to calculate individual HG channels
