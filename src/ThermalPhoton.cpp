@@ -307,6 +307,18 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
     }
 }
 
+void ThermalPhoton::analyticRates(double T, vector<double> &Eq, vector<double> &eqrate_ptr) {
+  double T2 = T*T;
+  double T3 = T*T*T;
+  for (int i = 0; i < Eq.size(); i++) {
+      double Eq_local = Eq[i];
+      double aT = -31.21 + 353.61*T - 1739.4*T2 + 3105*T3; 
+      double bT = -5.513 - 42.2*T + 333*T2 + -570*T3;
+      double cT = -6.153 + 57*T - 134.61*T2 + 8.31*T3;
+      double R = exp(aT*Eq_local + bT + cT/(Eq_local + 0.2));
+      eqrate_ptr[i] = R;
+  }
+}
 
 void ThermalPhoton::getPhotonemissionRate(
     vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
@@ -314,8 +326,9 @@ void ThermalPhoton::getPhotonemissionRate(
     vector<double> &eqrate_ptr, vector<double> &visrate_ptr,
     vector<double> &bulkvis_ptr) {
     //interpolate equilibrium rate
-    interpolation2D_bilinear(T, Eq, Eq_length, Emission_eqrateTb_ptr,
-                             eqrate_ptr);
+    //interpolation2D_bilinear(T, Eq, Eq_length, Emission_eqrateTb_ptr,
+    //                         eqrate_ptr);
+    analyticRates(T, Eq, eqrate_ptr);
     //interpolate viscous rate
     interpolation2D_bilinear(T, Eq, Eq_length, Emission_viscous_rateTb_ptr,
                              visrate_ptr);
