@@ -315,8 +315,9 @@ void ThermalPhoton::analyticRates(double T, vector<double> &Eq, vector<double> &
       double aT = -31.21 + 353.61*T - 1739.4*T2 + 3105*T3; 
       double bT = -5.513 - 42.2*T + 333*T2 + -570*T3;
       double cT = -6.153 + 57*T - 134.61*T2 + 8.31*T3;
-      double R = exp(aT*Eq_local + bT + cT/(Eq_local + 0.2));
-      eqrate_ptr[i] = R;
+      //double R = exp(aT*Eq_local + bT + cT/(Eq_local + 0.2));
+      double logR = aT*Eq_local + bT + cT/(Eq_local + 0.2);   // log(R_0)
+      eqrate_ptr[i] = logR;
   }
 }
 
