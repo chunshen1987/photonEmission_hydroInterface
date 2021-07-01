@@ -131,7 +131,7 @@ class ThermalPhoton {
         return(dNd2pTdphidy_tot[i][j][k]);
     }
 
-    void analyticRates(double T, double muB, std::vector<double> &Eq, std::vector<double> &eqrate_ptr);
+    virtual void analyticRates(double T, double muB, std::vector<double> &Eq, std::vector<double> &eqrate_ptr);
     void getPhotonemissionRate(std::vector<double> &Eq,
                                std::vector<double> &pi_zz,
                                std::vector<double> &bulkPi,

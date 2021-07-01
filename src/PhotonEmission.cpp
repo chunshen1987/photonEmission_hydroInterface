@@ -8,6 +8,7 @@
 
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
+#include "HadronGasRhoSpectralFunction.h"
 #include "tensor_trans.h"
 #include "PhotonEmission.h"
 #include "ParameterReader.h"
@@ -160,7 +161,8 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     photon_HG_meson->setupEmissionrate(
         "HG_2to2_meson_total", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
-    photon_HG_rho_spectralfun = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
+    //photon_HG_rho_spectralfun = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
+    photon_HG_rho_spectralfun = std::unique_ptr<ThermalPhoton>(new HadronGasRhoSpectralFunction(paraRdr));
     photon_HG_rho_spectralfun->setupEmissionrate(
         "HG_rho_spectralfun", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);

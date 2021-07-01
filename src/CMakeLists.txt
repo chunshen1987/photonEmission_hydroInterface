@@ -8,6 +8,7 @@ set (SOURCES
      tensor_trans.cpp
      gauss_quadrature.cpp
      Hydroinfo_MUSIC.cpp
+     HadronGasRhoSpectralFunction.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})
