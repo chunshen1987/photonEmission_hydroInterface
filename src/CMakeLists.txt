@@ -9,6 +9,7 @@ set (SOURCES
      gauss_quadrature.cpp
      Hydroinfo_MUSIC.cpp
      HadronGasRhoSpectralFunction.cpp
+     HadronGasPipiBremsstrahlung.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})

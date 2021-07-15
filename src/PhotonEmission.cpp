@@ -9,6 +9,7 @@
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
 #include "HadronGasRhoSpectralFunction.h"
+#include "HadronGasPipiBremsstrahlung.h"
 #include "tensor_trans.h"
 #include "PhotonEmission.h"
 #include "ParameterReader.h"
@@ -170,7 +171,8 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     photon_HG_omega->setupEmissionrate(
         "HG_omega", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
-    photon_HG_pipiBremsstrahlung = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
+    //photon_HG_pipiBremsstrahlung = std::unique_ptr<ThermalPhoton>(new ThermalPhoton(paraRdr));
+    photon_HG_pipiBremsstrahlung = std::unique_ptr<ThermalPhoton>(new HadronGasPipiBremsstrahlung(paraRdr));
     photon_HG_pipiBremsstrahlung->setupEmissionrate(
         "HG_pipi_bremsstrahlung", photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE);
