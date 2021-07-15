@@ -25,15 +25,21 @@ using ARSENAL::deleteA2DMatrix;
 using ARSENAL::deleteA3DMatrix;
 using ARSENAL::deleteA5DMatrix;
 
-ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
+ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
+                             std::string emissionProcess) {
     paraRdr = paraRdr_in;
+    emissionProcess_name = emissionProcess;
 
     neta = paraRdr->getVal("neta");
     np = paraRdr->getVal("np");
     nphi = paraRdr->getVal("nphi");
     nrapidity = paraRdr->getVal("nrapidity");
     norder = paraRdr->getVal("norder");
-    rate_path = "ph_rates/";
+    rate_path_ = "ph_rates/";
+
+    bRateTable_    = false;
+    bShearVisCorr_ = false;
+    bBulkVisCorr_  = false;
 
     //initial variables for photon spectra 
     double p_i = paraRdr->getVal("photon_q_i"); 
@@ -174,10 +180,16 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
 
 
 ThermalPhoton::~ThermalPhoton() {
-    int TbsizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
-    deleteA2DMatrix(Emission_eqrateTb_ptr, TbsizeX);
-    deleteA2DMatrix(Emission_viscous_rateTb_ptr, TbsizeX);
-    deleteA2DMatrix(Emission_bulkvis_rateTb_ptr, TbsizeX);
+    if (bRateTable_) {
+        int TbsizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
+        deleteA2DMatrix(Emission_eqrateTb_ptr, TbsizeX);
+        if (bShearVisCorr_) {
+            deleteA2DMatrix(Emission_viscous_rateTb_ptr, TbsizeX);
+        }
+        if (bBulkVisCorr_) {
+            deleteA2DMatrix(Emission_bulkvis_rateTb_ptr, TbsizeX);
+        }
+    }
 
     delete [] p;
     delete [] p_weight;
@@ -248,89 +260,121 @@ ThermalPhoton::~ThermalPhoton() {
     }
 }
 
-void ThermalPhoton::setupEmissionrate(string emissionProcess,
-                                      double Xmin, double dX,
-                                      double Ymin, double dY) {
-     EmissionrateTb_Xmin = Xmin;
-     EmissionrateTb_Ymin = Ymin;
-     EmissionrateTb_dX = dX;
-     EmissionrateTb_dY = dY;
-     readEmissionrate(emissionProcess);
+void ThermalPhoton::setupEmissionrate(double Xmin, double dX,
+                                      double Ymin, double dY,
+                                      bool bShearVisCorr, bool bBulkVisCorr) {
+    bRateTable_    = true;
+    bShearVisCorr_ = bBulkVisCorr;
+    bBulkVisCorr_  = bBulkVisCorr;
+    EmissionrateTb_Xmin = Xmin;
+    EmissionrateTb_Ymin = Ymin;
+    EmissionrateTb_dX = dX;
+    EmissionrateTb_dY = dY;
+    readEmissionrate(emissionProcess_name);
 }
 
 
 void ThermalPhoton::readEmissionrate(string emissionProcess) {
-    emissionProcess_name = emissionProcess;
     ostringstream eqrate_filename_stream;
-    ostringstream visrate_filename_stream;
-    ostringstream bulkvisrate_filename_stream;
-    eqrate_filename_stream << rate_path << "rate_"
+    eqrate_filename_stream << rate_path_ << "rate_"
                            << emissionProcess << "_eqrate.dat";
-    visrate_filename_stream << rate_path << "rate_"
-                            << emissionProcess << "_viscous.dat";
-    bulkvisrate_filename_stream << rate_path << "rate_"
-                                << emissionProcess << "_bulkvis.dat";
     Photonemission_eqrateTable_ptr = std::unique_ptr<Table2D>(
                         new Table2D(eqrate_filename_stream.str().c_str()));
-    Photonemission_viscous_rateTable_ptr = std::unique_ptr<Table2D>(
-                        new Table2D(visrate_filename_stream.str().c_str()));
-    Photonemission_bulkvis_rateTable_ptr = std::unique_ptr<Table2D>(
-                        new Table2D(bulkvisrate_filename_stream.str().c_str()));
-
     EmissionrateTb_sizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
     EmissionrateTb_sizeY = Photonemission_eqrateTable_ptr->getTbsizeY();
     Emission_eqrateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
                                             EmissionrateTb_sizeY, 0);
-    Emission_viscous_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
-                                                  EmissionrateTb_sizeY, 0);
-    Emission_bulkvis_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
-                                                  EmissionrateTb_sizeY, 0);
+
+    if (bShearVisCorr_) {
+        ostringstream visrate_filename_stream;
+        visrate_filename_stream << rate_path_ << "rate_"
+                                << emissionProcess << "_viscous.dat";
+        Photonemission_viscous_rateTable_ptr = std::unique_ptr<Table2D>(
+                    new Table2D(visrate_filename_stream.str().c_str()));
+        Emission_viscous_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                                      EmissionrateTb_sizeY, 0);
+    }
+    if (bBulkVisCorr_) {
+        ostringstream bulkvisrate_filename_stream;
+        bulkvisrate_filename_stream << rate_path_ << "rate_"
+                                    << emissionProcess << "_bulkvis.dat";
+        Photonemission_bulkvis_rateTable_ptr = std::unique_ptr<Table2D>(
+                    new Table2D(bulkvisrate_filename_stream.str().c_str()));
+        Emission_bulkvis_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                                      EmissionrateTb_sizeY, 0);
+    }
 
     EmissionrateTb_Yidxptr.resize(EmissionrateTb_sizeY, 0);
     for (int i = 0; i < EmissionrateTb_sizeY; i++)
         EmissionrateTb_Yidxptr[i] = EmissionrateTb_Ymin + i*EmissionrateTb_dY;
 
     // take log for the equilibrium emission rates for better
-    // interpolation precisions; 
+    // interpolation precisions;
     // take ratio of viscous rates w.r.t eq. rates for faster performance
-    for (int i=0; i<EmissionrateTb_sizeX; i++) {
-        for (int j=0; j<EmissionrateTb_sizeY; j++) {
+    for (int i = 0; i < EmissionrateTb_sizeX; i++) {
+        for (int j = 0; j < EmissionrateTb_sizeY; j++) {
             Emission_eqrateTb_ptr[i][j] =
                 log(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30);
-            Emission_viscous_rateTb_ptr[i][j] = (
-                Photonemission_viscous_rateTable_ptr->getTbdata(i,j)
-                /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
-            Emission_bulkvis_rateTb_ptr[i][j] = (
-                Photonemission_bulkvis_rateTable_ptr->getTbdata(i,j)
-                /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
+            if (bShearVisCorr_) {
+                Emission_viscous_rateTb_ptr[i][j] = (
+                    Photonemission_viscous_rateTable_ptr->getTbdata(i,j)
+                    /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
+            }
+            if (bBulkVisCorr_) {
+                Emission_bulkvis_rateTb_ptr[i][j] = (
+                    Photonemission_bulkvis_rateTable_ptr->getTbdata(i,j)
+                    /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
+            }
         }
     }
 }
 
 
-void ThermalPhoton::analyticRates(double T, double muB, vector<double> &Eq, vector<double> &eqrate_ptr) {
-    for (int i = 0; i < Eq.size(); i++) {
+void ThermalPhoton::analyticRates(double T, double muB, vector<double> &Eq,
+                                  std::vector<double> &eqrate_ptr) {
+    for (unsigned int i = 0; i < Eq.size(); i++) {
         eqrate_ptr[i] = -30.;
     }
 }
 
+
 void ThermalPhoton::getPhotonemissionRate(
     vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
-    int Eq_length, double T,
+    const double T, const double muB,
     vector<double> &eqrate_ptr, vector<double> &visrate_ptr,
     vector<double> &bulkvis_ptr) {
-    //interpolate equilibrium rate
-    //interpolation2D_bilinear(T, Eq, Eq_length, Emission_eqrateTb_ptr,
-    //                         eqrate_ptr);
-    analyticRates(T, 0.1, Eq, eqrate_ptr);
-    //interpolate viscous rate
-    interpolation2D_bilinear(T, Eq, Eq_length, Emission_viscous_rateTb_ptr,
-                             visrate_ptr);
-    //interpolate bulk viscous rate
-    interpolation2D_bilinear(T, Eq, Eq_length, Emission_bulkvis_rateTb_ptr,
-                             bulkvis_ptr);
-    for (int i=0; i<Eq_length; i++) {
-        eqrate_ptr[i] = exp(eqrate_ptr[i]);
+
+    if (bRateTable_) {
+        // interpolate equilibrium rate
+        interpolation2D_bilinear(T, Eq, Emission_eqrateTb_ptr,
+                                 eqrate_ptr);
+    } else {
+        analyticRates(T, muB, Eq, eqrate_ptr);
+    }
+
+    if (bShearVisCorr_) {
+        if (bRateTable_) {
+            // interpolate viscous rate
+            interpolation2D_bilinear(T, Eq, Emission_viscous_rateTb_ptr,
+                                     visrate_ptr);
+        }
+    } else {
+        for (unsigned int i = 0; i < visrate_ptr.size(); i++)
+            visrate_ptr[i] = 0.;
+    }
+    if (bBulkVisCorr_) {
+        if (bRateTable_) {
+            // interpolate bulk viscous rate
+            interpolation2D_bilinear(T, Eq, Emission_bulkvis_rateTb_ptr,
+                                     bulkvis_ptr);
+        }
+    } else {
+        for (unsigned int i = 0; i < bulkvis_ptr.size(); i++)
+            bulkvis_ptr[i] = 0.;
+    }
+
+    for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
+        eqrate_ptr[i]  = exp(eqrate_ptr[i]);
         visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i];
         bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i];
     }
@@ -400,7 +444,7 @@ void ThermalPhoton::calThermalPhotonemission(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
@@ -465,7 +509,7 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
@@ -516,7 +560,7 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     double eps = 1e-15;
@@ -556,7 +600,7 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau(
     vector<double> em_visrate(Tb_length, 0);
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
@@ -608,7 +652,7 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
     vector<double> em_visrate(Tb_length, 0);
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     double eps = 1e-15;
@@ -1466,8 +1510,9 @@ void ThermalPhoton::outputPhoton_SpvnpTdxperpdtau(string path) {
 //! this function is used the most frequent one,
 //! it needs to be as fast as possible
 void ThermalPhoton::interpolation2D_bilinear(
-        double varX, vector<double> &varY, int Y_length,
+        double varX, vector<double> &varY,
         double** Table2D_ptr, vector<double> &results) {
+    const int Y_length = varY.size();
     double varX_min = EmissionrateTb_Xmin;
     double varY_min = EmissionrateTb_Ymin;
     double dX = EmissionrateTb_dX;
