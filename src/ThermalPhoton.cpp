@@ -274,7 +274,7 @@ void ThermalPhoton::setupEmissionrateFromFile(
         double Xmin, double dX, double Ymin, double dY,
         bool bShearVisCorr, bool bBulkVisCorr) {
     bRateTable_    = true;
-    bShearVisCorr_ = bBulkVisCorr;
+    bShearVisCorr_ = bShearVisCorr;
     bBulkVisCorr_  = bBulkVisCorr;
     EmissionrateTb_Xmin = Xmin;
     EmissionrateTb_Ymin = Ymin;
