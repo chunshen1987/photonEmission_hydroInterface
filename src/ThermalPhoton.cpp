@@ -288,8 +288,6 @@ void ThermalPhoton::setupEmissionrateFromParametrization(
         double Xmin, double dX, int nX,
         double Ymin, double dY, int nY) {
     bRateTable_    = true;
-    bShearVisCorr_ = false;
-    bBulkVisCorr_  = false;
     EmissionrateTb_Xmin = Xmin;
     EmissionrateTb_Ymin = Ymin;
     EmissionrateTb_dX = dX;
