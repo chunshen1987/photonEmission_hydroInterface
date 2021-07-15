@@ -39,7 +39,7 @@ void HadronGasPiRhoOmega::analyticRates(
     for (unsigned int i = 0; i < Eq.size(); i++) {
         double q0 = Eq[i];
         // pi+rho->gamma+omega
-        double FFpiro = exp(a1*q0 +a2+a3*pow(q0,a4)+a5*pow((q0+a6),a7));
+        double FFpiro = exp(a1*q0+a2+a3*pow(q0,a4)+a5*pow((q0+a6),a7));
         // rho+omega->gamma+pi
         double FFomro = exp(b1*q0+b2+b3/(q0+0.2)+b4/pow((q0+0.2),2));
         // pi+omega->gamma+rho

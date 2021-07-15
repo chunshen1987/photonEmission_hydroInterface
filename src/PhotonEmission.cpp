@@ -168,11 +168,11 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
         photonrate_tb_Emin, photonrate_tb_dE, true, true);
     photon_HG_rho_spectralfun = std::unique_ptr<ThermalPhoton>(
             new HadronGasRhoSpectralFunction(paraRdr, "HG_rho_spectralfun"));
-    photon_HG_omega = std::unique_ptr<ThermalPhoton>(
-            new HadronGasPiRhoOmega(paraRdr, "HG_omega"));
     photon_HG_pipiBremsstrahlung = std::unique_ptr<ThermalPhoton>(
             new HadronGasPipiBremsstrahlung(paraRdr, "HG_pipi_bremsstrahlung"));
-    photon_HG_pipiBremsstrahlung->setupEmissionrateFromParametrization(
+    photon_HG_omega = std::unique_ptr<ThermalPhoton>(
+            new HadronGasPiRhoOmega(paraRdr, "HG_omega"));
+    photon_HG_omega->setupEmissionrateFromParametrization(
         photonrate_tb_Tmin, photonrate_tb_dT, 76,
         photonrate_tb_Emin, photonrate_tb_dE, 81);
 
