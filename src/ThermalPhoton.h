@@ -117,9 +117,14 @@ class ThermalPhoton {
 
     virtual ~ThermalPhoton();
 
-    void setupEmissionrate(double Xmin, double dX, double Ymin, double dY,
-                           bool bShearVisCorr, bool bBulkVisCorr);
+    void setupEmissionrateFromFile(
+            double Xmin, double dX, double Ymin, double dY,
+            bool bShearVisCorr, bool bBulkVisCorr);
     void readEmissionrate(std::string);
+
+    void setupEmissionrateFromParametrization(
+        double Xmin, double dX, int nX,
+        double Ymin, double dY, int nY);
 
     double get_dy() {return(dy);}
 

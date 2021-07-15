@@ -117,37 +117,39 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
     int diff_flag = paraRdr->getVal("differential_flag");
 
     if (diff_flag == 1 or diff_flag > 10) {
-       nTcut = paraRdr->getVal("nTcut");
-       nTaucut = paraRdr->getVal("nTaucut");
+        nTcut = paraRdr->getVal("nTcut");
+        nTaucut = paraRdr->getVal("nTaucut");
 
-       Tcut_high = paraRdr->getVal("T_cuthigh");
-       Tcut_low = paraRdr->getVal("T_cutlow");
-       Taucut_high = paraRdr->getVal("tau_end");
-       Taucut_low = paraRdr->getVal("tau_start");
+        Tcut_high = paraRdr->getVal("T_cuthigh");
+        Tcut_low = paraRdr->getVal("T_cutlow");
+        Taucut_high = paraRdr->getVal("tau_end");
+        Taucut_low = paraRdr->getVal("tau_start");
 
-       dNd2pTdphidydTdtau_eq = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydTdtau_vis = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydTdtau_bulkvis = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydTdtau_tot = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
+        dNd2pTdphidydTdtau_eq = createA5DMatrix(
+                    nTcut, nTaucut, np, nphi, nrapidity, 0.);
+        dNd2pTdphidydTdtau_vis = createA5DMatrix(
+                    nTcut, nTaucut, np, nphi, nrapidity, 0.);
+        dNd2pTdphidydTdtau_bulkvis = createA5DMatrix(
+                    nTcut, nTaucut, np, nphi, nrapidity, 0.);
+        dNd2pTdphidydTdtau_tot = createA5DMatrix(
+                    nTcut, nTaucut, np, nphi, nrapidity, 0.);
 
-       dNdydTdtau_eq = createA2DMatrix(nTcut, nTaucut, 0.);
-       dNdydTdtau_vis = createA2DMatrix(nTcut, nTaucut, 0.);
-       dNdydTdtau_bulkvis = createA2DMatrix(nTcut, nTaucut, 0.);
-       dNdydTdtau_tot = createA2DMatrix(nTcut, nTaucut, 0.);
+        dNdydTdtau_eq = createA2DMatrix(nTcut, nTaucut, 0.);
+        dNdydTdtau_vis = createA2DMatrix(nTcut, nTaucut, 0.);
+        dNdydTdtau_bulkvis = createA2DMatrix(nTcut, nTaucut, 0.);
+        dNdydTdtau_tot = createA2DMatrix(nTcut, nTaucut, 0.);
 
-       vndTdtau_cos_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_sin_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_cos_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_sin_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_cos_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_sin_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_cos_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_sin_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-
+        vndTdtau_cos_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_sin_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_cos_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_sin_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_cos_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_sin_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_cos_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_sin_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
     }
 
-    if(diff_flag == 2 or diff_flag > 10)
-    {
+    if (diff_flag == 2 or diff_flag > 10) {
        n_xperp_cut = paraRdr->getVal("n_xperp_cut");
        n_tau_cut_xtau = paraRdr->getVal("nTaucut");
 
@@ -156,10 +158,14 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
        tau_cut_high = paraRdr->getVal("tau_end");
        tau_cut_low = paraRdr->getVal("tau_start");
 
-       dNd2pTdphidydxperpdtau_eq = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydxperpdtau_vis = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydxperpdtau_bulkvis = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydxperpdtau_tot = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_eq = createA5DMatrix(
+               n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_vis = createA5DMatrix(
+               n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_bulkvis = createA5DMatrix(
+               n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_tot = createA5DMatrix(
+               n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
 
        dNdydxperpdtau_eq = createA2DMatrix(n_xperp_cut, n_tau_cut_xtau, 0.);
        dNdydxperpdtau_vis = createA2DMatrix(n_xperp_cut, n_tau_cut_xtau, 0.);
@@ -174,14 +180,13 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
        vndxperpdtau_sin_bulkvis = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
        vndxperpdtau_cos_tot = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
        vndxperpdtau_sin_tot = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-
     }
 }
 
 
 ThermalPhoton::~ThermalPhoton() {
     if (bRateTable_) {
-        int TbsizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
+        int TbsizeX = EmissionrateTb_sizeX;
         deleteA2DMatrix(Emission_eqrateTb_ptr, TbsizeX);
         if (bShearVisCorr_) {
             deleteA2DMatrix(Emission_viscous_rateTb_ptr, TbsizeX);
@@ -238,7 +243,7 @@ ThermalPhoton::~ThermalPhoton() {
         deleteA5DMatrix(dNd2pTdphidydTdtau_tot, nTcut, nTaucut, np, nphi);
     }
 
-    if(diff_flag == 2 or diff_flag > 10) {
+    if (diff_flag == 2 or diff_flag > 10) {
         deleteA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut);
         deleteA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut);
         deleteA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut);
@@ -253,16 +258,21 @@ ThermalPhoton::~ThermalPhoton() {
         deleteA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau);
         deleteA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau);
 
-        deleteA5DMatrix(dNd2pTdphidydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-        deleteA5DMatrix(dNd2pTdphidydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-        deleteA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-        deleteA5DMatrix(dNd2pTdphidydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_eq,
+                        n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_vis,
+                        n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis,
+                        n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_tot,
+                        n_xperp_cut, n_tau_cut_xtau, np, nphi);
     }
 }
 
-void ThermalPhoton::setupEmissionrate(double Xmin, double dX,
-                                      double Ymin, double dY,
-                                      bool bShearVisCorr, bool bBulkVisCorr) {
+
+void ThermalPhoton::setupEmissionrateFromFile(
+        double Xmin, double dX, double Ymin, double dY,
+        bool bShearVisCorr, bool bBulkVisCorr) {
     bRateTable_    = true;
     bShearVisCorr_ = bBulkVisCorr;
     bBulkVisCorr_  = bBulkVisCorr;
@@ -271,6 +281,37 @@ void ThermalPhoton::setupEmissionrate(double Xmin, double dX,
     EmissionrateTb_dX = dX;
     EmissionrateTb_dY = dY;
     readEmissionrate(emissionProcess_name);
+}
+
+
+void ThermalPhoton::setupEmissionrateFromParametrization(
+        double Xmin, double dX, int nX,
+        double Ymin, double dY, int nY) {
+    bRateTable_    = true;
+    bShearVisCorr_ = false;
+    bBulkVisCorr_  = false;
+    EmissionrateTb_Xmin = Xmin;
+    EmissionrateTb_Ymin = Ymin;
+    EmissionrateTb_dX = dX;
+    EmissionrateTb_dY = dY;
+    EmissionrateTb_sizeX = nX;
+    EmissionrateTb_sizeY = nY;
+
+    Emission_eqrateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                            EmissionrateTb_sizeY, 0);
+    EmissionrateTb_Yidxptr.resize(nY, 0);
+    for (int i = 0; i < nY; i++) {
+        EmissionrateTb_Yidxptr[i] = Ymin + i*dY;
+    }
+
+    std::vector<double> eqRates(nY, 0.);
+    for (int i = 0; i < nX; i++) {
+        double T = Xmin + i*dX;
+        analyticRates(T, 0., EmissionrateTb_Yidxptr, eqRates);
+        for (int j = 0; j < nY; j++) {
+            Emission_eqrateTb_ptr[i][j] = eqRates[j];
+        }
+    }
 }
 
 
@@ -1576,14 +1617,14 @@ void ThermalPhoton::interpolation2D_bilinear(
 
 
 void ThermalPhoton::update_rates_with_polyakov_suppression() {
-     for(int i=0; i<EmissionrateTb_sizeX; i++)
-     {
-         double T_local = EmissionrateTb_Xmin + i*EmissionrateTb_dX;
-         double suppression_factor = get_polyakov_suppression_factor(T_local);
-         for(int j=0; j<EmissionrateTb_sizeY; j++)
-         {
-             Emission_eqrateTb_ptr[i][j] += log(suppression_factor);
-         }
+    if (bRateTable_) {
+        for (int i = 0; i < EmissionrateTb_sizeX; i++) {
+            double T_local = EmissionrateTb_Xmin + i*EmissionrateTb_dX;
+            double suppression_factor = get_polyakov_suppression_factor(T_local);
+            for (int j = 0; j < EmissionrateTb_sizeY; j++) {
+                Emission_eqrateTb_ptr[i][j] += log(suppression_factor);
+            }
+        }
     }
 }
 

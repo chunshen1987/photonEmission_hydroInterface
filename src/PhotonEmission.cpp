@@ -148,12 +148,12 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
 
     photon_QGP_2_to_2 = std::unique_ptr<ThermalPhoton>(
             new ThermalPhoton(paraRdr, "QGP_2to2_total"));
-    photon_QGP_2_to_2->setupEmissionrate(
+    photon_QGP_2_to_2->setupEmissionrateFromFile(
         photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE, true, true);
     photon_QGP_collinear = std::unique_ptr<ThermalPhoton>(
             new ThermalPhoton(paraRdr, "QGP_AMYcollinear"));
-    photon_QGP_collinear->setupEmissionrate(
+    photon_QGP_collinear->setupEmissionrateFromFile(
         photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE, false, false);
     if (paraRdr->getVal("enable_polyakov_suppression") == 1) {
@@ -162,58 +162,62 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
     }
     photon_HG_meson = std::unique_ptr<ThermalPhoton>(
             new ThermalPhoton(paraRdr, "HG_2to2_meson_total"));
-    photon_HG_meson->setupEmissionrate(
+    photon_HG_meson->setupEmissionrateFromFile(
         photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE, true, true);
     photon_HG_rho_spectralfun = std::unique_ptr<ThermalPhoton>(
             new HadronGasRhoSpectralFunction(paraRdr, "HG_rho_spectralfun"));
     photon_HG_omega = std::unique_ptr<ThermalPhoton>(
             new ThermalPhoton(paraRdr, "HG_omega"));
-    photon_HG_omega->setupEmissionrate(
+    photon_HG_omega->setupEmissionrateFromFile(
         photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE, false, false);
     photon_HG_pipiBremsstrahlung = std::unique_ptr<ThermalPhoton>(
             new HadronGasPipiBremsstrahlung(paraRdr, "HG_pipi_bremsstrahlung"));
+    photon_HG_pipiBremsstrahlung->setupEmissionrateFromParametrization(
+        photonrate_tb_Tmin, photonrate_tb_dT, 76,
+        photonrate_tb_Emin, photonrate_tb_dE, 81);
+
 
     if (calHGIdFlag == 1) {
         photon_pirho = std::unique_ptr<ThermalPhoton>(
                 new ThermalPhoton(paraRdr, "pion_rho_to_pion_gamma"));
-        photon_pirho->setupEmissionrate(
+        photon_pirho->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT,
             photonrate_tb_Emin, photonrate_tb_dE, true, true);
         photon_KstarK = std::unique_ptr<ThermalPhoton>(
                 new ThermalPhoton(paraRdr, "K_Kstar_to_pion_gamma"));
-        photon_KstarK->setupEmissionrate(
+        photon_KstarK->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT,
             photonrate_tb_Emin, photonrate_tb_dE, true, true);
         photon_piK = std::unique_ptr<ThermalPhoton>(
                 new ThermalPhoton(paraRdr, "pion_Kstar_to_K_gamma"));
-        photon_piK->setupEmissionrate(
+        photon_piK->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT,
             photonrate_tb_Emin, photonrate_tb_dE, true, true);
         photon_piKstar = std::unique_ptr<ThermalPhoton>(
                 new ThermalPhoton(paraRdr, "pion_Kstar_to_K_gamma"));
-        photon_piKstar->setupEmissionrate(
+        photon_piKstar->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT,
             photonrate_tb_Emin, photonrate_tb_dE, true, true);
         photon_pipi = std::unique_ptr<ThermalPhoton>(
                 new ThermalPhoton(paraRdr, "pion_pion_to_rho_gamma"));
-        photon_pipi->setupEmissionrate(
+        photon_pipi->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT,
             photonrate_tb_Emin, photonrate_tb_dE, true, true);
         photon_rhoK = std::unique_ptr<ThermalPhoton>(
                 new ThermalPhoton(paraRdr, "rho_K_to_K_gamma"));
-        photon_rhoK->setupEmissionrate(
+        photon_rhoK->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT,
             photonrate_tb_Emin, photonrate_tb_dE, true, true);
         photon_rho = std::unique_ptr<ThermalPhoton>(
                 new ThermalPhoton(paraRdr, "rho_to_pion_pion_gamma"));
-        photon_rho->setupEmissionrate(
+        photon_rho->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT,
             photonrate_tb_Emin, photonrate_tb_dE, true, true);
         photon_pirho_omegat = std::unique_ptr<ThermalPhoton>(
                 new ThermalPhoton(paraRdr, "pion_rho_to_omega_to_pion_gamma"));
-        photon_pirho_omegat->setupEmissionrate(
+        photon_pirho_omegat->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT,
             photonrate_tb_Emin, photonrate_tb_dE, true, true);
     }
