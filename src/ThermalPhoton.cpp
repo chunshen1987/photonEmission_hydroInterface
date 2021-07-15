@@ -309,7 +309,7 @@ void ThermalPhoton::setupEmissionrateFromParametrization(
         double T = Xmin + i*dX;
         analyticRates(T, 0., EmissionrateTb_Yidxptr, eqRates);
         for (int j = 0; j < nY; j++) {
-            Emission_eqrateTb_ptr[i][j] = eqRates[j];
+            Emission_eqrateTb_ptr[i][j] = log(eqRates[j]);
         }
     }
 }
@@ -374,7 +374,7 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
 void ThermalPhoton::analyticRates(double T, double muB, vector<double> &Eq,
                                   std::vector<double> &eqrate_ptr) {
     for (unsigned int i = 0; i < Eq.size(); i++) {
-        eqrate_ptr[i] = -30.;
+        eqrate_ptr[i] = 1e-16;
     }
 }
 
@@ -414,10 +414,12 @@ void ThermalPhoton::getPhotonemissionRate(
             bulkvis_ptr[i] = 0.;
     }
 
-    for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
-        eqrate_ptr[i]  = exp(eqrate_ptr[i]);
-        visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i];
-        bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i];
+    if (bRateTable_) {
+        for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
+            eqrate_ptr[i]  = exp(eqrate_ptr[i]);
+            visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i];
+            bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i];
+        }
     }
 }
 
