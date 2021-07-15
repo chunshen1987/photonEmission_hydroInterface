@@ -12,7 +12,7 @@ class HadronGasPipiBremsstrahlung : public ThermalPhoton {
     HadronGasPipiBremsstrahlung(std::shared_ptr<ParameterReader> paraRdr_in,
                                 std::string emissionProcess);
     ~HadronGasPipiBremsstrahlung() {}
-    void analyticRates(double T, double muB, std::vector<double> &Eq,
+    void analyticRates(double T, std::vector<double> &Eq,
                         std::vector<double> &eqrate_ptr);
 };
 

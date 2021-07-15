@@ -8,19 +8,37 @@ HadronGasRhoSpectralFunction::HadronGasRhoSpectralFunction(
 
 
 void HadronGasRhoSpectralFunction::analyticRates(
-        double T, double muB, std::vector<double> &Eq,
+        double T, std::vector<double> &Eq,
         std::vector<double> &eqrate_ptr) {
     // parameterization taken from e-Print: 1411.7012 [hep-ph]
+    double T2 = T*T;
+    double T3 = T2*T;
+
+    double aT = -31.21 + 353.61*T - 1739.4*T2 + 3105*T3; 
+    double bT = -5.513 - 42.2*T + 333*T2 + -570*T3;
+    double cT = -6.153 + 57*T - 134.61*T2 + 8.31*T3;
+
+    for (unsigned int i = 0; i < Eq.size(); i++) {
+        double Eq_local = Eq[i];
+        double logR = aT*Eq_local + bT + cT/(Eq_local + 0.2);   // log(R_0)
+        eqrate_ptr[i] = exp(logR);
+    }
+}
+
+
+void HadronGasRhoSpectralFunction::NetBaryonCorrection(
+        double T, double muB, std::vector<double> &Eq,
+        std::vector<double> &eqrate_ptr) {
+
+    if (std::abs(muB) < 1e-8)
+        return;
+
     double T2 = T*T;
     double T3 = T2*T;
     double T4 = T3*T;
     double T5 = T4*T;
     double muB2 = muB*muB;
     double muB3 = muB2*muB;
-
-    double aT = -31.21 + 353.61*T - 1739.4*T2 + 3105*T3; 
-    double bT = -5.513 - 42.2*T + 333*T2 + -570*T3;
-    double cT = -6.153 + 57*T - 134.61*T2 + 8.31*T3;
 
     double nT = -0.04 + 2.3*T - 12.8*T2;
     double pT = 23.66 - 354*T + 1175*T2;
@@ -39,12 +57,7 @@ void HadronGasRhoSpectralFunction::analyticRates(
 
     for (unsigned int i = 0; i < Eq.size(); i++) {
         double Eq_local = Eq[i];
-        double logR = aT*Eq_local + bT + cT/(Eq_local + 0.2);   // log(R_0)
-
-        double logFrho = 0.;
-        if (std::abs(muB) > 0) {
-            logFrho = dmT - kmT/(Eq_local*Eq_local) - mmT/Eq_local;
-        }
-        eqrate_ptr[i] = exp(logR + logFrho);
+        double logFrho = dmT - kmT/(Eq_local*Eq_local) - mmT/Eq_local;
+        eqrate_ptr[i] *= exp(logFrho);
     }
 }

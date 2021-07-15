@@ -9,7 +9,7 @@ HadronGasPiRhoOmega::HadronGasPiRhoOmega(
 
 
 void HadronGasPiRhoOmega::analyticRates(
-            double T, double muB, std::vector<double> &Eq,
+            double T, std::vector<double> &Eq,
             std::vector<double> &eqrate_ptr) {
     // parameterization taken from e-Print: 1506.09205 [hep-ph]
     const double T2=T*T;

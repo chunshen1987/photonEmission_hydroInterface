@@ -9,7 +9,7 @@ HadronGasPipiBremsstrahlung::HadronGasPipiBremsstrahlung(
 
 
 void HadronGasPipiBremsstrahlung::analyticRates(
-            double T, double muB, std::vector<double> &Eq,
+            double T, std::vector<double> &Eq,
             std::vector<double> &eqrate_ptr) {
     // parameterization taken from e-Print: 1411.7012 [hep-ph]
     double T2 = T*T;

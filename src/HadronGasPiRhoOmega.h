@@ -12,8 +12,8 @@ class HadronGasPiRhoOmega : public ThermalPhoton {
     HadronGasPiRhoOmega(std::shared_ptr<ParameterReader> paraRdr_in,
                         std::string emissionProcess);
     ~HadronGasPiRhoOmega() {}
-    void analyticRates(double T, double muB, std::vector<double> &Eq,
-                        std::vector<double> &eqrate_ptr);
+    void analyticRates(double T, std::vector<double> &Eq,
+                       std::vector<double> &eqrate_ptr);
 };
 
 #endif

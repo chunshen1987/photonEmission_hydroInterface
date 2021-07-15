@@ -141,8 +141,17 @@ class ThermalPhoton {
         return(dNd2pTdphidy_tot[i][j][k]);
     }
 
-    virtual void analyticRates(double T, double muB, std::vector<double> &Eq,
+    virtual void analyticRates(double T, std::vector<double> &Eq,
                                std::vector<double> &eqrate_ptr);
+    virtual void NetBaryonCorrection(double T, double muB,
+                                     std::vector<double> &Eq,
+                                     std::vector<double> &eqrate_ptr) {}
+
+    virtual void analyticRatesShearVis(double T, std::vector<double> &Eq,
+                                       std::vector<double> &eqrate_ptr);
+    virtual void analyticRatesBulkVis(double T, std::vector<double> &Eq,
+                                      std::vector<double> &eqrate_ptr);
+
     void getPhotonemissionRate(std::vector<double> &Eq,
                                std::vector<double> &pi_zz,
                                std::vector<double> &bulkPi,

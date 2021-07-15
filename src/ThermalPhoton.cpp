@@ -305,7 +305,7 @@ void ThermalPhoton::setupEmissionrateFromParametrization(
     std::vector<double> eqRates(nY, 0.);
     for (int i = 0; i < nX; i++) {
         double T = Xmin + i*dX;
-        analyticRates(T, 0., EmissionrateTb_Yidxptr, eqRates);
+        analyticRates(T, EmissionrateTb_Yidxptr, eqRates);
         for (int j = 0; j < nY; j++) {
             Emission_eqrateTb_ptr[i][j] = log(eqRates[j]);
         }
@@ -369,10 +369,26 @@ void ThermalPhoton::readEmissionrate(string emissionProcess) {
 }
 
 
-void ThermalPhoton::analyticRates(double T, double muB, vector<double> &Eq,
+void ThermalPhoton::analyticRates(double T, vector<double> &Eq,
                                   std::vector<double> &eqrate_ptr) {
     for (unsigned int i = 0; i < Eq.size(); i++) {
         eqrate_ptr[i] = 1e-16;
+    }
+}
+
+
+void ThermalPhoton::analyticRatesShearVis(
+        double T, vector<double> &Eq, std::vector<double> &visrate_ptr) {
+    for (unsigned int i = 0; i < visrate_ptr.size(); i++) {
+        visrate_ptr[i] = 0.;
+    }
+}
+
+
+void ThermalPhoton::analyticRatesBulkVis(
+        double T, vector<double> &Eq, std::vector<double> &bulkvis_ptr) {
+    for (unsigned int i = 0; i < bulkvis_ptr.size(); i++) {
+        bulkvis_ptr[i] = 0.;
     }
 }
 
@@ -387,9 +403,12 @@ void ThermalPhoton::getPhotonemissionRate(
         // interpolate equilibrium rate
         interpolation2D_bilinear(T, Eq, Emission_eqrateTb_ptr,
                                  eqrate_ptr);
+        for (unsigned int i = 0; i < eqrate_ptr.size(); i++)
+            eqrate_ptr[i]  = exp(eqrate_ptr[i]);
     } else {
-        analyticRates(T, muB, Eq, eqrate_ptr);
+        analyticRates(T, Eq, eqrate_ptr);
     }
+    NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
 
     if (bShearVisCorr_) {
         if (bRateTable_) {
@@ -398,8 +417,7 @@ void ThermalPhoton::getPhotonemissionRate(
                                      visrate_ptr);
         }
     } else {
-        for (unsigned int i = 0; i < visrate_ptr.size(); i++)
-            visrate_ptr[i] = 0.;
+        analyticRatesShearVis(T, Eq, visrate_ptr);
     }
     if (bBulkVisCorr_) {
         if (bRateTable_) {
@@ -408,16 +426,12 @@ void ThermalPhoton::getPhotonemissionRate(
                                      bulkvis_ptr);
         }
     } else {
-        for (unsigned int i = 0; i < bulkvis_ptr.size(); i++)
-            bulkvis_ptr[i] = 0.;
+        analyticRatesBulkVis(T, Eq, bulkvis_ptr);
     }
 
-    if (bRateTable_) {
-        for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
-            eqrate_ptr[i]  = exp(eqrate_ptr[i]);
-            visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i];
-            bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i];
-        }
+    for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
+        visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i];
+        bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i];
     }
 }
 
