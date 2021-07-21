@@ -25,15 +25,21 @@ using ARSENAL::deleteA2DMatrix;
 using ARSENAL::deleteA3DMatrix;
 using ARSENAL::deleteA5DMatrix;
 
-ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
+ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
+                             std::string emissionProcess) {
     paraRdr = paraRdr_in;
+    emissionProcess_name = emissionProcess;
 
     neta = paraRdr->getVal("neta");
     np = paraRdr->getVal("np");
     nphi = paraRdr->getVal("nphi");
     nrapidity = paraRdr->getVal("nrapidity");
     norder = paraRdr->getVal("norder");
-    rate_path = "ph_rates/";
+    rate_path_ = "ph_rates/";
+
+    bRateTable_    = false;
+    bShearVisCorr_ = false;
+    bBulkVisCorr_  = false;
 
     //initial variables for photon spectra 
     double p_i = paraRdr->getVal("photon_q_i"); 
@@ -111,37 +117,39 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
     int diff_flag = paraRdr->getVal("differential_flag");
 
     if (diff_flag == 1 or diff_flag > 10) {
-       nTcut = paraRdr->getVal("nTcut");
-       nTaucut = paraRdr->getVal("nTaucut");
+        nTcut = paraRdr->getVal("nTcut");
+        nTaucut = paraRdr->getVal("nTaucut");
 
-       Tcut_high = paraRdr->getVal("T_cuthigh");
-       Tcut_low = paraRdr->getVal("T_cutlow");
-       Taucut_high = paraRdr->getVal("tau_end");
-       Taucut_low = paraRdr->getVal("tau_start");
+        Tcut_high = paraRdr->getVal("T_cuthigh");
+        Tcut_low = paraRdr->getVal("T_cutlow");
+        Taucut_high = paraRdr->getVal("tau_end");
+        Taucut_low = paraRdr->getVal("tau_start");
 
-       dNd2pTdphidydTdtau_eq = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydTdtau_vis = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydTdtau_bulkvis = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydTdtau_tot = createA5DMatrix(nTcut, nTaucut, np, nphi, nrapidity, 0.);
+        dNd2pTdphidydTdtau_eq = createA5DMatrix(
+                    nTcut, nTaucut, np, nphi, nrapidity, 0.);
+        dNd2pTdphidydTdtau_vis = createA5DMatrix(
+                    nTcut, nTaucut, np, nphi, nrapidity, 0.);
+        dNd2pTdphidydTdtau_bulkvis = createA5DMatrix(
+                    nTcut, nTaucut, np, nphi, nrapidity, 0.);
+        dNd2pTdphidydTdtau_tot = createA5DMatrix(
+                    nTcut, nTaucut, np, nphi, nrapidity, 0.);
 
-       dNdydTdtau_eq = createA2DMatrix(nTcut, nTaucut, 0.);
-       dNdydTdtau_vis = createA2DMatrix(nTcut, nTaucut, 0.);
-       dNdydTdtau_bulkvis = createA2DMatrix(nTcut, nTaucut, 0.);
-       dNdydTdtau_tot = createA2DMatrix(nTcut, nTaucut, 0.);
+        dNdydTdtau_eq = createA2DMatrix(nTcut, nTaucut, 0.);
+        dNdydTdtau_vis = createA2DMatrix(nTcut, nTaucut, 0.);
+        dNdydTdtau_bulkvis = createA2DMatrix(nTcut, nTaucut, 0.);
+        dNdydTdtau_tot = createA2DMatrix(nTcut, nTaucut, 0.);
 
-       vndTdtau_cos_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_sin_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_cos_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_sin_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_cos_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_sin_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_cos_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-       vndTdtau_sin_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
-
+        vndTdtau_cos_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_sin_eq = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_cos_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_sin_vis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_cos_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_sin_bulkvis = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_cos_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
+        vndTdtau_sin_tot = createA3DMatrix(nTcut, nTaucut, norder, 0.);
     }
 
-    if(diff_flag == 2 or diff_flag > 10)
-    {
+    if (diff_flag == 2 or diff_flag > 10) {
        n_xperp_cut = paraRdr->getVal("n_xperp_cut");
        n_tau_cut_xtau = paraRdr->getVal("nTaucut");
 
@@ -150,10 +158,14 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        tau_cut_high = paraRdr->getVal("tau_end");
        tau_cut_low = paraRdr->getVal("tau_start");
 
-       dNd2pTdphidydxperpdtau_eq = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydxperpdtau_vis = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydxperpdtau_bulkvis = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
-       dNd2pTdphidydxperpdtau_tot = createA5DMatrix(n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_eq = createA5DMatrix(
+               n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_vis = createA5DMatrix(
+               n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_bulkvis = createA5DMatrix(
+               n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
+       dNd2pTdphidydxperpdtau_tot = createA5DMatrix(
+               n_xperp_cut, n_tau_cut_xtau, np, nphi, nrapidity, 0.);
 
        dNdydxperpdtau_eq = createA2DMatrix(n_xperp_cut, n_tau_cut_xtau, 0.);
        dNdydxperpdtau_vis = createA2DMatrix(n_xperp_cut, n_tau_cut_xtau, 0.);
@@ -168,16 +180,21 @@ ThermalPhoton::ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in) {
        vndxperpdtau_sin_bulkvis = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
        vndxperpdtau_cos_tot = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
        vndxperpdtau_sin_tot = createA3DMatrix(n_xperp_cut, n_tau_cut_xtau, norder, 0.);
-
     }
 }
 
 
 ThermalPhoton::~ThermalPhoton() {
-    int TbsizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
-    deleteA2DMatrix(Emission_eqrateTb_ptr, TbsizeX);
-    deleteA2DMatrix(Emission_viscous_rateTb_ptr, TbsizeX);
-    deleteA2DMatrix(Emission_bulkvis_rateTb_ptr, TbsizeX);
+    if (bRateTable_) {
+        int TbsizeX = EmissionrateTb_sizeX;
+        deleteA2DMatrix(Emission_eqrateTb_ptr, TbsizeX);
+        if (bShearVisCorr_) {
+            deleteA2DMatrix(Emission_viscous_rateTb_ptr, TbsizeX);
+        }
+        if (bBulkVisCorr_) {
+            deleteA2DMatrix(Emission_bulkvis_rateTb_ptr, TbsizeX);
+        }
+    }
 
     delete [] p;
     delete [] p_weight;
@@ -226,7 +243,7 @@ ThermalPhoton::~ThermalPhoton() {
         deleteA5DMatrix(dNd2pTdphidydTdtau_tot, nTcut, nTaucut, np, nphi);
     }
 
-    if(diff_flag == 2 or diff_flag > 10) {
+    if (diff_flag == 2 or diff_flag > 10) {
         deleteA2DMatrix(dNdydxperpdtau_eq, n_xperp_cut);
         deleteA2DMatrix(dNdydxperpdtau_vis, n_xperp_cut);
         deleteA2DMatrix(dNdydxperpdtau_bulkvis, n_xperp_cut);
@@ -241,96 +258,178 @@ ThermalPhoton::~ThermalPhoton() {
         deleteA3DMatrix(vndxperpdtau_cos_tot, n_xperp_cut, n_tau_cut_xtau);
         deleteA3DMatrix(vndxperpdtau_sin_tot, n_xperp_cut, n_tau_cut_xtau);
 
-        deleteA5DMatrix(dNd2pTdphidydxperpdtau_eq, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-        deleteA5DMatrix(dNd2pTdphidydxperpdtau_vis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-        deleteA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis, n_xperp_cut, n_tau_cut_xtau, np, nphi);
-        deleteA5DMatrix(dNd2pTdphidydxperpdtau_tot, n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_eq,
+                        n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_vis,
+                        n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_bulkvis,
+                        n_xperp_cut, n_tau_cut_xtau, np, nphi);
+        deleteA5DMatrix(dNd2pTdphidydxperpdtau_tot,
+                        n_xperp_cut, n_tau_cut_xtau, np, nphi);
     }
 }
 
-void ThermalPhoton::setupEmissionrate(string emissionProcess,
-                                      double Xmin, double dX,
-                                      double Ymin, double dY) {
-     EmissionrateTb_Xmin = Xmin;
-     EmissionrateTb_Ymin = Ymin;
-     EmissionrateTb_dX = dX;
-     EmissionrateTb_dY = dY;
-     readEmissionrate(emissionProcess);
+
+void ThermalPhoton::setupEmissionrateFromFile(
+        double Xmin, double dX, double Ymin, double dY,
+        bool bShearVisCorr, bool bBulkVisCorr) {
+    bRateTable_    = true;
+    bShearVisCorr_ = bShearVisCorr;
+    bBulkVisCorr_  = bBulkVisCorr;
+    EmissionrateTb_Xmin = Xmin;
+    EmissionrateTb_Ymin = Ymin;
+    EmissionrateTb_dX = dX;
+    EmissionrateTb_dY = dY;
+    readEmissionrate(emissionProcess_name);
+}
+
+
+void ThermalPhoton::setupEmissionrateFromParametrization(
+        double Xmin, double dX, int nX,
+        double Ymin, double dY, int nY) {
+    bRateTable_    = true;
+    EmissionrateTb_Xmin = Xmin;
+    EmissionrateTb_Ymin = Ymin;
+    EmissionrateTb_dX = dX;
+    EmissionrateTb_dY = dY;
+    EmissionrateTb_sizeX = nX;
+    EmissionrateTb_sizeY = nY;
+
+    Emission_eqrateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                            EmissionrateTb_sizeY, 0);
+    EmissionrateTb_Yidxptr.resize(nY, 0);
+    for (int i = 0; i < nY; i++) {
+        EmissionrateTb_Yidxptr[i] = Ymin + i*dY;
+    }
+
+    std::vector<double> eqRates(nY, 0.);
+    for (int i = 0; i < nX; i++) {
+        double T = Xmin + i*dX;
+        analyticRates(T, EmissionrateTb_Yidxptr, eqRates);
+        for (int j = 0; j < nY; j++) {
+            Emission_eqrateTb_ptr[i][j] = log(eqRates[j]);
+        }
+    }
 }
 
 
 void ThermalPhoton::readEmissionrate(string emissionProcess) {
-    emissionProcess_name = emissionProcess;
     ostringstream eqrate_filename_stream;
-    ostringstream visrate_filename_stream;
-    ostringstream bulkvisrate_filename_stream;
-    eqrate_filename_stream << rate_path << "rate_"
+    eqrate_filename_stream << rate_path_ << "rate_"
                            << emissionProcess << "_eqrate.dat";
-    visrate_filename_stream << rate_path << "rate_"
-                            << emissionProcess << "_viscous.dat";
-    bulkvisrate_filename_stream << rate_path << "rate_"
-                                << emissionProcess << "_bulkvis.dat";
     Photonemission_eqrateTable_ptr = std::unique_ptr<Table2D>(
                         new Table2D(eqrate_filename_stream.str().c_str()));
-    Photonemission_viscous_rateTable_ptr = std::unique_ptr<Table2D>(
-                        new Table2D(visrate_filename_stream.str().c_str()));
-    Photonemission_bulkvis_rateTable_ptr = std::unique_ptr<Table2D>(
-                        new Table2D(bulkvisrate_filename_stream.str().c_str()));
-
     EmissionrateTb_sizeX = Photonemission_eqrateTable_ptr->getTbsizeX();
     EmissionrateTb_sizeY = Photonemission_eqrateTable_ptr->getTbsizeY();
     Emission_eqrateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
                                             EmissionrateTb_sizeY, 0);
-    Emission_viscous_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
-                                                  EmissionrateTb_sizeY, 0);
-    Emission_bulkvis_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
-                                                  EmissionrateTb_sizeY, 0);
+
+    if (bShearVisCorr_) {
+        ostringstream visrate_filename_stream;
+        visrate_filename_stream << rate_path_ << "rate_"
+                                << emissionProcess << "_viscous.dat";
+        Photonemission_viscous_rateTable_ptr = std::unique_ptr<Table2D>(
+                    new Table2D(visrate_filename_stream.str().c_str()));
+        Emission_viscous_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                                      EmissionrateTb_sizeY, 0);
+    }
+    if (bBulkVisCorr_) {
+        ostringstream bulkvisrate_filename_stream;
+        bulkvisrate_filename_stream << rate_path_ << "rate_"
+                                    << emissionProcess << "_bulkvis.dat";
+        Photonemission_bulkvis_rateTable_ptr = std::unique_ptr<Table2D>(
+                    new Table2D(bulkvisrate_filename_stream.str().c_str()));
+        Emission_bulkvis_rateTb_ptr = createA2DMatrix(EmissionrateTb_sizeX,
+                                                      EmissionrateTb_sizeY, 0);
+    }
 
     EmissionrateTb_Yidxptr.resize(EmissionrateTb_sizeY, 0);
     for (int i = 0; i < EmissionrateTb_sizeY; i++)
         EmissionrateTb_Yidxptr[i] = EmissionrateTb_Ymin + i*EmissionrateTb_dY;
 
     // take log for the equilibrium emission rates for better
-    // interpolation precisions; 
+    // interpolation precisions;
     // take ratio of viscous rates w.r.t eq. rates for faster performance
-    for (int i=0; i<EmissionrateTb_sizeX; i++) {
-        for (int j=0; j<EmissionrateTb_sizeY; j++) {
+    for (int i = 0; i < EmissionrateTb_sizeX; i++) {
+        for (int j = 0; j < EmissionrateTb_sizeY; j++) {
             Emission_eqrateTb_ptr[i][j] =
                 log(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30);
-            Emission_viscous_rateTb_ptr[i][j] = (
-                Photonemission_viscous_rateTable_ptr->getTbdata(i,j)
-                /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
-            Emission_bulkvis_rateTb_ptr[i][j] = (
-                Photonemission_bulkvis_rateTable_ptr->getTbdata(i,j)
-                /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
+            if (bShearVisCorr_) {
+                Emission_viscous_rateTb_ptr[i][j] = (
+                    Photonemission_viscous_rateTable_ptr->getTbdata(i,j)
+                    /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
+            }
+            if (bBulkVisCorr_) {
+                Emission_bulkvis_rateTb_ptr[i][j] = (
+                    Photonemission_bulkvis_rateTable_ptr->getTbdata(i,j)
+                    /(Photonemission_eqrateTable_ptr->getTbdata(i,j) + 1e-30));
+            }
         }
     }
 }
 
 
-void ThermalPhoton::analyticRates(double T, double muB, vector<double> &Eq, vector<double> &eqrate_ptr) {
-    for (int i = 0; i < Eq.size(); i++) {
-        eqrate_ptr[i] = -30.;
+void ThermalPhoton::analyticRates(double T, vector<double> &Eq,
+                                  std::vector<double> &eqrate_ptr) {
+    for (unsigned int i = 0; i < Eq.size(); i++) {
+        eqrate_ptr[i] = 1e-16;
     }
 }
 
+
+void ThermalPhoton::analyticRatesShearVis(
+        double T, vector<double> &Eq, std::vector<double> &visrate_ptr) {
+    for (unsigned int i = 0; i < visrate_ptr.size(); i++) {
+        visrate_ptr[i] = 0.;
+    }
+}
+
+
+void ThermalPhoton::analyticRatesBulkVis(
+        double T, vector<double> &Eq, std::vector<double> &bulkvis_ptr) {
+    for (unsigned int i = 0; i < bulkvis_ptr.size(); i++) {
+        bulkvis_ptr[i] = 0.;
+    }
+}
+
+
 void ThermalPhoton::getPhotonemissionRate(
     vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
-    int Eq_length, double T,
+    const double T, const double muB,
     vector<double> &eqrate_ptr, vector<double> &visrate_ptr,
     vector<double> &bulkvis_ptr) {
-    //interpolate equilibrium rate
-    //interpolation2D_bilinear(T, Eq, Eq_length, Emission_eqrateTb_ptr,
-    //                         eqrate_ptr);
-    analyticRates(T, 0.1, Eq, eqrate_ptr);
-    //interpolate viscous rate
-    interpolation2D_bilinear(T, Eq, Eq_length, Emission_viscous_rateTb_ptr,
-                             visrate_ptr);
-    //interpolate bulk viscous rate
-    interpolation2D_bilinear(T, Eq, Eq_length, Emission_bulkvis_rateTb_ptr,
-                             bulkvis_ptr);
-    for (int i=0; i<Eq_length; i++) {
-        eqrate_ptr[i] = exp(eqrate_ptr[i]);
+
+    if (bRateTable_) {
+        // interpolate equilibrium rate
+        interpolation2D_bilinear(T, Eq, Emission_eqrateTb_ptr,
+                                 eqrate_ptr);
+        for (unsigned int i = 0; i < eqrate_ptr.size(); i++)
+            eqrate_ptr[i]  = exp(eqrate_ptr[i]);
+    } else {
+        analyticRates(T, Eq, eqrate_ptr);
+    }
+    NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
+
+    if (bShearVisCorr_) {
+        if (bRateTable_) {
+            // interpolate viscous rate
+            interpolation2D_bilinear(T, Eq, Emission_viscous_rateTb_ptr,
+                                     visrate_ptr);
+        }
+    } else {
+        analyticRatesShearVis(T, Eq, visrate_ptr);
+    }
+    if (bBulkVisCorr_) {
+        if (bRateTable_) {
+            // interpolate bulk viscous rate
+            interpolation2D_bilinear(T, Eq, Emission_bulkvis_rateTb_ptr,
+                                     bulkvis_ptr);
+        }
+    } else {
+        analyticRatesBulkVis(T, Eq, bulkvis_ptr);
+    }
+
+    for (unsigned int i = 0; i < eqrate_ptr.size(); i++) {
         visrate_ptr[i] = pi_zz[i]*visrate_ptr[i]*eqrate_ptr[i];
         bulkvis_ptr[i] = bulkPi[i]*bulkvis_ptr[i]*eqrate_ptr[i];
     }
@@ -400,7 +499,7 @@ void ThermalPhoton::calThermalPhotonemission(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
@@ -465,7 +564,7 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
@@ -516,7 +615,7 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     double eps = 1e-15;
@@ -556,7 +655,7 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau(
     vector<double> em_visrate(Tb_length, 0);
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int n_pt_point = nrapidity*np*nphi;
@@ -608,7 +707,7 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
     vector<double> em_visrate(Tb_length, 0);
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     double eps = 1e-15;
@@ -1267,6 +1366,7 @@ void ThermalPhoton::outputPhoton_SpvnpT(string path) {
     fphotoninteSpvn_tot.close();
 }
 
+
 void ThermalPhoton::outputPhoton_SpvnpTdTdtau(string path) {
     double dT = (Tcut_high - Tcut_low)/(nTcut - 1);
     double dtau = (Taucut_high - Taucut_low)/(nTaucut - 1);
@@ -1275,10 +1375,14 @@ void ThermalPhoton::outputPhoton_SpvnpTdTdtau(string path) {
     ostringstream filename_stream_dNdydTdtau_bulkvis;
     ostringstream filename_stream_dNdydTdtau_tot;
 
-    filename_stream_dNdydTdtau_eq << path << emissionProcess_name << "_dNdydTdtau_eq.dat";
-    filename_stream_dNdydTdtau_vis << path << emissionProcess_name << "_dNdydTdtau_vis.dat";
-    filename_stream_dNdydTdtau_bulkvis << path << emissionProcess_name << "_dNdydTdtau_bulkvis.dat";
-    filename_stream_dNdydTdtau_tot << path << emissionProcess_name << "_dNdydTdtau_tot.dat";
+    filename_stream_dNdydTdtau_eq << path << emissionProcess_name
+                                  << "_dNdydTdtau_eq.dat";
+    filename_stream_dNdydTdtau_vis << path << emissionProcess_name
+                                   << "_dNdydTdtau_vis.dat";
+    filename_stream_dNdydTdtau_bulkvis << path << emissionProcess_name
+                                       << "_dNdydTdtau_bulkvis.dat";
+    filename_stream_dNdydTdtau_tot << path << emissionProcess_name
+                                   << "_dNdydTdtau_tot.dat";
 
     ofstream fphotondNdy_eq(filename_stream_dNdydTdtau_eq.str().c_str());
     ofstream fphotondNdy_vis(filename_stream_dNdydTdtau_vis.str().c_str());
@@ -1314,14 +1418,30 @@ void ThermalPhoton::outputPhoton_SpvnpTdTdtau(string path) {
        ostringstream filename_stream_vnsindTdtau_vis;
        ostringstream filename_stream_vnsindTdtau_bulkvis;
        ostringstream filename_stream_vnsindTdtau_tot;
-       filename_stream_vncosdTdtau_eq << path << emissionProcess_name << "_v_" << order << "_cos_dTdtau_eq.dat";
-       filename_stream_vncosdTdtau_vis << path << emissionProcess_name << "_v_" << order << "_cos_dTdtau_vis.dat";
-       filename_stream_vncosdTdtau_bulkvis << path << emissionProcess_name << "_v_" << order << "_cos_dTdtau_bulkvis.dat";
-       filename_stream_vncosdTdtau_tot << path << emissionProcess_name << "_v_" << order << "_cos_dTdtau_tot.dat";
-       filename_stream_vnsindTdtau_eq << path << emissionProcess_name << "_v_" << order << "_sin_dTdtau_eq.dat";
-       filename_stream_vnsindTdtau_vis << path << emissionProcess_name << "_v_" << order << "_sin_dTdtau_vis.dat";
-       filename_stream_vnsindTdtau_bulkvis << path << emissionProcess_name << "_v_" << order << "_sin_dTdtau_bulkvis.dat";
-       filename_stream_vnsindTdtau_tot << path << emissionProcess_name << "_v_" << order << "_sin_dTdtau_tot.dat";
+       filename_stream_vncosdTdtau_eq << path << emissionProcess_name
+                                      << "_v_" << order
+                                      << "_cos_dTdtau_eq.dat";
+       filename_stream_vncosdTdtau_vis << path << emissionProcess_name
+                                       << "_v_" << order
+                                       << "_cos_dTdtau_vis.dat";
+       filename_stream_vncosdTdtau_bulkvis << path << emissionProcess_name
+                                           << "_v_" << order
+                                           << "_cos_dTdtau_bulkvis.dat";
+       filename_stream_vncosdTdtau_tot << path << emissionProcess_name
+                                       << "_v_" << order
+                                       << "_cos_dTdtau_tot.dat";
+       filename_stream_vnsindTdtau_eq << path << emissionProcess_name
+                                      << "_v_" << order
+                                      << "_sin_dTdtau_eq.dat";
+       filename_stream_vnsindTdtau_vis << path << emissionProcess_name
+                                       << "_v_" << order
+                                       << "_sin_dTdtau_vis.dat";
+       filename_stream_vnsindTdtau_bulkvis << path << emissionProcess_name
+                                           << "_v_" << order
+                                           << "_sin_dTdtau_bulkvis.dat";
+       filename_stream_vnsindTdtau_tot << path << emissionProcess_name
+                                       << "_v_" << order
+                                       << "_sin_dTdtau_tot.dat";
 
        ofstream fphotonvncos_eq(filename_stream_vncosdTdtau_eq.str().c_str());
        ofstream fphotonvncos_vis(filename_stream_vncosdTdtau_vis.str().c_str());
@@ -1383,82 +1503,77 @@ void ThermalPhoton::outputPhoton_SpvnpTdxperpdtau(string path) {
     ofstream fphotondNdy_bulkvis(filename_stream_dNdydxperpdtau_bulkvis.str().c_str());
     ofstream fphotondNdy_tot(filename_stream_dNdydxperpdtau_tot.str().c_str());
 
-    for(int i = 0; i < n_xperp_cut; i++)
-    {
-       for(int j = 0; j < n_tau_cut_xtau; j++)
-       {
-          fphotondNdy_eq << dNdydxperpdtau_eq[i][j]/dxperp/dtau << "    ";
-          fphotondNdy_vis << dNdydxperpdtau_vis[i][j]/dxperp/dtau << "    ";
-          fphotondNdy_bulkvis << dNdydxperpdtau_bulkvis[i][j]/dxperp/dtau << "    ";
-          fphotondNdy_tot << dNdydxperpdtau_tot[i][j]/dxperp/dtau << "    ";
-       }
-       fphotondNdy_eq << endl;
-       fphotondNdy_vis << endl;
-       fphotondNdy_bulkvis << endl;
-       fphotondNdy_tot << endl;
+    for (int i = 0; i < n_xperp_cut; i++) {
+        for (int j = 0; j < n_tau_cut_xtau; j++) {
+            fphotondNdy_eq << dNdydxperpdtau_eq[i][j]/dxperp/dtau << "    ";
+            fphotondNdy_vis << dNdydxperpdtau_vis[i][j]/dxperp/dtau << "    ";
+            fphotondNdy_bulkvis << dNdydxperpdtau_bulkvis[i][j]/dxperp/dtau << "    ";
+            fphotondNdy_tot << dNdydxperpdtau_tot[i][j]/dxperp/dtau << "    ";
+        }
+        fphotondNdy_eq << endl;
+        fphotondNdy_vis << endl;
+        fphotondNdy_bulkvis << endl;
+        fphotondNdy_tot << endl;
     }
     fphotondNdy_eq.close();
     fphotondNdy_vis.close();
     fphotondNdy_bulkvis.close();
     fphotondNdy_tot.close();
 
-    for(int order = 1; order < norder; order++)
-    {
-       ostringstream filename_stream_vncosdxperpdtau_eq;
-       ostringstream filename_stream_vncosdxperpdtau_vis;
-       ostringstream filename_stream_vncosdxperpdtau_bulkvis;
-       ostringstream filename_stream_vncosdxperpdtau_tot;
-       ostringstream filename_stream_vnsindxperpdtau_eq;
-       ostringstream filename_stream_vnsindxperpdtau_vis;
-       ostringstream filename_stream_vnsindxperpdtau_bulkvis;
-       ostringstream filename_stream_vnsindxperpdtau_tot;
-       filename_stream_vncosdxperpdtau_eq << path << emissionProcess_name << "_v_" << order << "_cos_dxperpdtau_eq.dat";
-       filename_stream_vncosdxperpdtau_vis << path << emissionProcess_name << "_v_" << order << "_cos_dxperpdtau_vis.dat";
-       filename_stream_vncosdxperpdtau_bulkvis << path << emissionProcess_name << "_v_" << order << "_cos_dxperpdtau_bulkvis.dat";
-       filename_stream_vncosdxperpdtau_tot << path << emissionProcess_name << "_v_" << order << "_cos_dxperpdtau_tot.dat";
-       filename_stream_vnsindxperpdtau_eq << path << emissionProcess_name << "_v_" << order << "_sin_dxperpdtau_eq.dat";
-       filename_stream_vnsindxperpdtau_vis << path << emissionProcess_name << "_v_" << order << "_sin_dxperpdtau_vis.dat";
-       filename_stream_vnsindxperpdtau_bulkvis << path << emissionProcess_name << "_v_" << order << "_sin_dxperpdtau_bulkvis.dat";
-       filename_stream_vnsindxperpdtau_tot << path << emissionProcess_name << "_v_" << order << "_sin_dxperpdtau_tot.dat";
+    for (int order = 1; order < norder; order++) {
+        ostringstream filename_stream_vncosdxperpdtau_eq;
+        ostringstream filename_stream_vncosdxperpdtau_vis;
+        ostringstream filename_stream_vncosdxperpdtau_bulkvis;
+        ostringstream filename_stream_vncosdxperpdtau_tot;
+        ostringstream filename_stream_vnsindxperpdtau_eq;
+        ostringstream filename_stream_vnsindxperpdtau_vis;
+        ostringstream filename_stream_vnsindxperpdtau_bulkvis;
+        ostringstream filename_stream_vnsindxperpdtau_tot;
+        filename_stream_vncosdxperpdtau_eq << path << emissionProcess_name << "_v_" << order << "_cos_dxperpdtau_eq.dat";
+        filename_stream_vncosdxperpdtau_vis << path << emissionProcess_name << "_v_" << order << "_cos_dxperpdtau_vis.dat";
+        filename_stream_vncosdxperpdtau_bulkvis << path << emissionProcess_name << "_v_" << order << "_cos_dxperpdtau_bulkvis.dat";
+        filename_stream_vncosdxperpdtau_tot << path << emissionProcess_name << "_v_" << order << "_cos_dxperpdtau_tot.dat";
+        filename_stream_vnsindxperpdtau_eq << path << emissionProcess_name << "_v_" << order << "_sin_dxperpdtau_eq.dat";
+        filename_stream_vnsindxperpdtau_vis << path << emissionProcess_name << "_v_" << order << "_sin_dxperpdtau_vis.dat";
+        filename_stream_vnsindxperpdtau_bulkvis << path << emissionProcess_name << "_v_" << order << "_sin_dxperpdtau_bulkvis.dat";
+        filename_stream_vnsindxperpdtau_tot << path << emissionProcess_name << "_v_" << order << "_sin_dxperpdtau_tot.dat";
 
-       ofstream fphotonvncos_eq(filename_stream_vncosdxperpdtau_eq.str().c_str());
-       ofstream fphotonvncos_vis(filename_stream_vncosdxperpdtau_vis.str().c_str());
-       ofstream fphotonvncos_bulkvis(filename_stream_vncosdxperpdtau_bulkvis.str().c_str());
-       ofstream fphotonvncos_tot(filename_stream_vncosdxperpdtau_tot.str().c_str());
-       ofstream fphotonvnsin_eq(filename_stream_vnsindxperpdtau_eq.str().c_str());
-       ofstream fphotonvnsin_vis(filename_stream_vnsindxperpdtau_vis.str().c_str());
-       ofstream fphotonvnsin_bulkvis(filename_stream_vnsindxperpdtau_bulkvis.str().c_str());
-       ofstream fphotonvnsin_tot(filename_stream_vnsindxperpdtau_tot.str().c_str());
-       for(int i = 0; i < n_xperp_cut; i++)
-       {
-          for(int j = 0; j < n_tau_cut_xtau; j++)
-          {
-             fphotonvncos_eq << vndxperpdtau_cos_eq[i][j][order]/dxperp/dtau << "    ";
-             fphotonvncos_vis << vndxperpdtau_cos_vis[i][j][order]/dxperp/dtau << "    ";
-             fphotonvncos_bulkvis << vndxperpdtau_cos_bulkvis[i][j][order]/dxperp/dtau << "    ";
-             fphotonvncos_tot << vndxperpdtau_cos_tot[i][j][order]/dxperp/dtau << "    ";
-             fphotonvnsin_eq << vndxperpdtau_sin_eq[i][j][order]/dxperp/dtau << "    ";
-             fphotonvnsin_vis << vndxperpdtau_sin_vis[i][j][order]/dxperp/dtau << "    ";
-             fphotonvnsin_bulkvis << vndxperpdtau_sin_bulkvis[i][j][order]/dxperp/dtau << "    ";
-             fphotonvnsin_tot << vndxperpdtau_sin_tot[i][j][order]/dxperp/dtau << "    ";
-          }
-          fphotonvncos_eq << endl;
-          fphotonvncos_vis << endl;
-          fphotonvncos_bulkvis << endl;
-          fphotonvncos_tot << endl;
-          fphotonvnsin_eq << endl;
-          fphotonvnsin_vis << endl;
-          fphotonvnsin_bulkvis << endl;
-          fphotonvnsin_tot << endl;
-       }
-       fphotonvncos_eq.close();
-       fphotonvnsin_eq.close();
-       fphotonvncos_vis.close();
-       fphotonvnsin_vis.close();
-       fphotonvncos_bulkvis.close();
-       fphotonvnsin_bulkvis.close();
-       fphotonvncos_tot.close();
-       fphotonvnsin_tot.close();
+        ofstream fphotonvncos_eq(filename_stream_vncosdxperpdtau_eq.str().c_str());
+        ofstream fphotonvncos_vis(filename_stream_vncosdxperpdtau_vis.str().c_str());
+        ofstream fphotonvncos_bulkvis(filename_stream_vncosdxperpdtau_bulkvis.str().c_str());
+        ofstream fphotonvncos_tot(filename_stream_vncosdxperpdtau_tot.str().c_str());
+        ofstream fphotonvnsin_eq(filename_stream_vnsindxperpdtau_eq.str().c_str());
+        ofstream fphotonvnsin_vis(filename_stream_vnsindxperpdtau_vis.str().c_str());
+        ofstream fphotonvnsin_bulkvis(filename_stream_vnsindxperpdtau_bulkvis.str().c_str());
+        ofstream fphotonvnsin_tot(filename_stream_vnsindxperpdtau_tot.str().c_str());
+        for (int i = 0; i < n_xperp_cut; i++) {
+            for (int j = 0; j < n_tau_cut_xtau; j++) {
+                fphotonvncos_eq << vndxperpdtau_cos_eq[i][j][order]/dxperp/dtau << "    ";
+                fphotonvncos_vis << vndxperpdtau_cos_vis[i][j][order]/dxperp/dtau << "    ";
+                fphotonvncos_bulkvis << vndxperpdtau_cos_bulkvis[i][j][order]/dxperp/dtau << "    ";
+                fphotonvncos_tot << vndxperpdtau_cos_tot[i][j][order]/dxperp/dtau << "    ";
+                fphotonvnsin_eq << vndxperpdtau_sin_eq[i][j][order]/dxperp/dtau << "    ";
+                fphotonvnsin_vis << vndxperpdtau_sin_vis[i][j][order]/dxperp/dtau << "    ";
+                fphotonvnsin_bulkvis << vndxperpdtau_sin_bulkvis[i][j][order]/dxperp/dtau << "    ";
+                fphotonvnsin_tot << vndxperpdtau_sin_tot[i][j][order]/dxperp/dtau << "    ";
+            }
+            fphotonvncos_eq << endl;
+            fphotonvncos_vis << endl;
+            fphotonvncos_bulkvis << endl;
+            fphotonvncos_tot << endl;
+            fphotonvnsin_eq << endl;
+            fphotonvnsin_vis << endl;
+            fphotonvnsin_bulkvis << endl;
+            fphotonvnsin_tot << endl;
+        }
+        fphotonvncos_eq.close();
+        fphotonvnsin_eq.close();
+        fphotonvncos_vis.close();
+        fphotonvnsin_vis.close();
+        fphotonvncos_bulkvis.close();
+        fphotonvnsin_bulkvis.close();
+        fphotonvncos_tot.close();
+        fphotonvnsin_tot.close();
     }
 }
 
@@ -1466,8 +1581,9 @@ void ThermalPhoton::outputPhoton_SpvnpTdxperpdtau(string path) {
 //! this function is used the most frequent one,
 //! it needs to be as fast as possible
 void ThermalPhoton::interpolation2D_bilinear(
-        double varX, vector<double> &varY, int Y_length,
+        double varX, vector<double> &varY,
         double** Table2D_ptr, vector<double> &results) {
+    const int Y_length = varY.size();
     double varX_min = EmissionrateTb_Xmin;
     double varY_min = EmissionrateTb_Ymin;
     double dX = EmissionrateTb_dX;
@@ -1531,14 +1647,14 @@ void ThermalPhoton::interpolation2D_bilinear(
 
 
 void ThermalPhoton::update_rates_with_polyakov_suppression() {
-     for(int i=0; i<EmissionrateTb_sizeX; i++)
-     {
-         double T_local = EmissionrateTb_Xmin + i*EmissionrateTb_dX;
-         double suppression_factor = get_polyakov_suppression_factor(T_local);
-         for(int j=0; j<EmissionrateTb_sizeY; j++)
-         {
-             Emission_eqrateTb_ptr[i][j] += log(suppression_factor);
-         }
+    if (bRateTable_) {
+        for (int i = 0; i < EmissionrateTb_sizeX; i++) {
+            double T_local = EmissionrateTb_Xmin + i*EmissionrateTb_dX;
+            double suppression_factor = get_polyakov_suppression_factor(T_local);
+            for (int j = 0; j < EmissionrateTb_sizeY; j++) {
+                Emission_eqrateTb_ptr[i][j] += log(suppression_factor);
+            }
+        }
     }
 }
 

@@ -17,9 +17,13 @@ class ThermalPhoton {
     int np, nphi, nrapidity;
     int norder;
     int neta;
-    std::string rate_path;
+    std::string rate_path_;
 
     double dy;
+
+    bool bRateTable_;
+    bool bShearVisCorr_;
+    bool bBulkVisCorr_;
 
     // photon emission rate
     std::unique_ptr<Table2D> Photonemission_eqrateTable_ptr;
@@ -108,13 +112,19 @@ class ThermalPhoton {
     double ***vndxperpdtau_cos_tot, ***vndxperpdtau_sin_tot;
 
  public:
-    ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in);
+    ThermalPhoton(std::shared_ptr<ParameterReader> paraRdr_in,
+                  std::string emissionProcess);
 
-    ~ThermalPhoton();
+    virtual ~ThermalPhoton();
 
-    void setupEmissionrate(std::string emissionProcess, double Xmin, double dX,
-                           double Ymin, double dY);
+    void setupEmissionrateFromFile(
+            double Xmin, double dX, double Ymin, double dY,
+            bool bShearVisCorr, bool bBulkVisCorr);
     void readEmissionrate(std::string);
+
+    void setupEmissionrateFromParametrization(
+        double Xmin, double dX, int nX,
+        double Ymin, double dY, int nY);
 
     double get_dy() {return(dy);}
 
@@ -131,11 +141,21 @@ class ThermalPhoton {
         return(dNd2pTdphidy_tot[i][j][k]);
     }
 
-    virtual void analyticRates(double T, double muB, std::vector<double> &Eq, std::vector<double> &eqrate_ptr);
+    virtual void analyticRates(double T, std::vector<double> &Eq,
+                               std::vector<double> &eqrate_ptr);
+    virtual void NetBaryonCorrection(double T, double muB,
+                                     std::vector<double> &Eq,
+                                     std::vector<double> &eqrate_ptr) {}
+
+    virtual void analyticRatesShearVis(double T, std::vector<double> &Eq,
+                                       std::vector<double> &eqrate_ptr);
+    virtual void analyticRatesBulkVis(double T, std::vector<double> &Eq,
+                                      std::vector<double> &eqrate_ptr);
+
     void getPhotonemissionRate(std::vector<double> &Eq,
                                std::vector<double> &pi_zz,
                                std::vector<double> &bulkPi,
-                               int Eq_length, double T,
+                               const double T, const double muB,
                                std::vector<double> &eqrate_ptr,
                                std::vector<double> &visrate_ptr,
                                std::vector<double> &bulkvis_ptr);
@@ -173,7 +193,7 @@ class ThermalPhoton {
     void outputPhoton_SpvnpTdxperpdtau(std::string path);
     void output_photon_spectra_dTdtau(std::string path);
     void interpolation2D_bilinear(double varX, std::vector<double> &varY,
-                                  int Y_length, double** Table2D_ptr,
+                                  double** Table2D_ptr,
                                   std::vector<double> &results);
 
     void update_rates_with_polyakov_suppression();

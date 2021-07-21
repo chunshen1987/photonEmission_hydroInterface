@@ -10,6 +10,7 @@ set (SOURCES
      Hydroinfo_MUSIC.cpp
      HadronGasRhoSpectralFunction.cpp
      HadronGasPipiBremsstrahlung.cpp
+     HadronGasPiRhoOmega.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})
