@@ -9,6 +9,7 @@
 #include "Hydroinfo_h5.h"
 #include "ThermalPhoton.h"
 #include "QGP2to2Total.h"
+#include "QGPAMYCollinear.h"
 #include "HadronGasRhoSpectralFunction.h"
 #include "HadronGasPipiBremsstrahlung.h"
 #include "HadronGasPiRhoOmega.h"
@@ -154,7 +155,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
         photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE, true, true);
     photon_QGP_collinear = std::unique_ptr<ThermalPhoton>(
-            new ThermalPhoton(paraRdr, "QGP_AMYcollinear"));
+            new QGPAMYCollinear(paraRdr, "QGP_AMYcollinear"));
     photon_QGP_collinear->setupEmissionrateFromFile(
         photonrate_tb_Tmin, photonrate_tb_dT,
         photonrate_tb_Emin, photonrate_tb_dE, false, false);

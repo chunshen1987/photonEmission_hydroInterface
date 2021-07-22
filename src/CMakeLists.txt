@@ -9,6 +9,7 @@ set (SOURCES
      gauss_quadrature.cpp
      Hydroinfo_MUSIC.cpp
      QGP2to2Total.cpp
+     QGPAMYCollinear.cpp
      HadronGasRhoSpectralFunction.cpp
      HadronGasPipiBremsstrahlung.cpp
      HadronGasPiRhoOmega.cpp
