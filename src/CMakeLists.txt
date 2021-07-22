@@ -8,6 +8,7 @@ set (SOURCES
      tensor_trans.cpp
      gauss_quadrature.cpp
      Hydroinfo_MUSIC.cpp
+     QGP2to2Total.cpp
      HadronGasRhoSpectralFunction.cpp
      HadronGasPipiBremsstrahlung.cpp
      HadronGasPiRhoOmega.cpp
