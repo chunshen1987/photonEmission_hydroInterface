@@ -14,6 +14,8 @@ class QGP2to2Total : public ThermalPhoton {
     ~QGP2to2Total() {}
     void analyticRates(double T, std::vector<double> &Eq,
                        std::vector<double> &eqrate_ptr);
+    void NetBaryonCorrection(double T, double muB, std::vector<double> &Eq,
+                             std::vector<double> &eqrate_ptr);
 };
 
 #endif

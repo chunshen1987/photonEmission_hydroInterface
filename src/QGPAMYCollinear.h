@@ -14,6 +14,8 @@ class QGPAMYCollinear : public ThermalPhoton {
     ~QGPAMYCollinear() {}
     void analyticRates(double T, std::vector<double> &Eq,
                         std::vector<double> &eqrate_ptr);
+    void NetBaryonCorrection(double T, double muB, std::vector<double> &Eq,
+                             std::vector<double> &eqrate_ptr);
 };
 
 #endif
