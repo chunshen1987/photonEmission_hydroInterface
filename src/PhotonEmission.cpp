@@ -151,6 +151,9 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
 
     photon_QGP_2_to_2 = std::unique_ptr<ThermalPhoton>(
             new QGP2to2Total(paraRdr, "QGP_2to2_total"));
+    //photon_QGP_2_to_2->setupEmissionrateFromFile(
+    //        photonrate_tb_Tmin, photonrate_tb_dT,
+    //        photonrate_tb_Emin, photonrate_tb_dE, true, true);
     photon_QGP_collinear = std::unique_ptr<ThermalPhoton>(
             new QGPAMYCollinear(paraRdr, "QGP_AMYcollinear"));
     if (paraRdr->getVal("enable_polyakov_suppression") == 1) {
