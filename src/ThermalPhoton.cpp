@@ -446,7 +446,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, Tb_length, T,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int idx = 0;
