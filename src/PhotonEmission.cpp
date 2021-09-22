@@ -43,11 +43,6 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
 
     lambda = createA2DMatrix(4, 4, 0.);
 
-    int Eqtb_length = neta*nrapidity*np*nphi;
-    Eq_localrest_Tb.resize(Eqtb_length, 0);
-    pi_photon_Tb.resize(Eqtb_length, 0);
-    bulkPi_Tb.resize(Eqtb_length, 0);
-
     dNd2pTdphidy_eq = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pT_eq.resize(np, 0);
@@ -257,6 +252,11 @@ void PhotonEmission::calPhotonemission(
     double** pi_tensor_lab = createA2DMatrix(4, 4, 0.);
 
     fluidCell *fluidCellptr = new fluidCell;
+
+    const int Eqtb_length = neta*nrapidity*np*nphi;
+    Eq_localrest_Tb.resize(Eqtb_length, 0);
+    pi_photon_Tb.resize(Eqtb_length, 0);
+    bulkPi_Tb.resize(Eqtb_length, 0);
 
     // main loop begins ...
     // loop over time frame
@@ -623,6 +623,11 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double Nskip_eta = hydroinfo_MUSIC_ptr->get_hydro_Nskip_eta();
     double Nskip_tau = hydroinfo_MUSIC_ptr->get_hydro_Nskip_tau();
     double volume_base = Nskip_tau*dtau*Nskip_x*dx*Nskip_x*dx*Nskip_eta*deta;
+
+    const int Eqtb_length = nrapidity*np*nphi;
+    Eq_localrest_Tb.resize(Eqtb_length, 0);
+    pi_photon_Tb.resize(Eqtb_length, 0);
+    bulkPi_Tb.resize(Eqtb_length, 0);
 
     double tau_now = 0.0;
     double flow_u_mu_low[4];
