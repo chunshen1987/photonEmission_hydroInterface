@@ -21,8 +21,12 @@ void HadronGasPipiBremsstrahlung::analyticRates(
     double dbT = -2.51 + 58.152*T - 318.24*T2 + 610.7*T3;
     for (unsigned int i = 0; i < Eq.size(); i++) {
         double Eq_local = Eq[i];
-        double logB = (abT + bbT*Eq_local + ybT*Eq_local*Eq_local
-                       + dbT/(Eq_local + 0.2));
-        eqrate_ptr[i] = exp(logB);
+        if (Eq_local < 5.) {
+            double logB = (abT + bbT*Eq_local + ybT*Eq_local*Eq_local
+                           + dbT/(Eq_local + 0.2));
+            eqrate_ptr[i] = exp(logB);
+        } else {
+            eqrate_ptr[i] = 0.;
+        }
     }
 }

@@ -33,8 +33,11 @@ void QGP2to2Total::NetBaryonCorrection(
         double T, double muB, std::vector<double> &Eq,
         std::vector<double> &eqrate_ptr) {
 
-    if (std::abs(muB) < 1e-8)
-        return;
+    muB = std::abs(muB);
+    if (muB < 1e-8) return;
+
+    // set the upper limit to 0.4 GeV for this parameterization
+    muB = std::min(0.4, muB);
 
     const double muB_over_T = muB/T;
     const double kmuB = 1. + 1./(M_PI*M_PI)*muB_over_T*muB_over_T;
