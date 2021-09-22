@@ -438,7 +438,14 @@ void ThermalPhoton::getPhotonemissionRate(
 
 void ThermalPhoton::calThermalPhotonemission_3d(
         vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
-        int Tb_length, double T, double volume, double fraction) {
+        double T, double muB, double volume, double fraction) {
+    const int Tb_length = Eq.size();
+    if (Tb_length != nrapidity*nphi*np) {
+        std::cout << "The length of Eq array is not right! Please check!"
+                  << std::endl;
+        exit(1);
+    }
+    const double volfrac = volume*fraction;
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -446,7 +453,7 @@ void ThermalPhoton::calThermalPhotonemission_3d(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, muB,
                           em_eqrate, em_visrate, em_bulkvis);
 
     int idx = 0;
@@ -457,9 +464,9 @@ void ThermalPhoton::calThermalPhotonemission_3d(
                 double local_vis = em_visrate[idx];
                 double local_bulk = em_bulkvis[idx];
 
-                double temp_eq_sum = local_eq*volume*fraction;
-                double temp_vis_sum = local_vis*volume*fraction;
-                double temp_bulkvis_sum = local_bulk*volume*fraction;
+                double temp_eq_sum = local_eq*volfrac;
+                double temp_vis_sum = local_vis*volfrac;
+                double temp_bulkvis_sum = local_bulk*volfrac;
 
                 double ratio = fabs(local_vis + local_bulk)/(local_eq + 1e-20);
                 if (ratio > 1.0) {
@@ -467,10 +474,8 @@ void ThermalPhoton::calThermalPhotonemission_3d(
                     local_bulk = local_bulk/ratio;
                 }
 
-                double temp_vis_deltaf_restricted_sum = (
-                                                local_vis*volume*fraction);
-                double temp_bulkvis_deltaf_restricted_sum = (
-                                                local_bulk*volume*fraction);
+                double temp_vis_deltaf_restricted_sum = local_vis*volfrac;
+                double temp_bulkvis_deltaf_restricted_sum = local_bulk*volfrac;
 
                 dNd2pTdphidy_eq[l][m][k] += temp_eq_sum;
                 dNd2pTdphidy_vis[l][m][k] += temp_eq_sum + temp_vis_sum;
@@ -607,7 +612,9 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau(
 
 void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
     vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
-    int Tb_length, double T, double tau, double volume, double fraction) {
+    double T, double muB, double tau, double volume, double fraction) {
+    const int Tb_length = Eq.size();
+    const double volfrac = volume*fraction;
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
@@ -615,7 +622,7 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
 
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, muB,
                           em_eqrate, em_visrate, em_bulkvis);
 
     double eps = 1e-15;
@@ -628,9 +635,9 @@ void ThermalPhoton::calThermalPhotonemissiondTdtau_3d(
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
-                double temp_eq_sum = em_eqrate[idx]*volume*fraction;
-                double temp_vis_sum = em_visrate[idx]*volume*fraction;
-                double temp_bulkvis_sum = em_bulkvis[idx]*volume*fraction;
+                double temp_eq_sum = em_eqrate[idx]*volfrac;
+                double temp_vis_sum = em_visrate[idx]*volfrac;
+                double temp_bulkvis_sum = em_bulkvis[idx]*volfrac;
                 dNd2pTdphidydTdtau_eq[idx_T][idx_tau][l][m][k] += temp_eq_sum;
                 dNd2pTdphidydTdtau_vis[idx_T][idx_tau][l][m][k] += (
                                             temp_eq_sum + temp_vis_sum);
@@ -699,15 +706,17 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau(
 
 void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
     vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
-    int Tb_length, double T, double x_local, double tau, double volume,
+    double T, double muB, double x_local, double tau, double volume,
     double fraction) {
+    const int Tb_length = Eq.size();
+    const double volfrac = volume*fraction;
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
     // photon emission viscous correction at local rest cell
     vector<double> em_visrate(Tb_length, 0);
     // photon emission bulk viscous correction at local rest cell
     vector<double> em_bulkvis(Tb_length, 0);
-    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, 0.,
+    getPhotonemissionRate(Eq, pi_zz, bulkPi, T, muB,
                           em_eqrate, em_visrate, em_bulkvis);
 
     double eps = 1e-15;
@@ -720,9 +729,9 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
     for (int k = 0; k < nrapidity; k++) {
         for (int m = 0; m < nphi; m++) {
             for (int l = 0; l < np; l++) {
-                double temp_eq_sum = em_eqrate[idx]*volume*fraction;
-                double temp_vis_sum = em_visrate[idx]*volume*fraction;
-                double temp_bulkvis_sum = em_bulkvis[idx]*volume*fraction;
+                double temp_eq_sum = em_eqrate[idx]*volfrac;
+                double temp_vis_sum = em_visrate[idx]*volfrac;
+                double temp_bulkvis_sum = em_bulkvis[idx]*volfrac;
                 dNd2pTdphidydxperpdtau_eq[idx_xperp][idx_tau][l][m][k] +=
                                                                 temp_eq_sum;
                 dNd2pTdphidydxperpdtau_vis[idx_xperp][idx_tau][l][m][k] +=

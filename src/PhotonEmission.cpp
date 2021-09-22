@@ -652,7 +652,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         double volume = tau_local*volume_base;
 
         int idx_Tb = 0;
-        double temp_local = fluidCellptr.temperature;
+        const double temp_local = fluidCellptr.temperature;
+        const double muB_local = fluidCellptr.muB;
 
         if (temp_local < T_dec ||
             temp_local > T_cuthigh || temp_local < T_cutlow) {
@@ -735,27 +736,27 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         if (temp_local > T_sw_high) {   // QGP emission
             double QGP_fraction = 1.0;
             photon_QGP_2_to_2->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, QGP_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, QGP_fraction);
             photon_QGP_collinear->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, QGP_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, QGP_fraction);
             if (differential_flag == 1 || differential_flag > 10) {
                 photon_QGP_2_to_2->calThermalPhotonemissiondTdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, tau_local, volume, QGP_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, tau_local, volume, QGP_fraction);
                 photon_QGP_collinear->calThermalPhotonemissiondTdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, tau_local, volume, QGP_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, tau_local, volume, QGP_fraction);
             }
             if (differential_flag == 2 || differential_flag > 10) {
                 photon_QGP_2_to_2->calThermalPhotonemissiondxperpdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, x_local, tau_local, volume,
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, x_local, tau_local, volume,
                     QGP_fraction);
                 photon_QGP_collinear->calThermalPhotonemissiondxperpdtau_3d(
                     Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
-                    idx_Tb, temp_local, x_local, tau_local, volume,
+                    temp_local, muB_local, x_local, tau_local, volume,
                     QGP_fraction);
             }
         } else if (temp_local > T_sw_low) {     // QGP and HG emission
@@ -763,177 +764,177 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                         (temp_local - T_sw_low)/(T_sw_high - T_sw_low));
             double HG_fraction = 1. - QGP_fraction;
             photon_QGP_2_to_2->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, QGP_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, QGP_fraction);
             photon_QGP_collinear->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, QGP_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, QGP_fraction);
             photon_HG_meson->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, HG_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, HG_fraction);
             photon_HG_omega->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, HG_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, HG_fraction);
             photon_HG_rho_spectralfun->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, HG_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, HG_fraction);
             photon_HG_pipiBremsstrahlung->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, HG_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, HG_fraction);
             if (differential_flag == 1 || differential_flag > 10) {
                 photon_QGP_2_to_2->calThermalPhotonemissiondTdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, tau_local, volume, QGP_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, tau_local, volume, QGP_fraction);
                 photon_QGP_collinear->calThermalPhotonemissiondTdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, tau_local, volume, QGP_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, tau_local, volume, QGP_fraction);
                 photon_HG_meson->calThermalPhotonemissiondTdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, tau_local, volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, tau_local, volume, HG_fraction);
                 photon_HG_omega->calThermalPhotonemissiondTdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, tau_local, volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, tau_local, volume, HG_fraction);
                 photon_HG_rho_spectralfun->calThermalPhotonemissiondTdtau_3d(
                     Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
-                    idx_Tb, temp_local, tau_local, volume,
+                    temp_local, muB_local, tau_local, volume,
                     HG_fraction);
                 photon_HG_pipiBremsstrahlung->
                     calThermalPhotonemissiondTdtau_3d(
                         Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
-                        idx_Tb, temp_local, tau_local, volume,
+                        temp_local, muB_local, tau_local, volume,
                         HG_fraction);
             }
             if (differential_flag == 2 || differential_flag > 10) {
                 photon_QGP_2_to_2->calThermalPhotonemissiondxperpdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, x_local, tau_local, volume,
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, x_local, tau_local, volume,
                     QGP_fraction);
                 photon_QGP_collinear->calThermalPhotonemissiondxperpdtau_3d(
                     Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
-                    idx_Tb, temp_local, x_local, tau_local, volume,
+                    temp_local, muB_local, x_local, tau_local, volume,
                     QGP_fraction);
                 photon_HG_meson->calThermalPhotonemissiondxperpdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, x_local, tau_local, volume,
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, x_local, tau_local, volume,
                     HG_fraction);
                 photon_HG_omega->calThermalPhotonemissiondxperpdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, x_local, tau_local, volume,
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, x_local, tau_local, volume,
                     HG_fraction);
                 photon_HG_rho_spectralfun->
                     calThermalPhotonemissiondxperpdtau_3d(
-                        Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                        temp_local, x_local, tau_local, volume,
+                        Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                        temp_local, muB_local, x_local, tau_local, volume,
                         HG_fraction);
                 photon_HG_pipiBremsstrahlung->
                     calThermalPhotonemissiondxperpdtau_3d(
-                        Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                        temp_local, x_local, tau_local, volume,
+                        Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                        temp_local, muB_local, x_local, tau_local, volume,
                         HG_fraction);
             }
             if (calHGIdFlag == 1) {
                 photon_pirho->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_KstarK->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_piK->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_piKstar->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_pipi->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_rhoK->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_rho->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_pirho_omegat->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
             }
         } else {        // hadronic emission
             double HG_fraction = 1.0;
             photon_HG_meson->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, HG_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, HG_fraction);
             photon_HG_omega->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, HG_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, HG_fraction);
             photon_HG_rho_spectralfun->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, HG_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, HG_fraction);
             photon_HG_pipiBremsstrahlung->calThermalPhotonemission_3d(
-                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                temp_local, volume, HG_fraction);
+                Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                temp_local, muB_local, volume, HG_fraction);
             if (differential_flag == 1 || differential_flag > 10) {
                 photon_HG_meson->calThermalPhotonemissiondTdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, tau_local, volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, tau_local, volume, HG_fraction);
                 photon_HG_omega->calThermalPhotonemissiondTdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, tau_local, volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, tau_local, volume, HG_fraction);
                 photon_HG_rho_spectralfun->
                     calThermalPhotonemissiondTdtau_3d(
                         Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
-                        idx_Tb, temp_local, tau_local, volume,
+                        temp_local, muB_local, tau_local, volume,
                         HG_fraction);
                 photon_HG_pipiBremsstrahlung->
                     calThermalPhotonemissiondTdtau_3d(
                         Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
-                        idx_Tb, temp_local, tau_local, volume,
+                        temp_local, muB_local, tau_local, volume,
                         HG_fraction);
             }
             if (differential_flag == 2 || differential_flag > 10) {
                 photon_HG_meson->calThermalPhotonemissiondxperpdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, x_local, tau_local, volume,
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, x_local, tau_local, volume,
                     HG_fraction);
                 photon_HG_omega->calThermalPhotonemissiondxperpdtau_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local, x_local, tau_local, volume,
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, x_local, tau_local, volume,
                     HG_fraction);
                 photon_HG_rho_spectralfun->
                     calThermalPhotonemissiondxperpdtau_3d(
                         Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
-                        idx_Tb, temp_local, x_local, tau_local, volume,
+                        temp_local, muB_local, x_local, tau_local, volume,
                         HG_fraction);
                 photon_HG_pipiBremsstrahlung->
                     calThermalPhotonemissiondxperpdtau_3d(
                         Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
-                        idx_Tb, temp_local, x_local, tau_local, volume,
+                        temp_local, muB_local, x_local, tau_local, volume,
                         HG_fraction);
             }
             if (calHGIdFlag == 1) {
                 photon_pirho->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_KstarK->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_piK->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_piKstar->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_pipi->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_rhoK->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_rho->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
                 photon_pirho_omegat->calThermalPhotonemission_3d(
-                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
-                    temp_local,  volume, HG_fraction);
+                    Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb,
+                    temp_local, muB_local, volume, HG_fraction);
             }
         }
     }

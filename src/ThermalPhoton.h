@@ -165,7 +165,7 @@ class ThermalPhoton {
         std::vector<double> &volume, double fraction);
     void calThermalPhotonemission_3d(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, int Tb_length, double T, double volume,
+        std::vector<double> &bulkPi, double T, double muB, double volume,
         double fraction);
     void calThermalPhotonemissiondTdtau(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
@@ -173,8 +173,8 @@ class ThermalPhoton {
         std::vector<double> &volume, double fraction);
     void calThermalPhotonemissiondTdtau_3d(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, int Tb_length,
-        double T, double tau, double volume, double fraction);
+        std::vector<double> &bulkPi,
+        double T, double muB, double tau, double volume, double fraction);
     void calThermalPhotonemissiondxperpdtau(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
         std::vector<double> &bulkPi, int Tb_length,
@@ -182,8 +182,8 @@ class ThermalPhoton {
         std::vector<double> &volume, double fraction);
     void calThermalPhotonemissiondxperpdtau_3d(
         std::vector<double> &Eq, std::vector<double> &pi_zz,
-        std::vector<double> &bulkPi, int Tb_length,
-        double T, double x_local, double tau, double volume, double fraction);
+        std::vector<double> &bulkPi, double T, double muB,
+        double x_local, double tau, double volume, double fraction);
 
     void calPhoton_SpvnpT();
     void calPhoton_SpvnpT_dTdtau();
