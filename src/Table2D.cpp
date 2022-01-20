@@ -18,10 +18,10 @@ void Table2D::loadTableFromFile(std::string data_filename)
 {
     std::ostringstream filename_stream;
     filename_stream << data_filename;
-    std::fstream fs(filename_stream.str().c_str());
+    std::ifstream fs(filename_stream.str().c_str(), std::ifstream::in);
     if (fs.is_open()==false) {
-        std::cout << "Table2D::loadTableFromFile error: the data file cannot be opened."
-                  << std::endl;
+        std::cout << "Table2D::loadTableFromFile error: "
+                  << "the data file cannot be opened." << std::endl;
         std::cout << "Filename: " << data_filename << std::endl;
         exit(-1);
     }
