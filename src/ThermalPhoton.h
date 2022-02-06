@@ -185,10 +185,21 @@ class ThermalPhoton {
         std::vector<double> &bulkPi, double T, double muB,
         double x_local, double tau, double volume, double fraction);
 
-    void calPhoton_SpvnpT();
+    void calPhoton_SpvnpT(double ***dNd2pTdphipy,
+                          std::vector<double> &dNd2pT, double **vnpT_cos,
+                          double **vnpT_sin, double &dNdy,
+                          std::vector<double> &vn_cos,
+                          std::vector<double> &vn_sin);
+    void calPhoton_SpvnpT_shell();
     void calPhoton_SpvnpT_dTdtau();
     void calPhoton_SpvnpT_dxperpdtau();
-    void outputPhoton_SpvnpT(std::string path);
+    void outputPhoton_SpvnpT(std::string path, std::string type_str,
+                             double ***dNd2pTdphidy,
+                             std::vector<double> &dNd2pT,
+                             double **vnpT_cos, double **vnpT_sin,
+                             std::vector<double> &vn_cos,
+                             std::vector<double> &vn_sin);
+    void outputPhoton_SpvnpT_shell(std::string path);
     void outputPhoton_SpvnpTdTdtau(std::string path);
     void outputPhoton_SpvnpTdxperpdtau(std::string path);
     void output_photon_spectra_dTdtau(std::string path);

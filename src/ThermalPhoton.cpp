@@ -747,150 +747,71 @@ void ThermalPhoton::calThermalPhotonemissiondxperpdtau_3d(
 }
 
 
-void ThermalPhoton::calPhoton_SpvnpT() {
-    // calculate the photon spectra and differential vn at mid-rapidity
-    double eps = 1e-15;
+void ThermalPhoton::calPhoton_SpvnpT(
+        double ***dNd2pTdphidy,
+        vector<double> &dNd2pT, double **vnpT_cos, double **vnpT_sin,
+        double &dNdy, vector<double> &vn_cos, vector<double> &vn_sin) {
+    // calculate the photon spectra and differential vn
+    const double eps = 1e-15;
     for (int i = 0; i < np; i++) {
         for (int j = 0; j < nphi; j++) {
             double weight = phi_weight[j]*dy;
             for (int k = 0; k < nrapidity; k++) {
                 // dN/(dy pT dpT)
-                dNd2pT_eq[i] += dNd2pTdphidy_eq[i][j][k]*weight;
-                dNd2pT_vis[i] += dNd2pTdphidy_vis[i][j][k]*weight;
-                dNd2pT_vis_deltaf_restricted[i] += (
-                    dNd2pTdphidy_vis_deltaf_restricted[i][j][k]*weight);
-                dNd2pT_bulkvis[i] += (
-                    dNd2pTdphidy_bulkvis[i][j][k]*weight);
-                dNd2pT_bulkvis_deltaf_restricted[i] += (
-                    dNd2pTdphidy_bulkvis_deltaf_restricted[i][j][k]*weight);
-                dNd2pT_tot[i] += dNd2pTdphidy_tot[i][j][k]*weight;
+                dNd2pT[i] += dNd2pTdphidy[i][j][k]*weight;
                 for (int order = 0; order < norder; order++) {
-                    vnpT_cos_eq[order][i] += (
-                                dNd2pTdphidy_eq[i][j][k]
+                    vnpT_cos[order][i] += (
+                                dNd2pTdphidy[i][j][k]
                                 *cos(order*phi[j])*weight);
-                    vnpT_cos_vis[order][i] += (
+                    vnpT_sin[order][i] += (
                                 dNd2pTdphidy_vis[i][j][k]
-                                *cos(order*phi[j])*weight);
-                    vnpT_cos_vis_deltaf_restricted[order][i] += (
-                                dNd2pTdphidy_vis_deltaf_restricted[i][j][k]
-                                *cos(order*phi[j])*weight);
-                    vnpT_cos_bulkvis[order][i] += (
-                                dNd2pTdphidy_bulkvis[i][j][k]
-                                *cos(order*phi[j])*weight);
-                    vnpT_cos_bulkvis_deltaf_restricted[order][i] += (
-                                dNd2pTdphidy_bulkvis_deltaf_restricted[i][j][k]
-                                *cos(order*phi[j])*weight);
-                    vnpT_cos_tot[order][i] += (
-                                dNd2pTdphidy_tot[i][j][k]
-                                *cos(order*phi[j])*weight);
-                    vnpT_sin_eq[order][i] += (
-                                dNd2pTdphidy_eq[i][j][k]
-                                *sin(order*phi[j])*weight);
-                    vnpT_sin_vis[order][i] += (
-                                dNd2pTdphidy_vis[i][j][k]
-                                *sin(order*phi[j])*weight);
-                    vnpT_sin_vis_deltaf_restricted[order][i] += (
-                                dNd2pTdphidy_vis_deltaf_restricted[i][j][k]
-                                *sin(order*phi[j])*weight);
-                    vnpT_sin_bulkvis[order][i] += (
-                                dNd2pTdphidy_bulkvis[i][j][k]
-                                *sin(order*phi[j])*weight);
-                    vnpT_sin_bulkvis_deltaf_restricted[order][i] += (
-                                dNd2pTdphidy_bulkvis_deltaf_restricted[i][j][k]
-                                *sin(order*phi[j])*weight);
-                    vnpT_sin_tot[order][i] += (
-                                dNd2pTdphidy_tot[i][j][k]
                                 *sin(order*phi[j])*weight);
                 }
             }
         }
         double p_weight_factor = p[i]*p_weight[i];
-        dNdy_eq += dNd2pT_eq[i]*p_weight_factor;   //dN/dy
-        dNdy_vis += dNd2pT_vis[i]*p_weight_factor;
-        dNdy_vis_deltaf_restricted += (
-                            dNd2pT_vis_deltaf_restricted[i]*p_weight_factor);
-        dNdy_bulkvis += dNd2pT_bulkvis[i]*p_weight_factor;
-        dNdy_bulkvis_deltaf_restricted += (
-                        dNd2pT_bulkvis_deltaf_restricted[i]*p_weight_factor);
-        dNdy_tot += dNd2pT_tot[i]*p_weight_factor;
+        dNdy += dNd2pT[i]*p_weight_factor;   //dN/dy
         for (int order = 0; order < norder ; order++) {
-            vn_cos_eq[order] += vnpT_cos_eq[order][i]*p_weight_factor;
-            vn_sin_eq[order] += vnpT_sin_eq[order][i]*p_weight_factor;
-            vn_cos_vis[order] += vnpT_cos_vis[order][i]*p_weight_factor;
-            vn_sin_vis[order] += vnpT_sin_vis[order][i]*p_weight_factor;
-            vn_cos_vis_deltaf_restricted[order] += (
-                    vnpT_cos_vis_deltaf_restricted[order][i]*p_weight_factor);
-            vn_sin_vis_deltaf_restricted[order] += (
-                    vnpT_sin_vis_deltaf_restricted[order][i]*p_weight_factor);
-            vn_cos_bulkvis[order] += (
-                    vnpT_cos_bulkvis[order][i]*p_weight_factor);
-            vn_sin_bulkvis[order] += (
-                    vnpT_sin_bulkvis[order][i]*p_weight_factor);
-            vn_cos_bulkvis_deltaf_restricted[order] += (
-                    vnpT_cos_bulkvis_deltaf_restricted[order][i]
-                    *p_weight_factor);
-            vn_sin_bulkvis_deltaf_restricted[order] += (
-                    vnpT_sin_bulkvis_deltaf_restricted[order][i]
-                    *p_weight_factor);
-            vn_cos_tot[order] += vnpT_cos_tot[order][i]*p_weight_factor;
-            vn_sin_tot[order] += vnpT_sin_tot[order][i]*p_weight_factor;
+            vn_cos[order] += vnpT_cos[order][i]*p_weight_factor;
+            vn_sin[order] += vnpT_sin[order][i]*p_weight_factor;
 
             // vn(pT)
-            vnpT_cos_eq[order][i] = vnpT_cos_eq[order][i]/dNd2pT_eq[i];
-            vnpT_cos_vis[order][i] = vnpT_cos_vis[order][i]/dNd2pT_vis[i];
-            vnpT_cos_vis_deltaf_restricted[order][i] = (
-                    vnpT_cos_vis_deltaf_restricted[order][i]
-                    /dNd2pT_vis_deltaf_restricted[i]);
-            vnpT_cos_bulkvis[order][i] = (vnpT_cos_bulkvis[order][i]
-                                          /dNd2pT_bulkvis[i]);
-            vnpT_cos_bulkvis_deltaf_restricted[order][i] = (
-                    vnpT_cos_bulkvis_deltaf_restricted[order][i]
-                    /dNd2pT_bulkvis_deltaf_restricted[i]);
-            vnpT_cos_tot[order][i] = vnpT_cos_tot[order][i]/dNd2pT_tot[i];
-            vnpT_sin_eq[order][i] = vnpT_sin_eq[order][i]/dNd2pT_eq[i];
-            vnpT_sin_vis[order][i] = vnpT_sin_vis[order][i]/dNd2pT_vis[i];
-            vnpT_sin_vis_deltaf_restricted[order][i] = (
-                    vnpT_sin_vis_deltaf_restricted[order][i]
-                    /dNd2pT_vis_deltaf_restricted[i]);
-            vnpT_sin_bulkvis[order][i] = (vnpT_sin_bulkvis[order][i]
-                                          /dNd2pT_bulkvis[i]);
-            vnpT_sin_bulkvis_deltaf_restricted[order][i] = (
-                    vnpT_sin_bulkvis_deltaf_restricted[order][i]
-                    /dNd2pT_bulkvis_deltaf_restricted[i]);
-            vnpT_sin_tot[order][i] = vnpT_sin_tot[order][i]/dNd2pT_tot[i];
+            vnpT_cos[order][i] = vnpT_cos[order][i]/dNd2pT[i];
+            vnpT_sin[order][i] = vnpT_sin[order][i]/dNd2pT[i];
         }
-        dNd2pT_eq[i] = dNd2pT_eq[i]/(2*M_PI);  // dN/(2pi dy pT dpT)
-        dNd2pT_vis[i] = dNd2pT_vis[i]/(2*M_PI);
-        dNd2pT_vis_deltaf_restricted[i] = (
-                                dNd2pT_vis_deltaf_restricted[i]/(2*M_PI));
-        dNd2pT_bulkvis[i] = dNd2pT_bulkvis[i]/(2*M_PI);
-        dNd2pT_bulkvis_deltaf_restricted[i] = (
-                                dNd2pT_bulkvis_deltaf_restricted[i]/(2*M_PI));
-        dNd2pT_tot[i] = dNd2pT_tot[i]/(2*M_PI);
+        dNd2pT[i] = dNd2pT[i]/(2*M_PI);  // dN/(2pi dy pT dpT)
     }
     for (int order = 1; order < norder ; order++) {
         // vn
-        vn_cos_eq[order] = vn_cos_eq[order]/(dNdy_eq + eps);
-        vn_sin_eq[order] = vn_sin_eq[order]/(dNdy_eq + eps);
-        vn_cos_vis[order] = vn_cos_vis[order]/(dNdy_vis + eps);
-        vn_sin_vis[order] = vn_sin_vis[order]/(dNdy_vis + eps);
-        vn_cos_vis_deltaf_restricted[order] = (
-                vn_cos_vis_deltaf_restricted[order]
-                /(dNdy_vis_deltaf_restricted + eps));
-        vn_sin_vis_deltaf_restricted[order] = (
-                vn_sin_vis_deltaf_restricted[order]
-                /(dNdy_vis_deltaf_restricted + eps));
-        vn_cos_bulkvis[order] = vn_cos_bulkvis[order]/(dNdy_bulkvis + eps);
-        vn_sin_bulkvis[order] = vn_sin_bulkvis[order]/(dNdy_bulkvis + eps);
-        vn_cos_bulkvis_deltaf_restricted[order] = (
-                vn_cos_bulkvis_deltaf_restricted[order]
-                /(dNdy_bulkvis_deltaf_restricted + eps));
-        vn_sin_bulkvis_deltaf_restricted[order] = (
-                vn_sin_bulkvis_deltaf_restricted[order]
-                /(dNdy_bulkvis_deltaf_restricted + eps));
-        vn_cos_tot[order] = vn_cos_tot[order]/(dNdy_tot + eps);
-        vn_sin_tot[order] = vn_sin_tot[order]/(dNdy_tot + eps);
+        vn_cos[order] = vn_cos[order]/(dNdy + eps);
+        vn_sin[order] = vn_sin[order]/(dNdy + eps);
     }
+}
+
+
+void ThermalPhoton::calPhoton_SpvnpT_shell() {
+    calPhoton_SpvnpT(dNd2pTdphidy_eq, dNd2pT_eq, vnpT_cos_eq, vnpT_sin_eq,
+                     dNdy_eq, vn_cos_eq, vn_sin_eq);
+    calPhoton_SpvnpT(dNd2pTdphidy_vis, dNd2pT_vis, vnpT_cos_vis, vnpT_sin_vis,
+                     dNdy_vis, vn_cos_vis, vn_sin_vis);
+    calPhoton_SpvnpT(dNd2pTdphidy_vis_deltaf_restricted,
+                     dNd2pT_vis_deltaf_restricted,
+                     vnpT_cos_vis_deltaf_restricted,
+                     vnpT_sin_vis_deltaf_restricted,
+                     dNdy_vis_deltaf_restricted, vn_cos_vis_deltaf_restricted,
+                     vn_sin_vis_deltaf_restricted);
+    calPhoton_SpvnpT(dNd2pTdphidy_bulkvis,
+                     dNd2pT_bulkvis, vnpT_cos_bulkvis, vnpT_sin_bulkvis,
+                     dNdy_bulkvis, vn_cos_bulkvis, vn_sin_bulkvis);
+    calPhoton_SpvnpT(dNd2pTdphidy_bulkvis_deltaf_restricted,
+                     dNd2pT_bulkvis_deltaf_restricted,
+                     vnpT_cos_bulkvis_deltaf_restricted,
+                     vnpT_sin_bulkvis_deltaf_restricted,
+                     dNdy_bulkvis_deltaf_restricted,
+                     vn_cos_bulkvis_deltaf_restricted,
+                     vn_sin_bulkvis_deltaf_restricted);
+    calPhoton_SpvnpT(dNd2pTdphidy_tot, dNd2pT_tot, vnpT_cos_tot, vnpT_sin_tot,
+                     dNdy_tot, vn_cos_tot, vn_sin_tot);
 }
 
 
@@ -1128,251 +1049,88 @@ void ThermalPhoton::calPhoton_SpvnpT_dxperpdtau() {
 }
 
 
-void ThermalPhoton::outputPhoton_SpvnpT(string path) {
-    ostringstream filename_stream_SpMatrix_eq;
-    ostringstream filename_stream_SpMatrix_vis;
-    ostringstream filename_stream_SpMatrix_bulkvis;
-    ostringstream filename_stream_SpMatrix_vis_deltaf_restricted;
-    ostringstream filename_stream_SpMatrix_bulkvis_deltaf_restricted;
-    ostringstream filename_stream_SpMatrix_tot;
-    ostringstream filename_stream_Spvn_eq;
-    ostringstream filename_stream_Spvn_vis;
-    ostringstream filename_stream_Spvn_bulkvis;
-    ostringstream filename_stream_Spvn_vis_deltaf_restricted;
-    ostringstream filename_stream_Spvn_bulkvis_deltaf_restricted;
-    ostringstream filename_stream_Spvn_tot;
-    ostringstream filename_stream_inte_Spvn_eq;
-    ostringstream filename_stream_inte_Spvn_vis;
-    ostringstream filename_stream_inte_Spvn_bulkvis;
-    ostringstream filename_stream_inte_Spvn_vis_deltaf_restricted;
-    ostringstream filename_stream_inte_Spvn_bulkvis_deltaf_restricted;
-    ostringstream filename_stream_inte_Spvn_tot;
+void ThermalPhoton::outputPhoton_SpvnpT(string path, string type_str,
+        double ***dNd2pTdphidy, vector<double> &dNd2pT,
+        double **vnpT_cos, double **vnpT_sin,
+        vector<double> &vn_cos, vector<double> &vn_sin) {
+    ostringstream filename_stream_SpMatrix;
+    ostringstream filename_stream_Spvn;
+    ostringstream filename_stream_inte_Spvn;
 
-    filename_stream_SpMatrix_eq << path << emissionProcess_name
-                                << "_SpMatrix_eq.dat";
-    filename_stream_SpMatrix_vis << path << emissionProcess_name
-                                 << "_SpMatrix_vis.dat";
-    filename_stream_SpMatrix_vis_deltaf_restricted << path 
-        << emissionProcess_name << "_SpMatrix_vis_deltaf_restricted.dat";
-    filename_stream_SpMatrix_bulkvis << path << emissionProcess_name
-                                     << "_SpMatrix_bulkvis.dat";
-    filename_stream_SpMatrix_bulkvis_deltaf_restricted << path
-        << emissionProcess_name << "_SpMatrix_bulkvis_deltaf_restricted.dat";
-    filename_stream_SpMatrix_tot << path << emissionProcess_name
-                                 << "_SpMatrix_tot.dat";
-    filename_stream_Spvn_eq << path << emissionProcess_name << "_Spvn_eq.dat";
-    filename_stream_Spvn_vis << path << emissionProcess_name
-                             << "_Spvn_vis.dat";
-    filename_stream_Spvn_vis_deltaf_restricted << path 
-                << emissionProcess_name << "_Spvn_vis_deltaf_restricted.dat";
-    filename_stream_Spvn_bulkvis << path << emissionProcess_name
-                                 << "_Spvn_bulkvis.dat";
-    filename_stream_Spvn_bulkvis_deltaf_restricted << path
-        << emissionProcess_name << "_Spvn_bulkvis_deltaf_restricted.dat";
-    filename_stream_Spvn_tot << path << emissionProcess_name
-                             << "_Spvn_tot.dat";
-    filename_stream_inte_Spvn_eq << path << emissionProcess_name
-                                 << "_Spvn_eq_inte.dat";
-    filename_stream_inte_Spvn_vis << path << emissionProcess_name
-                                  << "_Spvn_vis_inte.dat";
-    filename_stream_inte_Spvn_vis_deltaf_restricted << path
-        << emissionProcess_name << "_Spvn_vis_deltaf_restricted_inte.dat";
-    filename_stream_inte_Spvn_bulkvis << path << emissionProcess_name
-                                      << "_Spvn_bulkvis_inte.dat";
-    filename_stream_inte_Spvn_bulkvis_deltaf_restricted << path
-        << emissionProcess_name << "_Spvn_bulkvis_deltaf_restricted_inte.dat";
-    filename_stream_inte_Spvn_tot << path << emissionProcess_name
-                                  << "_Spvn_tot_inte.dat";
+    filename_stream_SpMatrix << path << emissionProcess_name
+                             << "_SpMatrix_" << type_str << ".dat";
+    filename_stream_Spvn << path << emissionProcess_name << "_Spvn_"
+                         << type_str << ".dat";
+    filename_stream_inte_Spvn << path << emissionProcess_name
+                              << "_Spvn_" << type_str << "_inte.dat";
 
-    ofstream fphotonSpMatrix_eq(filename_stream_SpMatrix_eq.str().c_str());
-    ofstream fphotonSpMatrix_vis(filename_stream_SpMatrix_vis.str().c_str());
-    ofstream fphotonSpMatrix_vis_deltaf_restricted(
-                filename_stream_SpMatrix_vis_deltaf_restricted.str().c_str());
-    ofstream fphotonSpMatrix_bulkvis(
-                filename_stream_SpMatrix_bulkvis.str().c_str());
-    ofstream fphotonSpMatrix_bulkvis_deltaf_restricted(
-            filename_stream_SpMatrix_bulkvis_deltaf_restricted.str().c_str());
-    ofstream fphotonSpMatrix_tot(filename_stream_SpMatrix_tot.str().c_str());
-    ofstream fphotonSpvn_eq(filename_stream_Spvn_eq.str().c_str());
-    ofstream fphotonSpvn_vis(filename_stream_Spvn_vis.str().c_str());
-    ofstream fphotonSpvn_vis_deltaf_restricted(
-                filename_stream_Spvn_vis_deltaf_restricted.str().c_str());
-    ofstream fphotonSpvn_bulkvis(filename_stream_Spvn_bulkvis.str().c_str());
-    ofstream fphotonSpvn_bulkvis_deltaf_restricted(
-                filename_stream_Spvn_bulkvis_deltaf_restricted.str().c_str());
-    ofstream fphotonSpvn_tot(filename_stream_Spvn_tot.str().c_str());
-    ofstream fphotoninteSpvn_eq(filename_stream_inte_Spvn_eq.str().c_str());
-    ofstream fphotoninteSpvn_vis(filename_stream_inte_Spvn_vis.str().c_str());
-    ofstream fphotoninteSpvn_vis_deltaf_restricted(
-                filename_stream_inte_Spvn_vis_deltaf_restricted.str().c_str());
-    ofstream fphotoninteSpvn_bulkvis(
-                filename_stream_inte_Spvn_bulkvis.str().c_str());
-    ofstream fphotoninteSpvn_bulkvis_deltaf_restricted(
-            filename_stream_inte_Spvn_bulkvis_deltaf_restricted.str().c_str());
-    ofstream fphotoninteSpvn_tot(filename_stream_inte_Spvn_tot.str().c_str());
+    ofstream fphotonSpMatrix(filename_stream_SpMatrix.str().c_str());
+    ofstream fphotonSpvn(filename_stream_Spvn.str().c_str());
+    ofstream fphotoninteSpvn(filename_stream_inte_Spvn.str().c_str());
 
     for (int i = 0; i < nphi; i++) {
-        fphotonSpMatrix_eq << phi[i] << "  ";
-        fphotonSpMatrix_vis << phi[i] << "  ";
-        fphotonSpMatrix_bulkvis << phi[i] << "  ";
-        fphotonSpMatrix_vis_deltaf_restricted << phi[i] << "  ";
-        fphotonSpMatrix_bulkvis_deltaf_restricted << phi[i] << "  ";
-        fphotonSpMatrix_tot << phi[i] << "  ";
+        fphotonSpMatrix << phi[i] << "  ";
         for (int j = 0; j < np; j++) {
-            double temp_eq = 0.0;
-            double temp_vis = 0.0;
-            double temp_vis_deltaf_restricted = 0.0;
-            double temp_bulkvis = 0.0;
-            double temp_bulkvis_deltaf_restricted = 0.0;
-            double temp_tot = 0.0;
+            double temp = 0.0;
             for (int k = 0; k < nrapidity; k++) {
-                temp_eq += dNd2pTdphidy_eq[j][i][k]*dy;
-                temp_vis += dNd2pTdphidy_vis[j][i][k]*dy;
-                temp_vis_deltaf_restricted += (
-                        dNd2pTdphidy_vis_deltaf_restricted[j][i][k]*dy);
-                temp_bulkvis += dNd2pTdphidy_bulkvis[j][i][k]*dy;
-                temp_bulkvis_deltaf_restricted += (
-                        dNd2pTdphidy_bulkvis_deltaf_restricted[j][i][k]*dy);
-                temp_tot = dNd2pTdphidy_tot[j][i][k]*dy;
+                temp += dNd2pTdphidy[j][i][k]*dy;
             }
-            fphotonSpMatrix_eq << scientific << setprecision(6) << setw(16) 
-                               << temp_eq << "  ";
-            fphotonSpMatrix_vis << scientific << setprecision(6) << setw(16) 
-                                << temp_vis << "  ";
-            fphotonSpMatrix_vis_deltaf_restricted << scientific 
-                                << setprecision(6) << setw(16) 
-                                << temp_vis_deltaf_restricted << "  ";
-            fphotonSpMatrix_bulkvis << scientific << setprecision(6)
-                                    << setw(16) << temp_bulkvis << "  ";
-            fphotonSpMatrix_bulkvis_deltaf_restricted << scientific
-                                << setprecision(6) << setw(16) 
-                                << temp_bulkvis_deltaf_restricted << "  ";
-            fphotonSpMatrix_tot << scientific << setprecision(6) << setw(16) 
-                                << temp_tot << "  ";
+            fphotonSpMatrix << scientific << setprecision(6) << setw(16)
+                            << temp << "  ";
         }
-        fphotonSpMatrix_eq << endl;
-        fphotonSpMatrix_vis << endl;
-        fphotonSpMatrix_vis_deltaf_restricted << endl;
-        fphotonSpMatrix_bulkvis << endl;
-        fphotonSpMatrix_bulkvis_deltaf_restricted << endl;
-        fphotonSpMatrix_tot << endl;
+        fphotonSpMatrix << endl;
     }
     for (int i = 0; i < np; i++) {
-        fphotonSpvn_eq << scientific << setprecision(6) << setw(16) 
-                       << p[i] << "  " << dNd2pT_eq[i] << "  " ;
-        fphotonSpvn_vis << scientific << setprecision(6) << setw(16) 
-                        << p[i] << "  " << dNd2pT_vis[i] << "  " ;
-        fphotonSpvn_vis_deltaf_restricted << scientific 
-            << setprecision(6) << setw(16) 
-            << p[i] << "  " << dNd2pT_vis_deltaf_restricted[i] << "  " ;
-        fphotonSpvn_bulkvis << scientific << setprecision(6) << setw(16) 
-                            << p[i] << "  " << dNd2pT_bulkvis[i] << "  " ;
-        fphotonSpvn_bulkvis_deltaf_restricted << scientific
-            << setprecision(6) << setw(16) 
-            << p[i] << "  " << dNd2pT_bulkvis_deltaf_restricted[i] << "  " ;
-        fphotonSpvn_tot << scientific << setprecision(6) << setw(16) 
-                        << p[i] << "  " << dNd2pT_tot[i] << "  " ;
+        fphotonSpvn << scientific << setprecision(6) << setw(16)
+                    << p[i] << "  " << dNd2pT[i] << "  " ;
         for (int order = 1; order < norder; order++) {
-            fphotonSpvn_eq << scientific << setprecision(6) << setw(16) 
-                           << vnpT_cos_eq[order][i] << "  " 
-                           << vnpT_sin_eq[order][i] << "  "
-                           << sqrt(pow(vnpT_cos_eq[order][i], 2)
-                                   + pow(vnpT_sin_eq[order][i], 2)) << "  ";
-            fphotonSpvn_vis << scientific << setprecision(6) << setw(16) 
-                            << vnpT_cos_vis[order][i] << "  "
-                            << vnpT_sin_vis[order][i] << "  "
-                            << sqrt(pow(vnpT_cos_vis[order][i], 2)
-                                    + pow(vnpT_sin_vis[order][i], 2)) << "  ";
-            fphotonSpvn_vis_deltaf_restricted << scientific 
-                << setprecision(6) << setw(16) 
-                << vnpT_cos_vis_deltaf_restricted[order][i] << "  "
-                << vnpT_sin_vis_deltaf_restricted[order][i] << "  "
-                << sqrt(pow(vnpT_cos_vis_deltaf_restricted[order][i], 2)
-                        + pow(vnpT_sin_vis_deltaf_restricted[order][i], 2))
-                << "  ";
-            fphotonSpvn_bulkvis << scientific << setprecision(6) << setw(16) 
-                                << vnpT_cos_bulkvis[order][i] << "  "
-                                << vnpT_sin_bulkvis[order][i] << "  "
-                                << sqrt(pow(vnpT_cos_bulkvis[order][i], 2)
-                                        + pow(vnpT_sin_bulkvis[order][i], 2))
-                                << "  ";
-            fphotonSpvn_bulkvis_deltaf_restricted << scientific 
-                << setprecision(6) << setw(16) 
-                << vnpT_cos_bulkvis_deltaf_restricted[order][i] << "  "
-                << vnpT_sin_bulkvis_deltaf_restricted[order][i] << "  "
-                << sqrt(pow(vnpT_cos_bulkvis_deltaf_restricted[order][i], 2)
-                        + pow(vnpT_sin_bulkvis_deltaf_restricted[order][i], 2))
-                << "  ";
-            fphotonSpvn_tot << scientific << setprecision(6) << setw(16) 
-                            << vnpT_cos_tot[order][i] << "  "
-                            << vnpT_sin_tot[order][i] << "  "
-                            << sqrt(pow(vnpT_cos_tot[order][i], 2)
-                                    + pow(vnpT_sin_tot[order][i], 2)) << "  ";
+            fphotonSpvn << scientific << setprecision(6) << setw(16)
+                        << vnpT_cos[order][i] << "  "
+                        << vnpT_sin[order][i] << "  ";
         }
-        fphotonSpvn_eq << endl;
-        fphotonSpvn_vis << endl;
-        fphotonSpvn_vis_deltaf_restricted << endl;
-        fphotonSpvn_bulkvis << endl;
-        fphotonSpvn_bulkvis_deltaf_restricted << endl;
-        fphotonSpvn_tot << endl;
+        fphotonSpvn << endl;
     }
 
     for (int order = 0; order < norder; order++) {
-        fphotoninteSpvn_eq << scientific << setprecision(6) << setw(16)
-                           << order << "   " << vn_cos_eq[order] << "   "
-                           << vn_sin_eq[order] << "   "
-                           << sqrt(pow(vn_cos_eq[order], 2)
-                                   + pow(vn_sin_eq[order], 2)) << endl;
-        fphotoninteSpvn_vis << scientific << setprecision(6) << setw(16)
-                            << order << "   " << vn_cos_vis[order] << "   "
-                            << vn_sin_vis[order] << "   "
-                            << sqrt(pow(vn_cos_vis[order], 2)
-                                    + pow(vn_sin_vis[order], 2)) << endl;
-        fphotoninteSpvn_vis_deltaf_restricted << scientific
-            << setprecision(6) << setw(16) 
-            << order << "   " << vn_cos_vis_deltaf_restricted[order] << "   "
-            << vn_sin_vis_deltaf_restricted[order] << "   "
-            << sqrt(pow(vn_cos_vis_deltaf_restricted[order], 2)
-                    + pow(vn_sin_vis_deltaf_restricted[order], 2)) << endl;
-        fphotoninteSpvn_bulkvis << scientific << setprecision(6) << setw(16) 
-                                << order << "   "
-                                << vn_cos_bulkvis[order] << "   " 
-                                << vn_sin_bulkvis[order] << "   " 
-                                << sqrt(pow(vn_cos_bulkvis[order], 2)
-                                        + pow(vn_sin_bulkvis[order], 2))
-                                << endl;
-        fphotoninteSpvn_bulkvis_deltaf_restricted << scientific
-            << setprecision(6) << setw(16) 
-            << order << "   "
-            << vn_cos_bulkvis_deltaf_restricted[order] << "   " 
-            << vn_sin_bulkvis_deltaf_restricted[order] << "   " 
-            << sqrt(pow(vn_cos_bulkvis_deltaf_restricted[order], 2)
-                    + pow(vn_sin_bulkvis_deltaf_restricted[order], 2)) << endl;
-        fphotoninteSpvn_tot << scientific << setprecision(6) << setw(16) 
-                            << order << "   " << vn_cos_tot[order] << "   " 
-                            << vn_sin_tot[order] << "   " 
-                            << sqrt(pow(vn_cos_tot[order], 2)
-                                    + pow(vn_sin_tot[order], 2)) << endl;
+        fphotoninteSpvn << scientific << setprecision(6) << setw(16)
+                        << order << "   " << vn_cos[order] << "   "
+                        << vn_sin[order] << endl;
     }
 
-    fphotonSpMatrix_eq.close();
-    fphotonSpMatrix_vis.close();
-    fphotonSpMatrix_vis_deltaf_restricted.close();
-    fphotonSpMatrix_bulkvis.close();
-    fphotonSpMatrix_bulkvis_deltaf_restricted.close();
-    fphotonSpMatrix_tot.close();
-    fphotonSpvn_eq.close();
-    fphotonSpvn_vis.close();
-    fphotonSpvn_vis_deltaf_restricted.close();
-    fphotonSpvn_bulkvis.close();
-    fphotonSpvn_bulkvis_deltaf_restricted.close();
-    fphotonSpvn_tot.close();
-    fphotoninteSpvn_eq.close();
-    fphotoninteSpvn_vis.close();
-    fphotoninteSpvn_vis_deltaf_restricted.close();
-    fphotoninteSpvn_bulkvis.close();
-    fphotoninteSpvn_bulkvis_deltaf_restricted.close();
-    fphotoninteSpvn_tot.close();
+    fphotonSpMatrix.close();
+    fphotonSpvn.close();
+    fphotoninteSpvn.close();
+}
+
+
+
+void ThermalPhoton::outputPhoton_SpvnpT_shell(string path) {
+    outputPhoton_SpvnpT(path, "eq", dNd2pTdphidy_eq,
+                        dNd2pT_eq, vnpT_cos_eq, vnpT_sin_eq,
+                        vn_cos_eq, vn_sin_eq);
+    outputPhoton_SpvnpT(path, "vis", dNd2pTdphidy_vis,
+                        dNd2pT_vis, vnpT_cos_vis, vnpT_sin_vis,
+                        vn_cos_vis, vn_sin_vis);
+    outputPhoton_SpvnpT(path, "bulkvis", dNd2pTdphidy_bulkvis,
+                        dNd2pT_bulkvis, vnpT_cos_bulkvis, vnpT_sin_bulkvis,
+                        vn_cos_bulkvis, vn_sin_bulkvis);
+    outputPhoton_SpvnpT(path, "vis_deltaf_restricted",
+                        dNd2pTdphidy_vis_deltaf_restricted,
+                        dNd2pT_vis_deltaf_restricted,
+                        vnpT_cos_vis_deltaf_restricted,
+                        vnpT_sin_vis_deltaf_restricted,
+                        vn_cos_vis_deltaf_restricted,
+                        vn_sin_vis_deltaf_restricted);
+    outputPhoton_SpvnpT(path, "bulkvis_deltaf_restricted",
+                        dNd2pTdphidy_bulkvis_deltaf_restricted,
+                        dNd2pT_bulkvis_deltaf_restricted,
+                        vnpT_cos_bulkvis_deltaf_restricted,
+                        vnpT_sin_bulkvis_deltaf_restricted,
+                        vn_cos_bulkvis_deltaf_restricted,
+                        vn_sin_bulkvis_deltaf_restricted);
+    outputPhoton_SpvnpT(path, "tot", dNd2pTdphidy_tot,
+                        dNd2pT_tot, vnpT_cos_tot, vnpT_sin_tot,
+                        vn_cos_tot, vn_sin_tot);
 }
 
 
