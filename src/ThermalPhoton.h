@@ -53,20 +53,22 @@ class ThermalPhoton {
     double ***dNd2pTdphidy_vis_deltaf_restricted;
     double ***dNd2pTdphidy_bulkvis_deltaf_restricted;
 
-    std::vector<double> dNd2pT_eq;
     double **vnpT_cos_eq, **vnpT_sin_eq;
-    std::vector<double> dNd2pT_vis;
+    double ***vnypT_cos_eq, ***vnypT_sin_eq;
     double **vnpT_cos_vis, **vnpT_sin_vis;
-    std::vector<double> dNd2pT_vis_deltaf_restricted;
+    double ***vnypT_cos_vis, ***vnypT_sin_vis;
     double **vnpT_cos_vis_deltaf_restricted;
     double **vnpT_sin_vis_deltaf_restricted;
-    std::vector<double> dNd2pT_bulkvis;
+    double ***vnypT_cos_vis_deltaf_restricted;
+    double ***vnypT_sin_vis_deltaf_restricted;
     double **vnpT_cos_bulkvis, **vnpT_sin_bulkvis;
-    std::vector<double> dNd2pT_bulkvis_deltaf_restricted;
+    double ***vnypT_cos_bulkvis, ***vnypT_sin_bulkvis;
     double **vnpT_cos_bulkvis_deltaf_restricted;
     double **vnpT_sin_bulkvis_deltaf_restricted;
-    std::vector<double> dNd2pT_tot;
+    double ***vnypT_cos_bulkvis_deltaf_restricted;
+    double ***vnypT_sin_bulkvis_deltaf_restricted;
     double **vnpT_cos_tot, **vnpT_sin_tot;
+    double ***vnypT_cos_tot, ***vnypT_sin_tot;
 
     std::vector<double> vn_cos_eq;
     std::vector<double> vn_sin_eq;
@@ -182,7 +184,8 @@ class ThermalPhoton {
         std::vector<double> &bulkPi, double T, double muB,
         double x_local, double tau, double volume, double fraction);
 
-    void calPhoton_SpvnpT(double ***dNd2pTdphipy, std::vector<double> &dNd2pT,
+    void calPhoton_SpvnpT(double ***dNd2pTdphipy,
+                          double ***vnypT_cos, double *** vnypT_sin,
                           double **vnpT_cos, double **vnpT_sin,
                           std::vector<double> &vn_cos,
                           std::vector<double> &vn_sin);
@@ -191,7 +194,7 @@ class ThermalPhoton {
     void calPhoton_SpvnpT_dxperpdtau();
     void outputPhoton_SpvnpT(std::string path, std::string type_str,
                              double ***dNd2pTdphidy,
-                             std::vector<double> &dNd2pT,
+                             double ***vnypT_cos, double ***vnypT_sin,
                              double **vnpT_cos, double **vnpT_sin,
                              std::vector<double> &vn_cos,
                              std::vector<double> &vn_sin);
