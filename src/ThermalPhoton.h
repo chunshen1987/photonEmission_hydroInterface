@@ -68,9 +68,6 @@ class ThermalPhoton {
     std::vector<double> dNd2pT_tot;
     double **vnpT_cos_tot, **vnpT_sin_tot;
 
-    double dNdy_eq, dNdy_vis, dNdy_tot, dNdy_bulkvis;
-    double dNdy_vis_deltaf_restricted, dNdy_bulkvis_deltaf_restricted;
-
     std::vector<double> vn_cos_eq;
     std::vector<double> vn_sin_eq;
     std::vector<double> vn_cos_vis;
@@ -185,9 +182,8 @@ class ThermalPhoton {
         std::vector<double> &bulkPi, double T, double muB,
         double x_local, double tau, double volume, double fraction);
 
-    void calPhoton_SpvnpT(double ***dNd2pTdphipy,
-                          std::vector<double> &dNd2pT, double **vnpT_cos,
-                          double **vnpT_sin, double &dNdy,
+    void calPhoton_SpvnpT(double ***dNd2pTdphipy, std::vector<double> &dNd2pT,
+                          double **vnpT_cos, double **vnpT_sin,
                           std::vector<double> &vn_cos,
                           std::vector<double> &vn_sin);
     void calPhoton_SpvnpT_shell();
