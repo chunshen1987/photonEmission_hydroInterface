@@ -161,6 +161,21 @@ double ParameterReader::getVal(string name)
 
 
 //----------------------------------------------------------------------
+double ParameterReader::getVal(string name, double value) {
+    long idx = find(name);
+    if (idx!=-1) {
+        return (*values)[idx];
+    } else {
+        cout << "ParameterReader::getVal error: parameter with name "
+             << name << " not found. Using the default value: "
+             << value << endl;
+        return(value);
+    }
+    return(value);
+}
+
+
+//----------------------------------------------------------------------
 void ParameterReader::echo()
 /*
   Print out all stored parameters to screen.

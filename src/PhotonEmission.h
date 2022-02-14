@@ -36,6 +36,7 @@ class PhotonEmission {
     int hydro_flag;
     int differential_flag;
     int turn_off_transverse_flow;
+    int turn_on_muB_;
     int calHGIdFlag;
 
     double **lambda;  // Lorentz boost transverse only

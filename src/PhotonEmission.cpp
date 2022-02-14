@@ -34,6 +34,8 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     hydro_flag = paraRdr->getVal("hydro_flag");
     differential_flag = paraRdr->getVal("differential_flag");
     turn_off_transverse_flow = paraRdr->getVal("turn_off_transverse_flow");
+    turn_on_muB_ = static_cast<int>(paraRdr->getVal("turn_on_muB", 1));
+
 
     set_hydroGridinfo();
     print_hydroGridinfo();
@@ -653,7 +655,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
 
         int idx_Tb = 0;
         const double temp_local = fluidCellptr.temperature;
-        const double muB_local = fluidCellptr.muB;
+        const double muB_local = turn_on_muB_*fluidCellptr.muB;
 
         if (temp_local < T_dec ||
             temp_local > T_cuthigh || temp_local < T_cutlow) {

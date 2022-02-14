@@ -47,6 +47,7 @@ class ParameterReader {
 
     // return the value for parameter with "name"
     double getVal(std::string name);
+    double getVal(std::string name, double value);
 
     // print out all parameters to the screen
     void echo();
