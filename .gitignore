@@ -1,6 +1,10 @@
 *.[oa]
 *.~
 .DS_Store
-results/
+results*
 test/
+*.e
+lib/
 hydro_photon_emission
+__MACOSX
+utilities/*.pdf

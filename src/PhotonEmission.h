@@ -8,6 +8,7 @@
 #include <iomanip>
 #include <string>
 #include <fstream>
+#include <memory>
 #include <vector>
 
 #include "Hydroinfo_h5.h"
@@ -15,12 +16,11 @@
 #include "ThermalPhoton.h"
 #include "ParameterReader.h"
 
-using namespace std;
 
 class PhotonEmission {
  private:
-    ParameterReader *paraRdr;
-    string output_path;
+    std::shared_ptr<ParameterReader> paraRdr;
+    std::string output_path;
 
     int neta;
     int np, nphi, nrapidity;
@@ -36,44 +36,47 @@ class PhotonEmission {
     int hydro_flag;
     int differential_flag;
     int turn_off_transverse_flow;
+    int turn_on_muB_;
     int calHGIdFlag;
 
-    double** lambda; // Lorentz boost transverse only
-    double* Eq_localrest_Tb;
-    double* pi_photon_Tb;
-    double* bulkPi_Tb;
+    double **lambda;  // Lorentz boost transverse only
+    std::vector<double> Eq_localrest_Tb;
+    std::vector<double> pi_photon_Tb;
+    std::vector<double> bulkPi_Tb;
 
-    double ***dNd2pTdphidy_eq, *dNd2pT_eq;
+    std::vector<double> dNd2pT_eq;
+    std::vector<double> dNd2pT;
+    double ***dNd2pTdphidy_eq;
     double **vnpT_cos_eq, **vnpT_sin_eq;
     double ***dNd2pTdphidy;
-    double *dNd2pT;
     double **vnpT_cos, **vnpT_sin;
 
     double dNdy_eq, dNdy_tot;
-    double *vn_sin_eq;
-    double *vn_cos_tot, *vn_sin_tot;
-
+    std::vector<double> vn_sin_eq;
     std::vector<double> vn_cos_eq;
+    std::vector<double> vn_cos_tot;
+    std::vector<double> vn_sin_tot;
 
     //photon production processes
-    ThermalPhoton* photon_QGP_2_to_2;
-    ThermalPhoton* photon_QGP_collinear;
-    ThermalPhoton* photon_HG_meson;
-    ThermalPhoton* photon_HG_omega;
-    ThermalPhoton* photon_HG_rho_spectralfun;
-    ThermalPhoton* photon_HG_pipiBremsstrahlung;
+    std::unique_ptr<ThermalPhoton> photon_QGP_2_to_2;
+    std::unique_ptr<ThermalPhoton> photon_QGP_collinear;
+    std::unique_ptr<ThermalPhoton> photon_HG_meson;
+    std::unique_ptr<ThermalPhoton> photon_HG_omega;
+    std::unique_ptr<ThermalPhoton> photon_HG_rho_spectralfun;
+    std::unique_ptr<ThermalPhoton> photon_HG_pipiBremsstrahlung;
 
-    ThermalPhoton* photon_pirho;
-    ThermalPhoton* photon_KstarK;
-    ThermalPhoton* photon_piK;
-    ThermalPhoton* photon_piKstar;
-    ThermalPhoton* photon_pipi;
-    ThermalPhoton* photon_rhoK;
-    ThermalPhoton* photon_rho;
-    ThermalPhoton* photon_pirho_omegat;
+    std::unique_ptr<ThermalPhoton> photon_pirho;
+    std::unique_ptr<ThermalPhoton> photon_KstarK;
+    std::unique_ptr<ThermalPhoton> photon_piK;
+    std::unique_ptr<ThermalPhoton> photon_piKstar;
+    std::unique_ptr<ThermalPhoton> photon_pipi;
+    std::unique_ptr<ThermalPhoton> photon_rhoK;
+    std::unique_ptr<ThermalPhoton> photon_rho;
+    std::unique_ptr<ThermalPhoton> photon_pirho_omegat;
+
 
  public:
-    PhotonEmission(ParameterReader* paraRdr_in);
+    PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in);
     ~PhotonEmission();
 
     void set_hydroGridinfo();
@@ -85,7 +88,7 @@ class PhotonEmission {
     void calPhoton_total_SpMatrix();
     void calPhoton_SpvnpT_individualchannel();
     void calPhoton_total_Spvn();
-    void outputPhoton_total_SpvnpT(string );
+    void outputPhoton_total_SpvnpT(std::string );
     void outputPhotonSpvn();
 };
 

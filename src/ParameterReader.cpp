@@ -12,6 +12,7 @@ Ver 1.02
 #include "ParameterReader.h"
 
 using namespace std;
+using namespace ARSENAL;
 
 //----------------------------------------------------------------------
 ParameterReader::ParameterReader()
@@ -156,6 +157,21 @@ double ParameterReader::getVal(string name)
     cout << "ParameterReader::getVal error: parameter with name " << name << " not found." << endl;
     exit(-1);
   }
+}
+
+
+//----------------------------------------------------------------------
+double ParameterReader::getVal(string name, double value) {
+    long idx = find(name);
+    if (idx!=-1) {
+        return (*values)[idx];
+    } else {
+        cout << "ParameterReader::getVal error: parameter with name "
+             << name << " not found. Using the default value: "
+             << value << endl;
+        return(value);
+    }
+    return(value);
 }
 
 

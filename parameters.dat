@@ -1,4 +1,4 @@
-hydro_flag = 1                # read in mode for hydro medium
+hydro_flag = 2                # read in mode for hydro medium
                               # 0: read in hdf5 file
                               # 1: read in binary file output from MUSIC
                               # 2: read in binary file output from new MUSIC (no grid)
@@ -31,11 +31,12 @@ photon_y_i = 0.0              # the smallest photon rapidity
 photon_y_f = 0.0              # the largest photon rapidity
 
 norder = 10                   # calculate photon vn to norder
+turn_on_muB = 1               # flag to include muB dependence in photon rates
 
 T_dec = 0.105                 # freeze out temperature (GeV)
 T_sw_high = 0.180             # high end of the switching temperature
 T_sw_low = 0.1795             # low end of the switching temperature
-T_cuthigh = 1.0               # maximum allowed emission T (GeV)
+T_cuthigh = 0.80              # maximum allowed emission T (GeV)
 T_cutlow = 0.10               # minimum allowed emission T (GeV)
 
 calHGIdFlag = 0               # Flag to decide whether to calculate individual HG channels

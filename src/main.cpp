@@ -17,6 +17,7 @@
 #include <cmath>
 #include <iomanip>
 #include <cstdlib>
+#include <memory>
 
 #include "./PhotonEmission.h"
 #include "./Hydroinfo_h5.h"
@@ -32,7 +33,7 @@ int main(int argc, char** argv) {
     Stopwatch sw;
 
     sw.tic();
-    ParameterReader* paraRdr = new ParameterReader();
+    std::shared_ptr<ParameterReader> paraRdr(new ParameterReader());
     paraRdr->readFromFile("parameters.dat");
     paraRdr->readFromArguments(argc, argv);
 
@@ -55,7 +56,7 @@ int main(int argc, char** argv) {
         HydroinfoH5* hydroinfo_ptr = new HydroinfoH5(
                         "results/JetData.h5", bufferSize, hydroInfoVisflag);
         // calculate thermal photons from the hydro medium
-        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, 
+        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
                                          etaweight_ptr);
         delete hydroinfo_ptr;
     } else if (hydro_flag == 1) {
@@ -64,7 +65,7 @@ int main(int argc, char** argv) {
         int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
-        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, 
+        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
                                          etaweight_ptr);
         delete hydroinfo_ptr;
     } else if (hydro_flag == 3) {
@@ -73,16 +74,21 @@ int main(int argc, char** argv) {
         int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
-        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, 
+        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
                                          etaweight_ptr);
         delete hydroinfo_ptr;
     } else if (hydro_flag == 2) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
-        int hydro_mode = 10;
+        int hydro_mode = 12;
         int nskip_tau = 1;
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
-        thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
+        if (hydroinfo_ptr->isBoostInvariant()) {
+            thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
+                                             etaweight_ptr);
+        } else {
+            thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
+        }
         delete hydroinfo_ptr;
     } else {
         cout << "main: unrecognized hydro_flag = " << hydro_flag << endl;
