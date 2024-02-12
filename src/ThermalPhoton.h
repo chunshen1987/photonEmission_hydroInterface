@@ -151,6 +151,8 @@ class ThermalPhoton {
     virtual void analyticRatesBulkVis(double T, std::vector<double> &Eq,
                                       std::vector<double> &eqrate_ptr);
 
+    void checkAnalyticRates();
+
     void getPhotonemissionRate(std::vector<double> &Eq,
                                std::vector<double> &pi_zz,
                                std::vector<double> &bulkPi,

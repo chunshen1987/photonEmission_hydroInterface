@@ -407,6 +407,32 @@ void ThermalPhoton::analyticRatesBulkVis(
 }
 
 
+void ThermalPhoton::checkAnalyticRates() {
+    ofstream checkRates("checkPhotonRates.dat");
+    double Emin = 0.05;
+    double Tmin = 0.1;
+    double dE = 0.05;
+    double dT = 0.002;
+    int nE = 80;
+    int nT = 351;
+    vector<double> Eq(nE, 0);
+    for (int iE = 0; iE < nE; iE++) {
+        Eq[iE] = Emin + iE*dE;
+    }
+    vector<double> eqrate(nE, 0);
+    for (int iT = 0; iT < nT; iT++) {
+        double T_local = Tmin + iT*dT;
+        analyticRates(T_local, Eq, eqrate);
+        for (const auto rate_i: eqrate) {
+            checkRates << std::scientific << std::setprecision(6)
+                       << std::setw(10) << rate_i << "  ";
+        }
+        checkRates << std::endl;
+    }
+    checkRates.close();
+}
+
+
 void ThermalPhoton::getPhotonemissionRate(
     vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
     const double T, const double muB,
