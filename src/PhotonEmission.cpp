@@ -249,7 +249,7 @@ void PhotonEmission::calPhotonemission(
     double vz_local = 0.;
     double bulkPi_local = 0.;
     double tau_local = 1.;
-    double eta_local = 0.;
+    //double eta_local = 0.;
     std::vector<double> volume(neta, 0);
     double** pi_tensor_lab = createA2DMatrix(4, 4, 0.);
 
@@ -311,6 +311,7 @@ void PhotonEmission::calPhotonemission(
                 if (turn_off_transverse_flow == 1) {
                     vx_local = 0.0;
                     vy_local = 0.0;
+                    vz_local = 0.0;
                 } else {
                     vx_local = fluidCellptr->vx;
                     vy_local = fluidCellptr->vy;
@@ -326,20 +327,21 @@ void PhotonEmission::calPhotonemission(
 
                 getTransverseflow_u_mu_low(flow_u_mu_low,
                                            vx_local, vy_local, vz_local);
+
                 double prefactor_pimunu = 1./(2.*(e_local + p_local));
                 for (int jj = 0; jj < neta; jj++) {
-                    eta_local = eta_ptr[jj];
+                    //eta_local = eta_ptr[jj];
 
                     // photon momentum loops
                     for (int k = 0; k < nrapidity; k++) {
-                        double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
-                        double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
+                        double cosh_y = cosh(y_q[k]);
+                        double sinh_y = sinh(y_q[k]);
                         for (int m = 0; m < nphi; m++) {
                             for (int l = 0; l < np; l++) {
-                                p_lab_local[0] = p_q[l]*cosh_y_minus_eta;
+                                p_lab_local[0] = p_q[l]*cosh_y;
                                 p_lab_local[1] = p_q[l]*cos_phiq[m];
                                 p_lab_local[2] = p_q[l]*sin_phiq[m];
-                                p_lab_local[3] = p_q[l]*sinh_y_minus_eta;
+                                p_lab_local[3] = p_q[l]*sinh_y;
                                 p_lab_lowmu[0] = p_lab_local[0];
 
                                 for (int local_i = 1; local_i < 4; local_i++)
@@ -619,7 +621,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     double dtau = hydroinfo_MUSIC_ptr->get_hydro_dtau();
     double dx = hydroinfo_MUSIC_ptr->get_hydro_dx();
     double deta = hydroinfo_MUSIC_ptr->get_hydro_deta();
-    double eta_max = hydroinfo_MUSIC_ptr->get_hydro_eta_max();
+    //double eta_max = hydroinfo_MUSIC_ptr->get_hydro_eta_max();
     double X_max = hydroinfo_MUSIC_ptr->get_hydro_x_max();
     double Nskip_x = hydroinfo_MUSIC_ptr->get_hydro_Nskip_x();
     double Nskip_eta = hydroinfo_MUSIC_ptr->get_hydro_Nskip_eta();
@@ -662,52 +664,70 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             // fluid cell is out of interest
             continue;
         }
-        double ux, uy, ueta;
+        double ux, uy, uz;
         if (turn_off_transverse_flow == 1) {
             ux = 0.0;
             uy = 0.0;
-            ueta = 0.0;
+            uz = 0.0;
         } else {
             ux = fluidCellptr.ux;
             uy = fluidCellptr.uy;
-            ueta = fluidCellptr.ueta;
+            uz = fluidCellptr.uz;
         }
-        double utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
+        double ut = sqrt(1. + ux*ux + uy*uy + uz*uz);
+        double LorentzBoost[4][4] = {
+            {ut, ux, uy, uz},
+            {ux, 1. + ux * ux / (ut + 1.), ux * uy / (ut + 1.),
+             ux * uz / (ut + 1.)},
+            {uy, ux * uy / (ut + 1.), 1. + uy * uy / (ut + 1.),
+             uy * uz / (ut + 1.)},
+            {uz, ux * uz / (ut + 1.), uy * uz / (ut + 1.),
+             1. + uz * uz / (ut + 1.)}
+        };
 
-        double pi11 = fluidCellptr.pi11;
-        double pi12 = fluidCellptr.pi12;
-        double pi13 = fluidCellptr.pi13;
-        double pi22 = fluidCellptr.pi22;
-        double pi23 = fluidCellptr.pi23;
-        // reconstruct all other components of the shear stress tensor
-        double pi01 = (ux*pi11 + uy*pi12 + ueta*pi13)/utau;
-        double pi02 = (ux*pi12 + uy*pi22 + ueta*pi23)/utau;
-        double pi33 = (utau*(ux*pi01 + uy*pi02) - utau*utau*(pi11 + pi22)
-                       + ueta*(ux*pi13 + uy*pi23))/(utau*utau - ueta*ueta);
-        double pi00 = pi11 + pi22 + pi33;
-        double pi03 = (ux*pi13 + uy*pi23 + ueta*pi33)/utau;
+        double pi_LRF[4][4] = {
+            {0, 0, 0, 0},
+            {0, fluidCellptr.pi11, fluidCellptr.pi12, fluidCellptr.pi13},
+            {0, fluidCellptr.pi12, fluidCellptr.pi22, fluidCellptr.pi23},
+            {0, fluidCellptr.pi13, fluidCellptr.pi23,
+                - fluidCellptr.pi11 - fluidCellptr.pi22}
+        };
+        // reconstruct shear stress tensor in the lab frame
+        double pi_tz[4][4];
+        for (int i = 0; i < 4; i++) {
+            for (int j = i; j < 4; j++) {
+                pi_tz[i][j] = 0.;
+                for (int a = 0; a < 4; a++) {
+                    for (int b = 0; b < 4; b++) {
+                        pi_tz[i][j] += LorentzBoost[a][i] *
+                            pi_LRF[a][b] * LorentzBoost[b][j];
+                    }
+                }
+                pi_tz[j][i] = pi_tz[i][j];
+            }
+        }
 
         double bulkPi_local = fluidCellptr.bulkPi;
 
-        flow_u_mu_low[0] = utau;
+        flow_u_mu_low[0] = ut;
         flow_u_mu_low[1] = -ux;
         flow_u_mu_low[2] = -uy;
-        flow_u_mu_low[3] = -ueta;
+        flow_u_mu_low[3] = -uz;
 
         double prefactor_pimunu = 1./2.;
-        double eta_local = -eta_max + fluidCellptr.ieta*deta;
+        //double eta_local = -eta_max + fluidCellptr.ieta*deta;
         double x_local = -X_max + fluidCellptr.ix*dx;
 
         // photon momentum loops
         for (int k = 0; k < nrapidity; k++) {
-            double cosh_y_minus_eta = cosh(y_q[k] - eta_local);
-            double sinh_y_minus_eta = sinh(y_q[k] - eta_local);
+            double cosh_y = cosh(y_q[k]);
+            double sinh_y = sinh(y_q[k]);
             for (int m = 0; m < nphi; m++) {
                 for (int l = 0; l < np; l++) {
-                    p_lab_local[0] = p_q[l]*cosh_y_minus_eta;
+                    p_lab_local[0] = p_q[l]*cosh_y;
                     p_lab_local[1] = p_q[l]*cos_phiq[m];
                     p_lab_local[2] = p_q[l]*sin_phiq[m];
-                    p_lab_local[3] = p_q[l]*sinh_y_minus_eta;
+                    p_lab_local[3] = p_q[l]*sinh_y;
 
                     double Eq_localrest_temp = 0.0e0;
                     for (int local_i = 0; local_i < 4; local_i++) {
@@ -716,16 +736,16 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                     }
 
                     double pi_photon = (
-                          p_lab_local[0]*p_lab_local[0]*pi00
-                        - 2.*p_lab_local[0]*p_lab_local[1]*pi01
-                        - 2.*p_lab_local[0]*p_lab_local[2]*pi02
-                        - 2.*p_lab_local[0]*p_lab_local[3]*pi03
-                        + p_lab_local[1]*p_lab_local[1]*pi11
-                        + 2.*p_lab_local[1]*p_lab_local[2]*pi12
-                        + 2.*p_lab_local[1]*p_lab_local[3]*pi13
-                        + p_lab_local[2]*p_lab_local[2]*pi22
-                        + 2.*p_lab_local[2]*p_lab_local[3]*pi23
-                        + p_lab_local[3]*p_lab_local[3]*pi33);
+                          p_lab_local[0]*p_lab_local[0]*pi_tz[0][0]
+                        - 2.*p_lab_local[0]*p_lab_local[1]*pi_tz[0][1]
+                        - 2.*p_lab_local[0]*p_lab_local[2]*pi_tz[0][2]
+                        - 2.*p_lab_local[0]*p_lab_local[3]*pi_tz[0][3]
+                        + p_lab_local[1]*p_lab_local[1]*pi_tz[1][1]
+                        + 2.*p_lab_local[1]*p_lab_local[2]*pi_tz[1][2]
+                        + 2.*p_lab_local[1]*p_lab_local[3]*pi_tz[1][3]
+                        + p_lab_local[2]*p_lab_local[2]*pi_tz[2][2]
+                        + 2.*p_lab_local[2]*p_lab_local[3]*pi_tz[2][3]
+                        + p_lab_local[3]*p_lab_local[3]*pi_tz[3][3]);
 
                     Eq_localrest_Tb[idx_Tb] = Eq_localrest_temp;
                     pi_photon_Tb[idx_Tb] = pi_photon*prefactor_pimunu;

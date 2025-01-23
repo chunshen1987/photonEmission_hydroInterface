@@ -761,7 +761,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
         zeroCell.muB = 0.;
         zeroCell.ux = 0.;
         zeroCell.uy = 0.;
-        zeroCell.ueta = 0.;
+        zeroCell.uz = 0.;
         zeroCell.pi11 = 0.;
         zeroCell.pi12 = 0.;
         zeroCell.pi13 = 0.;
@@ -791,7 +791,7 @@ void Hydroinfo_MUSIC::readHydroData(int whichHydro, int nskip_tau_in) {
             newCell.cs2 = cell_info[7];
             newCell.ux = cell_info[8];
             newCell.uy = cell_info[9];
-            newCell.ueta = cell_info[10];
+            newCell.uz = cell_info[10];
             if (turn_on_rhob == 1) {
                 newCell.muB = cell_info[12];
             } else {
@@ -1151,12 +1151,10 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         info->pressure = HydroCell3DIdealInterp.pressure;
         info->sd = (info->ed + info->pressure)/(info->temperature + 1e-16);
     } else if (hydroWhichHydro == 12) {
-        float ux = HydroCell3DnewInterp.ux;
-        float uy = HydroCell3DnewInterp.uy;
-        float ueta = HydroCell3DnewInterp.ueta;
-        float utau = sqrt(1. + ux*ux + uy*uy + ueta*ueta);
-        float ut = utau*cosh_eta + ueta*sinh_eta;
-        float uz = utau*sinh_eta + ueta*cosh_eta;
+        float ux = HydroCell3DIdealInterp.ux;
+        float uy = HydroCell3DIdealInterp.uy;
+        float uz = HydroCell3DIdealInterp.uz;
+        float ut = sqrt(1. + ux*ux + uy*uy + uz*uz);
         info->vx = ux/ut;
         info->vy = uy/ut;
         info->vz = uz/ut;
@@ -1164,22 +1162,37 @@ void Hydroinfo_MUSIC::getHydroValues(float x, float y,
         info->ed = 1.0;
         info->sd = 0.0;
         info->pressure = 0.0;
-        info->pi[0][0] = 0.;
-        info->pi[0][1] = 0.;
-        info->pi[0][2] = 0.;
-        info->pi[0][3] = 0.;
-        info->pi[1][0] = 0.;
-        info->pi[1][1] = HydroCell3DnewInterp.pi11;
-        info->pi[1][2] = HydroCell3DnewInterp.pi12;
-        info->pi[1][3] = HydroCell3DnewInterp.pi13;
-        info->pi[2][0] = 0.;
-        info->pi[2][1] = HydroCell3DnewInterp.pi12;
-        info->pi[2][2] = HydroCell3DnewInterp.pi22;
-        info->pi[2][3] = HydroCell3DnewInterp.pi23;
-        info->pi[3][0] = 0.;
-        info->pi[3][1] = HydroCell3DnewInterp.pi13;
-        info->pi[3][2] = HydroCell3DnewInterp.pi23;
-        info->pi[3][3] = - info->pi[1][1] - info->pi[2][2];
+
+        double LorentzBoost[4][4] = {
+            {ut, ux, uy, uz},
+            {ux, 1. + ux * ux / (ut + 1.), ux * uy / (ut + 1.),
+             ux * uz / (ut + 1.)},
+            {uy, ux * uy / (ut + 1.), 1. + uy * uy / (ut + 1.),
+             uy * uz / (ut + 1.)},
+            {uz, ux * uz / (ut + 1.), uy * uz / (ut + 1.),
+             1. + uz * uz / (ut + 1.)}
+        };
+        double pi_LRF[4][4] = {
+            {0, 0, 0, 0},
+            {0, HydroCell3DnewInterp.pi11, HydroCell3DnewInterp.pi12,
+                HydroCell3DnewInterp.pi13},
+            {0, HydroCell3DnewInterp.pi12, HydroCell3DnewInterp.pi22,
+                HydroCell3DnewInterp.pi23},
+            {0, HydroCell3DnewInterp.pi13, HydroCell3DnewInterp.pi23,
+                - HydroCell3DnewInterp.pi11 - HydroCell3DnewInterp.pi22}
+        };
+        for (int i = 0; i < 4; i++) {
+            for (int j = i; j < 4; j++) {
+                info->pi[i][j] = 0.;
+                for (int a = 0; a < 4; a++) {
+                    for (int b = 0; b < 4; b++) {
+                        info->pi[i][j] += LorentzBoost[a][i] *
+                            pi_LRF[a][b] * LorentzBoost[b][j];
+                    }
+                }
+                info->pi[j][i] = info->pi[i][j];
+            }
+        }
         info->bulkPi = HydroCell3DnewInterp.bulkPi;
     }
     return;

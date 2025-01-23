@@ -173,7 +173,7 @@ class fluidCell_3D_new {
     float temperature = 0.;
     float ux = 0;
     float uy = 0;
-    float ueta = 0;
+    float uz = 0;
     float cs2 = 0;
     float muB = 0;
     // the shear stress tensor are already divided by e+P
@@ -189,7 +189,7 @@ class fluidCell_3D_new {
         res.temperature = temperature + obj.temperature;
         res.ux = ux + obj.ux;
         res.uy = uy + obj.uy;
-        res.ueta = ueta + obj.ueta;
+        res.uz = uz + obj.uz;
         res.cs2 = cs2 + obj.cs2;
         res.muB = muB + obj.muB;
         res.pi11 = pi11 + obj.pi11;
@@ -206,7 +206,7 @@ class fluidCell_3D_new {
         res.temperature = temperature*a;
         res.ux = ux*a;
         res.uy = uy*a;
-        res.ueta = ueta*a;
+        res.uz = uz*a;
         res.cs2 = cs2*a;
         res.muB = muB*a;
         res.pi11 = pi11*a;
