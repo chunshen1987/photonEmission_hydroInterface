@@ -1,12 +1,14 @@
+#include "Table2D.h"
+
+#include <cmath>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "stdlib.h"
-#include <cmath>
+
 #include "Arsenal.h"
-#include "Table2D.h"
+#include "stdlib.h"
 
 Table2D::Table2D() {};
 
@@ -19,7 +21,7 @@ void Table2D::loadTableFromFile(std::string data_filename)
     std::ostringstream filename_stream;
     filename_stream << data_filename;
     std::ifstream fs(filename_stream.str().c_str(), std::ifstream::in);
-    if (fs.is_open()==false) {
+    if (fs.is_open() == false) {
         std::cout << "Table2D::loadTableFromFile error: "
                   << "the data file cannot be opened." << std::endl;
         std::cout << "Filename: " << data_filename << std::endl;
@@ -34,8 +36,8 @@ void Table2D::outputTabletoFile(std::string filename) {
     std::ostringstream filename_stream;
     filename_stream << filename << ".dat";
     std::ofstream output(filename_stream.str().c_str());
-    for (int i=0; i<tb_sizeX; i++) {
-        for (int j=0; j<tb_sizeY; j++) {
+    for (int i = 0; i < tb_sizeX; i++) {
+        for (int j = 0; j < tb_sizeY; j++) {
             output << std::scientific << std::setw(16) << std::setprecision(6)
                    << (*(*data)[j])[i] << "   ";
         }

@@ -1,16 +1,16 @@
 /***********************************************************************
-ParameterReader class is used to simplify the process of reading parameters from an input file and/or from the command line.
-Version 1.02 (03-14-2012) Zhi Qiu
+ParameterReader class is used to simplify the process of reading parameters from
+an input file and/or from the command line. Version 1.02 (03-14-2012) Zhi Qiu
 ***********************************************************************/
 
 #ifndef _ParameterReaderHeader
 #define _ParameterReaderHeader
 
-#include <vector>
 #include <string>
+#include <vector>
 
 class ParameterReader {
- private:
+  private:
     std::vector<std::string>* names;
     std::vector<double>* values;  // store all parameter names and values
 
@@ -22,22 +22,22 @@ class ParameterReader {
 
     // give the index of parameter with "name", or -1 if it does not exist
     long find(std::string name);
- public:
 
+  public:
     ParameterReader();
     ~ParameterReader();
     // read and phrase one setting string like "x=1"
-    void phraseOneLine(std::string str,
-                       std::string commentSymbol=(std::string)("#"));
+    void phraseOneLine(
+        std::string str, std::string commentSymbol = (std::string)("#"));
     // read in parameters from a file
-    void readFromFile(std::string filename,
-                      std::string commentSymbol=(std::string)("#"));
+    void readFromFile(
+        std::string filename, std::string commentSymbol = (std::string)("#"));
 
     // read in parameter from argument list.
     // The process starts with index="start_from".
-    void readFromArguments(long argc, char * argv[],
-                           std::string commentSymbol=(std::string)("#"),
-                           long start_from=1);
+    void readFromArguments(
+        long argc, char* argv[], std::string commentSymbol = (std::string)("#"),
+        long start_from = 1);
 
     // check if parameter with "name" exists
     bool exist(std::string name);
@@ -58,7 +58,8 @@ class ParameterReader {
 /***********************************************************************
 Changelog:
 09-20-2011: Ver1.01
- -- Bug fix: If the parameter file that is passed to the readFromFile function does not exist, the program stops instead of going into infinite loops.
+ -- Bug fix: If the parameter file that is passed to the readFromFile function
+does not exist, the program stops instead of going into infinite loops.
 03-13-2012: Ver1.02
  -- Bug fix: The commentSymbol parameter was not passed to the phraseOneLine
  function in readFromFile.

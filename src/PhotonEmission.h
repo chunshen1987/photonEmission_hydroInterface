@@ -1,24 +1,22 @@
 #ifndef SRC_PHOTONEMISSION_H_
 #define SRC_PHOTONEMISSION_H_
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
 #include <cmath>
-#include <iomanip>
-#include <string>
 #include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <memory>
+#include <sstream>
+#include <string>
 #include <vector>
 
-#include "Hydroinfo_h5.h"
 #include "Hydroinfo_MUSIC.h"
-#include "ThermalPhoton.h"
+#include "Hydroinfo_h5.h"
 #include "ParameterReader.h"
-
+#include "ThermalPhoton.h"
 
 class PhotonEmission {
- private:
+  private:
     std::shared_ptr<ParameterReader> paraRdr;
     std::string output_path;
 
@@ -57,7 +55,7 @@ class PhotonEmission {
     std::vector<double> vn_cos_tot;
     std::vector<double> vn_sin_tot;
 
-    //photon production processes
+    // photon production processes
     std::unique_ptr<ThermalPhoton> photon_QGP_2_to_2;
     std::unique_ptr<ThermalPhoton> photon_QGP_collinear;
     std::unique_ptr<ThermalPhoton> photon_HG_meson;
@@ -74,23 +72,21 @@ class PhotonEmission {
     std::unique_ptr<ThermalPhoton> photon_rho;
     std::unique_ptr<ThermalPhoton> photon_pirho_omegat;
 
-
- public:
+  public:
     PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in);
     ~PhotonEmission();
 
     void set_hydroGridinfo();
     void print_hydroGridinfo();
     void InitializePhotonEmissionRateTables();
-    void calPhotonemission(void *hydroinfo_ptr_in, double* eta_ptr, 
-                           double* etaweight_ptr);
+    void calPhotonemission(
+        void *hydroinfo_ptr_in, double *eta_ptr, double *etaweight_ptr);
     void calPhotonemission_3d(void *hydroinfo_ptr_in);
     void calPhoton_total_SpMatrix();
     void calPhoton_SpvnpT_individualchannel();
     void calPhoton_total_Spvn();
-    void outputPhoton_total_SpvnpT(std::string );
+    void outputPhoton_total_SpvnpT(std::string);
     void outputPhotonSpvn();
 };
 
-#endif   // SRC_PHOTONEMISSION_H_
-
+#endif  // SRC_PHOTONEMISSION_H_

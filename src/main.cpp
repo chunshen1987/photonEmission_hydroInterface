@@ -11,20 +11,20 @@
 //  To do in the future:
 /////////////////////////////////////////////////////////////////////////
 
-#include <iostream>
-#include <sstream>
-#include <fstream>
 #include <cmath>
-#include <iomanip>
 #include <cstdlib>
+#include <fstream>
+#include <iomanip>
+#include <iostream>
 #include <memory>
+#include <sstream>
 
-#include "./PhotonEmission.h"
-#include "./Hydroinfo_h5.h"
-#include "./Hydroinfo_MUSIC.h"
-#include "./Stopwatch.h"
 #include "./Arsenal.h"
+#include "./Hydroinfo_MUSIC.h"
+#include "./Hydroinfo_h5.h"
 #include "./ParameterReader.h"
+#include "./PhotonEmission.h"
+#include "./Stopwatch.h"
 #include "./gauss_quadrature.h"
 
 using namespace std;
@@ -53,11 +53,10 @@ int main(int argc, char** argv) {
         int bufferSize = paraRdr->getVal("HydroinfoBuffersize");
         int hydroInfoVisflag = paraRdr->getVal("HydroinfoVisflag");
         // hydro data file pointer
-        HydroinfoH5* hydroinfo_ptr = new HydroinfoH5(
-                        "results/JetData.h5", bufferSize, hydroInfoVisflag);
+        HydroinfoH5* hydroinfo_ptr =
+            new HydroinfoH5("results/JetData.h5", bufferSize, hydroInfoVisflag);
         // calculate thermal photons from the hydro medium
-        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
-                                         etaweight_ptr);
+        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, etaweight_ptr);
         delete hydroinfo_ptr;
     } else if (hydro_flag == 1) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
@@ -65,8 +64,7 @@ int main(int argc, char** argv) {
         int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
-        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
-                                         etaweight_ptr);
+        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, etaweight_ptr);
         delete hydroinfo_ptr;
     } else if (hydro_flag == 3) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
@@ -74,8 +72,7 @@ int main(int argc, char** argv) {
         int nskip_tau = paraRdr->getVal("hydro_nskip_tau");
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
-        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
-                                         etaweight_ptr);
+        thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr, etaweight_ptr);
         delete hydroinfo_ptr;
     } else if (hydro_flag == 2) {
         Hydroinfo_MUSIC* hydroinfo_ptr = new Hydroinfo_MUSIC();
@@ -84,8 +81,8 @@ int main(int argc, char** argv) {
         hydroinfo_ptr->readHydroData(hydro_mode, nskip_tau);
         // calculate thermal photons from the hydro medium
         if (hydroinfo_ptr->isBoostInvariant()) {
-            thermalPhotons.calPhotonemission(hydroinfo_ptr, eta_ptr,
-                                             etaweight_ptr);
+            thermalPhotons.calPhotonemission(
+                hydroinfo_ptr, eta_ptr, etaweight_ptr);
         } else {
             thermalPhotons.calPhotonemission_3d(hydroinfo_ptr);
         }
@@ -107,9 +104,8 @@ int main(int argc, char** argv) {
     cout << "totally takes : " << sw.takeTime() << " seconds." << endl;
 
     // clean up
-    delete [] eta_ptr;
-    delete [] etaweight_ptr;
+    delete[] eta_ptr;
+    delete[] etaweight_ptr;
 
-    return(0);
+    return (0);
 }
-
