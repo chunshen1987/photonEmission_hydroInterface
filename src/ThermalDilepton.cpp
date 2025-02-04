@@ -111,26 +111,11 @@ ThermalDilepton::~ThermalDilepton() {
 
 
 void ThermalDilepton::analyticRates(
-    const double T, const double MInv, std::vector<double> &Eq,
-    std::vector<double> &eqrate_ptr) {
-    for (unsigned int i = 0; i < Eq.size(); i++) {
-        eqrate_ptr[i] = 1e-16;
-    }
+    const double T, const double MInv, const double Eq,
+    double &eqrate) {
+    eqrate = 1e-16;
 }
 
-void ThermalDilepton::analyticRatesShearVis(
-    double T, vector<double> &Eq, std::vector<double> &visrate_ptr) {
-    for (unsigned int i = 0; i < visrate_ptr.size(); i++) {
-        visrate_ptr[i] = 0.;
-    }
-}
-
-void ThermalDilepton::analyticRatesBulkVis(
-    double T, vector<double> &Eq, std::vector<double> &bulkvis_ptr) {
-    for (unsigned int i = 0; i < bulkvis_ptr.size(); i++) {
-        bulkvis_ptr[i] = 0.;
-    }
-}
 
 void ThermalDilepton::checkAnalyticRates() {
     ofstream checkRates("checkPhotonRates.dat");
@@ -147,7 +132,7 @@ void ThermalDilepton::checkAnalyticRates() {
     vector<double> eqrate(nE, 0);
     for (int iT = 0; iT < nT; iT++) {
         double T_local = Tmin + iT * dT;
-        analyticRates(T_local, 0, Eq, eqrate);
+        analyticRates(T_local, MInv_, Eq, eqrate);
         for (const auto rate_i : eqrate) {
             checkRates << std::scientific << std::setprecision(6)
                        << std::setw(10) << rate_i << "  ";
@@ -158,21 +143,24 @@ void ThermalDilepton::checkAnalyticRates() {
 }
 
 void ThermalDilepton::getEmissionRate(
-    vector<double> &Eq, const double Minv, const double T, const double muB,
+    vector<double> &Eq, const double T, const double muB,
     vector<double> &eqrate_ptr) {
-    if (bRateTable_) {
-        analyticRates(T, Minv, Eq, eqrate_ptr);
-    } else {
-        analyticRates(T, Minv, Eq, eqrate_ptr);
+    int npoints = np * nphi * nrapidity;
+    if (!bRateTable_) {
+        for (int i = 0; i < Eq.size(); i++) {
+            double eqrateLoc = 0;
+            int iM = static_cast<int>(i / npoints) % nMInv_;
+            analyticRates(T, Minv_[iM], Eq[i], eqrateLoc);
+            eqrate_ptr[i] = eqrateLoc;
+        }
     }
     NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
 }
 
 void ThermalDilepton::calThermalDileptonemission_3d(
-    vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
-    double T, double muB, double volume, double fraction) {
+    vector<double> &Eq, double T, double muB, double volume, double fraction) {
     const int Tb_length = Eq.size();
-    if (Tb_length != nrapidity * nphi * np) {
+    if (Tb_length != nMInv_ * nrapidity * nphi * np) {
         std::cout << "The length of Eq array is not right! Please check!"
                   << std::endl;
         exit(1);
@@ -180,50 +168,50 @@ void ThermalDilepton::calThermalDileptonemission_3d(
     const double volfrac = volume * fraction;
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
-    // photon emission viscous correction at local rest cell
-    vector<double> em_visrate(Tb_length, 0);
-    // photon emission bulk viscous correction at local rest cell
-    vector<double> em_bulkvis(Tb_length, 0);
 
     getEmissionRate(Eq, T, muB, em_eqrate);
 
     int idx = 0;
-    for (int k = 0; k < nrapidity; k++) {
-        for (int m = 0; m < nphi; m++) {
-            for (int l = 0; l < np; l++) {
-                double local_eq = em_eqrate[idx];
-
-                double temp_eq_sum = local_eq * volfrac;
-
-                dNpTdpTdphidydM_eq[l][m][k] += temp_eq_sum;
-                idx++;
+    for (int im = 0; im < nMInv_; im++) {
+        for (int k = 0; k < nrapidity; k++) {
+            for (int m = 0; m < nphi; m++) {
+                for (int l = 0; l < np; l++) {
+                    double local_eq = em_eqrate[idx];
+                    double temp_eq_sum = local_eq * volfrac;
+                    dNpTdpTdphidydM_eq[im][l][m][k] += temp_eq_sum;
+                    idx++;
+                }
             }
         }
     }
 }
 
+
 void ThermalDilepton::calThermalDileptonemission(
-    vector<double> &Eq, vector<double> &pi_zz, vector<double> &bulkPi,
+    vector<double> &Eq,
     int Tb_length, double T, vector<double> &volume, double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
 
     getEmissionRate(Eq, T, 0., em_eqrate);
 
-    int n_pt_point = nrapidity * np * nphi;
+    int n_pt_point = nMinv_ * nrapidity * np * nphi;
 
     double temp_eq_sum;
     int idx = 0;
-    for (int k = 0; k < nrapidity; k++) {
-        for (int m = 0; m < nphi; m++) {
-            for (int l = 0; l < np; l++) {
-                temp_eq_sum = 0.0;
-                for (int i = 0; i < neta; i++) {
-                    double local_eq = em_eqrate[idx + i * n_pt_point];
-                    temp_eq_sum += local_eq * volume[i] * fraction;
+    for (int im = 0; im < nMInv_; im++) {
+        for (int k = 0; k < nrapidity; k++) {
+            for (int m = 0; m < nphi; m++) {
+                for (int l = 0; l < np; l++) {
+                    temp_eq_sum = 0.0;
+                    for (int i = 0; i < neta; i++) {
+                        // integrate over eta
+                        double local_eq = em_eqrate[idx + i * n_pt_point];
+                        temp_eq_sum += local_eq * volume[i] * fraction;
+                    }
+                    dNpTdpTdphidydM_eq[im][l][m][k] += temp_eq_sum;
+                    idx++;
                 }
-                dNpTdpTdphidydM_eq[l][m][k] += temp_eq_sum;
-                idx++;
             }
         }
     }

@@ -14,6 +14,7 @@
 #include "Hydroinfo_h5.h"
 #include "ParameterReader.h"
 #include "ThermalPhoton.h"
+#include "ThermalDilepton.h"
 
 class PhotonEmission {
   private:
@@ -21,7 +22,7 @@ class PhotonEmission {
     std::string output_path;
 
     int neta;
-    int np, nphi, nrapidity;
+    int np, nphi, nrapidity, nMInv_;
     int norder;
 
     double gridDx, gridDy, gridDtau;
@@ -41,6 +42,8 @@ class PhotonEmission {
     std::vector<double> Eq_localrest_Tb;
     std::vector<double> pi_photon_Tb;
     std::vector<double> bulkPi_Tb;
+
+    std::vector<double> dileopton_Eq_localrest_Tb;
 
     std::vector<double> dNd2pT_eq;
     std::vector<double> dNd2pT;
@@ -71,6 +74,8 @@ class PhotonEmission {
     std::unique_ptr<ThermalPhoton> photon_rhoK;
     std::unique_ptr<ThermalPhoton> photon_rho;
     std::unique_ptr<ThermalPhoton> photon_pirho_omegat;
+
+    std::unique_ptr<ThermalDilepton> dilepton_QGPLO;
 
   public:
     PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in);
