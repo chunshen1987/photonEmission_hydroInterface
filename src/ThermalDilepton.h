@@ -25,7 +25,7 @@ class ThermalDilepton {
     bool bShearVisCorr_;
     bool bBulkVisCorr_;
 
-    double ***Emission_eqrateTb_ptr;        // muB/T, k/T, M/T
+    double ***Emission_eqrateTb_ptr;  // muB/T, k/T, M/T
 
     std::vector<double> EmissionrateTb_Yidxptr;
     double EmissionrateTb_Xmin;
@@ -68,8 +68,8 @@ class ThermalDilepton {
     double getDileptonMinv(int i) { return (Minv_[i]); }
 
     virtual void analyticRates(
-        const double T, std::vector<doouble> &MInv, std::vector<double> &Eq,
-        std::vector<double> &eqrate_ptr) {
+        const double T, const double MInv, const double Eq, double &eqrate);
+
     virtual void NetBaryonCorrection(
         double T, double muB, std::vector<double> &Eq,
         std::vector<double> &eqrate_ptr) {}
@@ -77,15 +77,14 @@ class ThermalDilepton {
     void checkAnalyticRates();
 
     void getEmissionRate(
-        std::vector<double> &Eq, std::vector<double> &Minv,
-        const double T, const double muB,
-        std::vector<double> &eqrate_ptr);
+        std::vector<double> &Eq, std::vector<double> &Minv, const double T,
+        const double muB, std::vector<double> &eqrate_ptr);
     void calThermalDileptonemission(
-        std::vector<double> &Eq, int Tb_length,
-        double T, std::vector<double> &volume, double fraction);
+        std::vector<double> &Eq, int Tb_length, double T,
+        std::vector<double> &volume, double fraction);
     void calThermalDileptonemission_3d(
-        std::vector<double> &Eq,
-        double T, double muB, double volume, double fraction);
+        std::vector<double> &Eq, double T, double muB, double volume,
+        double fraction);
 
     void calPhoton_SpvnpT(
         double ***dNd2pTdphipy, double ***vnypT_cos, double ***vnypT_sin,

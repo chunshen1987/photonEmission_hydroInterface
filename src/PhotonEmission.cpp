@@ -9,6 +9,7 @@
 #include <string>
 
 #include "Arsenal.h"
+#include "DileptonQGPLO.h"
 #include "HadronGasPiRhoOmega.h"
 #include "HadronGasPipiBremsstrahlung.h"
 #include "HadronGasRhoSpectralFunction.h"
@@ -155,8 +156,8 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
         photon_QGP_collinear->update_rates_with_polyakov_suppression();
     }
 
-    dilepton_QGPLO = std::unique_ptr<ThermalDilepton>(
-        new DileptonQGPLO(paraRdr, "QGPLO"));
+    dilepton_QGPLO =
+        std::unique_ptr<ThermalDilepton>(new DileptonQGPLO(paraRdr, "QGPLO"));
 
     photon_HG_meson = std::unique_ptr<ThermalPhoton>(
         new ThermalPhoton(paraRdr, "HG_2to2_meson_total"));
@@ -266,7 +267,7 @@ void PhotonEmission::calPhotonemission(
     bulkPi_Tb.resize(Eqtb_length, 0);
 
     const int dileptonEqtb_length = neta * nrapidity * np * nphi * nMInv_;
-    dileopton_Eq_localrest_Tb.resize(dileptonEqtb_length, 0);
+    dilepton_Eq_localrest_Tb.resize(dileptonEqtb_length, 0);
 
     // main loop begins ...
     // loop over time frame
@@ -323,7 +324,7 @@ void PhotonEmission::calPhotonemission(
                 } else {
                     vx_local = fluidCellptr->vx;
                     vy_local = fluidCellptr->vy;
-                    vz_local = 0.0;         // boost-invariant medium
+                    vz_local = 0.0;  // boost-invariant medium
                 }
 
                 for (int mu = 0; mu < 4; mu++) {
@@ -391,21 +392,23 @@ void PhotonEmission::calPhotonemission(
                             double sinh_y = sinh(y_q[k] - eta_local);
                             for (int m = 0; m < nphi; m++) {
                                 for (int l = 0; l < np; l++) {
-                                    double mT = sqrt(p_q[l] * p_q[l]
-                                                     + MInv_[im] * MInv_[im]);
+                                    double mT = sqrt(
+                                        p_q[l] * p_q[l] + MInv[im] * MInv[im]);
                                     p_lab_local[0] = mT * cosh_y;
                                     p_lab_local[1] = p_q[l] * cos_phiq[m];
                                     p_lab_local[2] = p_q[l] * sin_phiq[m];
                                     p_lab_local[3] = mT * sinh_y;
 
                                     double Eq_localrest_temp = 0.0e0;
-                                    for (int local_i = 0; local_i < 4; local_i++) {
+                                    for (int local_i = 0; local_i < 4;
+                                         local_i++) {
                                         Eq_localrest_temp +=
                                             (flow_u_mu_low[local_i]
                                              * p_lab_local[local_i]);
                                     }
 
-                                    dileopton_Eq_localrest_Tb[idx_Tb_dilepton] = Eq_localrest_temp;
+                                    dilepton_Eq_localrest_Tb[idx_Tb_dilepton] =
+                                        Eq_localrest_temp;
                                     idx_Tb_dilepton++;
                                 }
                             }
@@ -423,8 +426,8 @@ void PhotonEmission::calPhotonemission(
                         Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
                         temp_local, volume, QGP_fraction);
                     dilepton_QGPLO->calThermalDileptonemission(
-                        dileopton_Eq_localrest_Tb, idx_Tb_dilepton,
-                        temp_local, volume, QGP_fraction);
+                        dilepton_Eq_localrest_Tb, idx_Tb_dilepton, temp_local,
+                        volume, QGP_fraction);
                     if (differential_flag == 1 || differential_flag > 10) {
                         photon_QGP_2_to_2->calThermalPhotonemissiondTdtau(
                             Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
@@ -677,7 +680,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     bulkPi_Tb.resize(Eqtb_length, 0);
 
     const int dileptonEqtb_length = nrapidity * np * nphi * nMInv_;
-    dileopton_Eq_localrest_Tb.resize(dileptonEqtb_length, 0);
+    dilepton_Eq_localrest_Tb.resize(dileptonEqtb_length, 0);
 
     double tau_now = 0.0;
     double flow_u_mu_low[4];
@@ -819,7 +822,8 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
                                 (flow_u_mu_low[local_i] * p_lab_local[local_i]);
                         }
 
-                        dileptonEqtb_length[idx_Tb_dilepton] = Eq_localrest_temp;
+                        dilepton_Eq_localrest_Tb[idx_Tb_dilepton] =
+                            Eq_localrest_temp;
                         idx_Tb_dilepton++;
                     }
                 }
@@ -835,9 +839,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             photon_QGP_collinear->calThermalPhotonemission_3d(
                 Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, temp_local, muB_local,
                 volume, QGP_fraction);
-            dilepton_QGPLO->calThermalPhotonemission_3d(
-                dileopton_Eq_localrest_Tb,
-                temp_local, muB_local, volume, QGP_fraction);
+            dilepton_QGPLO->calThermalDileptonemission_3d(
+                dilepton_Eq_localrest_Tb, temp_local, muB_local, volume,
+                QGP_fraction);
             if (differential_flag == 1 || differential_flag > 10) {
                 photon_QGP_2_to_2->calThermalPhotonemissiondTdtau_3d(
                     Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, temp_local,

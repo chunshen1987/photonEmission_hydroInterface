@@ -13,8 +13,8 @@
 #include "Hydroinfo_MUSIC.h"
 #include "Hydroinfo_h5.h"
 #include "ParameterReader.h"
-#include "ThermalPhoton.h"
 #include "ThermalDilepton.h"
+#include "ThermalPhoton.h"
 
 class PhotonEmission {
   private:
@@ -43,7 +43,7 @@ class PhotonEmission {
     std::vector<double> pi_photon_Tb;
     std::vector<double> bulkPi_Tb;
 
-    std::vector<double> dileopton_Eq_localrest_Tb;
+    std::vector<double> dilepton_Eq_localrest_Tb;
 
     std::vector<double> dNd2pT_eq;
     std::vector<double> dNd2pT;

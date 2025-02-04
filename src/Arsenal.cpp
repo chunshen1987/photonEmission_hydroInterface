@@ -606,7 +606,7 @@ double**** createA4DMatrix(
         for (int j = 0; j < n2; j++) {
             mat[i][j] = new double*[n3];
             for (int k = 0; k < n3; k++) {
-                mat[i][j][k] = new double [n4];
+                mat[i][j][k] = new double[n4];
                 for (int l = 0; l < n4; l++) {
                     mat[i][j][k][l] = init;
                 }
@@ -644,8 +644,7 @@ void deleteA5DMatrix(
     delete[] mat;
 }
 
-void deleteA4DMatrix(
-    double**** mat, const int n1, const int n2, const int n3) {
+void deleteA4DMatrix(double**** mat, const int n1, const int n2, const int n3) {
     for (int i = 0; i < n1; i++) {
         for (int j = 0; j < n2; j++) {
             for (int k = 0; k < n3; k++) {

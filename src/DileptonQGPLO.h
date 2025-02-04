@@ -1,16 +1,17 @@
 #ifndef SRC_DILEPTONQGPLO_H
 #define SRC_DILEPTONQGPLO_H
 
-#include <vector>
 #include <memory>
+#include <vector>
 
-#include "ThermalDilepton.h"
 #include "ParameterReader.h"
+#include "ThermalDilepton.h"
 
 class DileptonQGPLO : public ThermalDilepton {
- public:
-    DileptonQGPLO(std::shared_ptr<ParameterReader> paraRdr_in,
-                  std::string emissionProcess);
+  public:
+    DileptonQGPLO(
+        std::shared_ptr<ParameterReader> paraRdr_in,
+        std::string emissionProcess);
     ~DileptonQGPLO() {}
 
     void analyticRates(

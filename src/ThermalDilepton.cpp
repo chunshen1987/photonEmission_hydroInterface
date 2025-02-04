@@ -109,13 +109,10 @@ ThermalDilepton::~ThermalDilepton() {
     deleteA2DMatrix(vnMInv_sin_eq, norder_);
 }
 
-
 void ThermalDilepton::analyticRates(
-    const double T, const double MInv, const double Eq,
-    double &eqrate) {
+    const double T, const double MInv, const double Eq, double &eqrate) {
     eqrate = 1e-16;
 }
-
 
 void ThermalDilepton::checkAnalyticRates() {
     ofstream checkRates("checkPhotonRates.dat");
@@ -188,10 +185,9 @@ void ThermalDilepton::calThermalDileptonemission_3d(
     }
 }
 
-
 void ThermalDilepton::calThermalDileptonemission(
-    vector<double> &Eq,
-    int Tb_length, double T, vector<double> &volume, double fraction) {
+    vector<double> &Eq, int Tb_length, double T, vector<double> &volume,
+    double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
 
@@ -218,7 +214,6 @@ void ThermalDilepton::calThermalDileptonemission(
         }
     }
 }
-
 
 void ThermalDilepton::calPhoton_SpvnpT(
     double ***dNd2pTdphidy, double ***vnypT_cos, double ***vnypT_sin,
@@ -274,7 +269,6 @@ void ThermalDilepton::calPhoton_SpvnpT_shell() {
         dNd2pTdphidy_eq, vnypT_cos_eq, vnypT_sin_eq, vnpT_cos_eq, vnpT_sin_eq,
         vn_cos_eq, vn_sin_eq);
 }
-
 
 void ThermalDilepton::outputPhoton_SpvnpT(
     string path, string type_str, double ***dNd2pTdphidy, double ***vnypT_cos,
