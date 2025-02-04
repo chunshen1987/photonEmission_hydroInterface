@@ -132,7 +132,9 @@ void ThermalDilepton::checkAnalyticRates() {
     vector<double> eqrate(nE, 0);
     for (int iT = 0; iT < nT; iT++) {
         double T_local = Tmin + iT * dT;
-        analyticRates(T_local, MInv_, Eq, eqrate);
+        for (int iE = 0; iE < nE; iE++) {
+            analyticRates(T_local, 1.0, Eq[iE], eqrate[iE]);
+        }
         for (const auto rate_i : eqrate) {
             checkRates << std::scientific << std::setprecision(6)
                        << std::setw(10) << rate_i << "  ";

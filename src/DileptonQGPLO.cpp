@@ -12,23 +12,23 @@ DileptonQGPLO::DileptonQGPLO(
 
 // PRC. 93, 044902, 2016
 void DileptonQGPLO::analyticRates(
-    const double T, const double MInv, std::vector<double> &Eq,
-    std::vector<double> &eqrate_ptr) {
+    const double T, const double MInv, const double Eq,
+    double &eqrate) {
 
-    const double aem = 1./137.;
-    const double Qu  = 2./3.;
-    const double Qd  = -1./3.;
-    const double Qs  = -1./3.;
+    //const double aem = 1./137.;
+    //const double Qu  = 2./3.;
+    //const double Qd  = -1./3.;
+    //const double Qs  = -1./3.;
 
-    double prefac = (Qu*Qu+Qd*Qd+Qs*Qs)*aem*aem/(2.*pow(M_PI, 4))/pow(hbarC, 4);
-    for (unsigned int i = 0; i < Eq.size(); i++) {
-        double p = sqrt(Eq[i]*Eq[i] - MInv*MInv);
-        double x = Eq[i]/T;
-        double y = p/T;
-        double fq = 1./(exp(x) - 1.);
-        double log_r = log(cosh(0.25*(x+y))/cosh(0.25*(x-y)));
+    //double prefac = (Qu*Qu+Qd*Qd+Qs*Qs)*aem*aem/(2.*pow(M_PI, 4))/pow(hbarC, 4);
+    double prefac = 0.00012024462067159784;
 
-        eqrate_ptr[i] = prefac/y*fq*log_r;
-    }
+    double p = sqrt(Eq*Eq - MInv*MInv);
+    double x = Eq/T;
+    double y = p/T;
+    double fq = 1./(exp(x) - 1.);
+    double log_r = log(cosh(0.25*(x+y))/cosh(0.25*(x-y)));
+
+    eqrate = prefac/y*fq*log_r;
 }
 

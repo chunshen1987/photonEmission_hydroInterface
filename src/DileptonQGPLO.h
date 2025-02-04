@@ -14,7 +14,7 @@ class DileptonQGPLO : public ThermalDilepton {
     ~DileptonQGPLO() {}
 
     void analyticRates(
-        double T, std::vector<double> &Eq, std::vector<double> &eqrate_ptr);
+        const double T, const double MInv, const double Eq, double &eqrate);
 };
 
 #endif  // SRC_DILEPTONQGPLO_H
