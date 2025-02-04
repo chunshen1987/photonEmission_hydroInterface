@@ -41,12 +41,12 @@ class ThermalDilepton {
     double *phi, *phi_weight;
     std::vector<double> y;
     std::vector<double> theta;
-    std::vector<double> Minv_;
+    std::vector<double> MInv_;
 
     double ****dNpTdpTdphidydM_eq;
 
-    double **vnMinV_cos_eq, **vnMinV_sin_eq;
-    double ***vnMInvpT_cos_eq, ***vnMInv_sin_eq;
+    double **vnMInv_cos_eq, **vnMInv_sin_eq;
+    double ***vnMInvpT_cos_eq, ***vnMInvpT_sin_eq;
 
   public:
     ThermalDilepton(
@@ -65,7 +65,7 @@ class ThermalDilepton {
     double getPhotontheta(int i) { return (theta[i]); }
     double getPhotonrapidity(int i) { return (y[i]); }
 
-    double getDileptonMinv(int i) { return (Minv_[i]); }
+    double getDileptonMinv(int i) { return (MInv_[i]); }
 
     virtual void analyticRates(
         const double T, const double MInv, const double Eq, double &eqrate);
@@ -77,8 +77,8 @@ class ThermalDilepton {
     void checkAnalyticRates();
 
     void getEmissionRate(
-        std::vector<double> &Eq, std::vector<double> &Minv, const double T,
-        const double muB, std::vector<double> &eqrate_ptr);
+        std::vector<double> &Eq, const double T, const double muB,
+        std::vector<double> &eqrate_ptr);
     void calThermalDileptonemission(
         std::vector<double> &Eq, int Tb_length, double T,
         std::vector<double> &volume, double fraction);

@@ -2,6 +2,7 @@ set (SOURCES
      Hydroinfo_h5.cpp
      Arsenal.cpp
      ThermalPhoton.cpp
+     ThermalDilepton.cpp
      Table2D.cpp
      PhotonEmission.cpp
      ParameterReader.cpp
@@ -13,6 +14,7 @@ set (SOURCES
      HadronGasRhoSpectralFunction.cpp
      HadronGasPipiBremsstrahlung.cpp
      HadronGasPiRhoOmega.cpp
+     DileptonQGPLO.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})
