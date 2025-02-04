@@ -216,58 +216,58 @@ void ThermalDilepton::calThermalDileptonemission(
 }
 
 void ThermalDilepton::calPhoton_SpvnpT(
-    double ***dNd2pTdphidy, double ***vnypT_cos, double ***vnypT_sin,
-    double **vnpT_cos, double **vnpT_sin, vector<double> &vn_cos,
-    vector<double> &vn_sin) {
+    double ****dNpTdpTdphidydM, double ***vnMInvpT_cos, double ***vnMInvpT_sin,
+    double **vnMInv_cos, double **vnMInv_sin) {
     // calculate the photon spectra and differential vn
     const double eps = 1e-15;
-    for (int i = 0; i < np; i++) {
-        for (int k = 0; k < nrapidity; k++) {
-            for (int j = 0; j < nphi; j++) {
-                double weight = phi_weight[j];
-                for (int order = 0; order < norder_; order++) {
-                    double cos_tmp =
-                        (dNd2pTdphidy[i][j][k] * cos(order * phi[j]) * weight);
-                    double sin_tmp =
-                        (dNd2pTdphidy[i][j][k] * sin(order * phi[j]) * weight);
-                    vnypT_cos[order][i][k] += cos_tmp;
-                    vnypT_sin[order][i][k] += sin_tmp;
-                    if (std::abs(y[k]) < 0.5) {
-                        // only integrate mid-rapidity
-                        vnpT_cos[order][i] += cos_tmp * dy;
-                        vnpT_sin[order][i] += sin_tmp * dy;
+    for (int im = 0; im < nMInv_; im++) {
+        for (int i = 0; i < np; i++) {
+            for (int k = 0; k < nrapidity; k++) {
+                for (int j = 0; j < nphi; j++) {
+                    double weight = phi_weight[j];
+                    for (int order = 0; order < norder_; order++) {
+                        double cos_tmp =
+                            (dNpTdpTdphidydM[im][i][j][k] * cos(order * phi[j])
+                             * weight);
+                        double sin_tmp =
+                            (dNpTdpTdphidydM[im][i][j][k] * sin(order * phi[j])
+                             * weight);
+                        if (std::abs(y[k]) < 0.5) {
+                            vnMInvpT_cos[order][im][i] += cos_tmp * dy;
+                            vnMInvpT_sin[order][im][i] += sin_tmp * dy;
+                        }
                     }
                 }
             }
-        }
-        double p_weight_factor = p[i] * p_weight[i];
-        for (int order = 0; order < norder_; order++) {
-            vn_cos[order] += vnpT_cos[order][i] * p_weight_factor;
-            vn_sin[order] += vnpT_sin[order][i] * p_weight_factor;
+            double p_weight_factor = p[i] * p_weight[i];
+            for (int order = 0; order < norder_; order++) {
+                vnMInv_cos[order][im] +=
+                    vnMInvpT_cos[order][im][i] * p_weight_factor;
+                vnMInv_sin[order][im] +=
+                    vnMInvpT_sin[order][im][i] * p_weight_factor;
 
-            // vn(pT)
-            if (order > 0) {
-                vnpT_cos[order][i] /= (vnpT_cos[0][i] + eps);
-                vnpT_sin[order][i] /= (vnpT_cos[0][i] + eps);
-                for (int k = 0; k < nrapidity; k++) {
-                    vnypT_cos[order][i][k] /= (vnypT_cos[0][i][k] + eps);
-                    vnypT_sin[order][i][k] /= (vnypT_cos[0][i][k] + eps);
+                // vn(pT)
+                if (order > 0) {
+                    vnMInvpT_cos[order][im][i] /=
+                        (vnMInvpT_cos[0][im][i] + eps);
+                    vnMInvpT_sin[order][im][i] /=
+                        (vnMInvpT_cos[0][im][i] + eps);
                 }
             }
+            vnMInvpT_cos[0][im][i] /= (2 * M_PI);  // dN/(2pi dy pT dpT)
         }
-        vnpT_cos[0][i] /= (2 * M_PI);  // dN/(2pi dy pT dpT)
-    }
-    for (int order = 1; order < norder_; order++) {
-        // vn
-        vn_cos[order] /= (vn_cos[0] + eps);
-        vn_sin[order] /= (vn_cos[0] + eps);
+        for (int order = 1; order < norder_; order++) {
+            // vn
+            vnMInv_cos[order][im] /= (vnMInv_cos[0][im] + eps);
+            vnMInv_sin[order][im] /= (vnMInv_cos[0][im] + eps);
+        }
     }
 }
 
 void ThermalDilepton::calPhoton_SpvnpT_shell() {
-    // calPhoton_SpvnpT(
-    //     dNd2pTdphidy_eq, vnypT_cos_eq, vnypT_sin_eq, vnpT_cos_eq,
-    //     vnpT_sin_eq, vn_cos_eq, vn_sin_eq);
+    calPhoton_SpvnpT(
+        dNpTdpTdphidydM_eq, vnMInvpT_cos_eq, vnMInvpT_sin_eq, vnMInv_cos_eq,
+        vnMInv_sin_eq);
 }
 
 void ThermalDilepton::outputPhoton_SpvnpT(

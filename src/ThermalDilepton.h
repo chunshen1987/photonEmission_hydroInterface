@@ -87,9 +87,8 @@ class ThermalDilepton {
         double fraction);
 
     void calPhoton_SpvnpT(
-        double ***dNd2pTdphipy, double ***vnypT_cos, double ***vnypT_sin,
-        double **vnpT_cos, double **vnpT_sin, std::vector<double> &vn_cos,
-        std::vector<double> &vn_sin);
+        double ****dNpTdpTdphidydM, double ***vnMInvpT_cos,
+        double ***vnMInvpT_sin, double **vnMInv_cos, double **vnMInv_sin);
     void calPhoton_SpvnpT_shell();
     void outputPhoton_SpvnpT(
         std::string path, std::string type_str, double ***dNd2pTdphidy,
