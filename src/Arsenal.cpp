@@ -598,6 +598,24 @@ double*** createA3DMatrix(
     return (mat);
 }
 
+double**** createA4DMatrix(
+    const int n1, const int n2, const int n3, const int n4, const double init) {
+    double**** mat = new double***[n1];
+    for (int i = 0; i < n1; i++) {
+        mat[i] = new double**[n2];
+        for (int j = 0; j < n2; j++) {
+            mat[i][j] = new double*[n3];
+            for (int k = 0; k < n3; k++) {
+                mat[i][j][k] = new double [n4];
+                for (int l = 0; l < n4; l++) {
+                    mat[i][j][k][l] = init;
+                }
+            }
+        }
+    }
+    return (mat);
+}
+
 double** createA2DMatrix(const int n1, const int n2, const double init) {
     double** mat = new double*[n1];
     for (int i = 0; i < n1; i++) {
@@ -617,6 +635,20 @@ void deleteA5DMatrix(
                 for (int l = 0; l < n4; l++) {
                     delete[] mat[i][j][k][l];
                 }
+                delete[] mat[i][j][k];
+            }
+            delete[] mat[i][j];
+        }
+        delete[] mat[i];
+    }
+    delete[] mat;
+}
+
+void deleteA4DMatrix(
+    double**** mat, const int n1, const int n2, const int n3) {
+    for (int i = 0; i < n1; i++) {
+        for (int j = 0; j < n2; j++) {
+            for (int k = 0; k < n3; k++) {
                 delete[] mat[i][j][k];
             }
             delete[] mat[i][j];

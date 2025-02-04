@@ -14,14 +14,16 @@ class ThermalDilepton {
   private:
     std::shared_ptr<ParameterReader> paraRdr;
 
-    int np, nphi, nrapidity, nM;
-    int norder;
+    int np, nphi, nrapidity, nMInv_;
+    int norder_;
     int neta;
     std::string rate_path_;
 
-    double dy;
+    double dy, dMInv_;
 
     bool bRateTable_;
+    bool bShearVisCorr_;
+    bool bBulkVisCorr_;
 
     double ***Emission_eqrateTb_ptr;        // muB/T, k/T, M/T
 
@@ -41,16 +43,10 @@ class ThermalDilepton {
     std::vector<double> theta;
     std::vector<double> Minv_;
 
-    double ****dNd2pTdphidydM_eq;
+    double ****dNpTdpTdphidydM_eq;
 
-    double **vnpT_cos_eq, **vnpT_sin_eq;
-    double **vnM_cos_eq, **vnM_sin_eq;
-
-    double ***vnypT_cos_eq, ***vnypT_sin_eq;
-
-    std::vector<double> vn_cos_eq;
-    std::vector<double> vn_sin_eq;
-
+    double **vnMinV_cos_eq, **vnMinV_sin_eq;
+    double ***vnMInvpT_cos_eq, ***vnMInv_sin_eq;
 
   public:
     ThermalDilepton(
@@ -59,15 +55,8 @@ class ThermalDilepton {
 
     virtual ~ThermalDilepton();
 
-    void setupEmissionrateFromFile(
-        double Xmin, double dX, double Ymin, double dY, bool bShearVisCorr,
-        bool bBulkVisCorr);
-    void readEmissionrate(std::string);
-
-    void setupEmissionrateFromParametrization(
-        double Xmin, double dX, int nX, double Ymin, double dY, int nY);
-
-    double get_dy() { return (dy); }
+    double get_dy() const { return (dy); }
+    double get_dMInv() const { return (dMInv_); }
 
     double getPhotonp(int i) { return (p[i]); }
     double getPhoton_pweight(int i) { return (p_weight[i]); }
@@ -77,7 +66,8 @@ class ThermalDilepton {
     double getPhotonrapidity(int i) { return (y[i]); }
 
     virtual void analyticRates(
-        double T, std::vector<double> &Eq, std::vector<double> &eqrate_ptr);
+        const double T, const double MInv, std::vector<double> &Eq,
+        std::vector<double> &eqrate_ptr) {
     virtual void NetBaryonCorrection(
         double T, double muB, std::vector<double> &Eq,
         std::vector<double> &eqrate_ptr) {}
@@ -88,10 +78,10 @@ class ThermalDilepton {
         std::vector<double> &Eq,
         const double Minv, const double T, const double muB,
         std::vector<double> &eqrate_ptr);
-    void calThermalPhotonemission(
+    void calThermalDileptonemission(
         std::vector<double> &Eq, int Tb_length, const double Minv, double T,
         std::vector<double> &volume, double fraction);
-    void calThermalPhotonemission_3d(
+    void calThermalDileptonemission_3d(
         std::vector<double> &Eq,
         const double Minv, double T, double muB, double volume,
         double fraction);
@@ -107,9 +97,6 @@ class ThermalDilepton {
         double **vnpT_sin, std::vector<double> &vn_cos,
         std::vector<double> &vn_sin);
     void outputPhoton_SpvnpT_shell(std::string path);
-    void interpolation2D_bilinear(
-        double varX, std::vector<double> &varY, double **Table2D_ptr,
-        std::vector<double> &results);
 };
 
 #endif  // SRC_THERMALDILEPTON_H

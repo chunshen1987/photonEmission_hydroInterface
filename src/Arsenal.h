@@ -53,6 +53,11 @@ double*** createA3DMatrix(
 
 void deleteA3DMatrix(double*** mat, const int n1, const int n2);
 
+double**** createA4DMatrix(
+    const int n1, const int n2, const int n3, const int n4, const double init);
+
+void deleteA4DMatrix(double**** mat, const int n1, const int n2, const int n3);
+
 double***** createA5DMatrix(
     const int n1, const int n2, const int n3, const int n4, const int n5,
     const double init);
