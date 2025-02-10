@@ -25,16 +25,6 @@ class ThermalDilepton {
     bool bShearVisCorr_;
     bool bBulkVisCorr_;
 
-    double ***Emission_eqrateTb_ptr;  // muB/T, k/T, M/T
-
-    std::vector<double> EmissionrateTb_Yidxptr;
-    double EmissionrateTb_Xmin;
-    double EmissionrateTb_Ymin;
-    int EmissionrateTb_sizeX;
-    int EmissionrateTb_sizeY;
-    double EmissionrateTb_dX;
-    double EmissionrateTb_dY;
-
     // photon spectra parameters
     std::string emissionProcess_name;
     double *p, *p_weight;
@@ -91,10 +81,9 @@ class ThermalDilepton {
         double ***vnMInvpT_sin, double **vnMInv_cos, double **vnMInv_sin);
     void calPhoton_SpvnpT_shell();
     void outputPhoton_SpvnpT(
-        std::string path, std::string type_str, double ***dNd2pTdphidy,
-        double ***vnypT_cos, double ***vnypT_sin, double **vnpT_cos,
-        double **vnpT_sin, std::vector<double> &vn_cos,
-        std::vector<double> &vn_sin);
+        std::string path, std::string type_str, double ****dNpTdpTdphidydM,
+        double ***vnMInvpT_cos, double ***vnMInvpT_sin, double **vnMInv_cos,
+        double **vnMInv_sin);
     void outputPhoton_SpvnpT_shell(std::string path);
 };
 

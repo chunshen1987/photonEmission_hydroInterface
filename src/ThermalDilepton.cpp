@@ -271,62 +271,52 @@ void ThermalDilepton::calPhoton_SpvnpT_shell() {
 }
 
 void ThermalDilepton::outputPhoton_SpvnpT(
-    string path, string type_str, double ***dNd2pTdphidy, double ***vnypT_cos,
-    double ***vnypT_sin, double **vnpT_cos, double **vnpT_sin,
-    vector<double> &vn_cos, vector<double> &vn_sin) {
+    string path, string type_str, double ****dNpTdpTdphidydM,
+    double ***vnMInvpT_cos, double ***vnMInvpT_sin, double **vnMInv_cos,
+    double **vnMInv_sin) {
     ostringstream filename_stream_SpMatrix;
     ostringstream filename_stream_Spvn;
     ostringstream filename_stream_inte_Spvn;
 
     filename_stream_SpMatrix << path << emissionProcess_name << "_Spvn_"
-                             << type_str << "_ypTdiff.dat";
+                             << type_str << "_MInvpTdiff.dat";
     filename_stream_Spvn << path << emissionProcess_name << "_Spvn_" << type_str
-                         << ".dat";
-    filename_stream_inte_Spvn << path << emissionProcess_name << "_Spvn_"
-                              << type_str << "_inte.dat";
+                         << "_MInv.dat";
 
     ofstream fphotonSpMatrix(filename_stream_SpMatrix.str().c_str());
     ofstream fphotonSpvn(filename_stream_Spvn.str().c_str());
-    ofstream fphotoninteSpvn(filename_stream_inte_Spvn.str().c_str());
 
-    for (int k = 0; k < nrapidity; k++) {
+    for (int im = 0; im < nMInv_; im++) {
         for (int j = 0; j < np; j++) {
-            fphotonSpMatrix << scientific << setprecision(6) << setw(16) << y[k]
-                            << "  " << p[j] << "  " << vnypT_cos[0][j][k]
-                            << "  ";
+            fphotonSpMatrix << scientific << setprecision(6) << setw(16)
+                            << MInv_[im] << "  " << p[j] << "  "
+                            << vnMInvpT_cos[0][im][j];
             for (int order = 1; order < norder_; order++) {
                 fphotonSpMatrix << scientific << setprecision(6) << setw(16)
-                                << vnypT_cos[order][j][k] << "  "
-                                << vnypT_sin[order][j][k] << "  ";
+                                << "  " << vnMInvpT_cos[order][im][j] << "  "
+                                << vnMInvpT_sin[order][im][j];
             }
             fphotonSpMatrix << endl;
         }
     }
 
-    for (int i = 0; i < np; i++) {
-        fphotonSpvn << scientific << setprecision(6) << setw(16) << p[i] << "  "
-                    << vnpT_cos[0][i] << "  ";
+    for (int im = 0; im < nMInv_; im++) {
+        fphotonSpvn << scientific << setprecision(6) << setw(16) << MInv_[im]
+                    << "  " << vnMInv_cos[0][im];
         for (int order = 1; order < norder_; order++) {
-            fphotonSpvn << scientific << setprecision(6) << setw(16)
-                        << vnpT_cos[order][i] << "  " << vnpT_sin[order][i]
-                        << "  ";
+            fphotonSpvn << scientific << setprecision(6) << setw(16) << "  "
+                        << vnMInv_cos[order][im] << "  "
+                        << vnMInv_sin[order][im];
         }
         fphotonSpvn << endl;
     }
 
-    for (int order = 0; order < norder_; order++) {
-        fphotoninteSpvn << scientific << setprecision(6) << setw(16) << order
-                        << "   " << vn_cos[order] << "   " << vn_sin[order]
-                        << endl;
-    }
-
     fphotonSpMatrix.close();
     fphotonSpvn.close();
-    fphotoninteSpvn.close();
 }
 
 void ThermalDilepton::outputPhoton_SpvnpT_shell(string path) {
-    // outputPhoton_SpvnpT(
-    //     path, "eq", dNd2pTdphidy_eq, vnypT_cos_eq, vnypT_sin_eq, vnpT_cos_eq,
-    //     vnpT_sin_eq, vn_cos_eq, vn_sin_eq);
+    outputPhoton_SpvnpT(
+        path, "eq", dNpTdpTdphidydM_eq, vnMInvpT_cos_eq, vnMInvpT_sin_eq,
+        vnMInv_cos_eq, vnMInv_sin_eq);
 }
