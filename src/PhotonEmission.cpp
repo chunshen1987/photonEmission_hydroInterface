@@ -156,8 +156,8 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
         photon_QGP_collinear->update_rates_with_polyakov_suppression();
     }
 
-    dilepton_QGPLO =
-        std::unique_ptr<ThermalDilepton>(new DileptonQGPLO(paraRdr, "QGPLO"));
+    dilepton_QGPLO = std::unique_ptr<ThermalDilepton>(
+        new DileptonQGPLO(paraRdr, "Dilepton_QGPLO"));
 
     photon_HG_meson = std::unique_ptr<ThermalPhoton>(
         new ThermalPhoton(paraRdr, "HG_2to2_meson_total"));

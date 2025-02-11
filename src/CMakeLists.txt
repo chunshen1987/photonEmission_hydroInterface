@@ -15,16 +15,17 @@ set (SOURCES
      HadronGasPipiBremsstrahlung.cpp
      HadronGasPiRhoOmega.cpp
      DileptonQGPLO.cpp
+     DileptonQGPNLO.cpp
     )
 
 add_library(${libname} SHARED ${SOURCES})
-target_link_libraries(${libname} ${HDF5_LIBRARIES})
+target_link_libraries(${libname} ${HDF5_LIBRARIES} ${GSL_LIBRARIES})
 if (link_with_lib)
     add_executable(${exename} main.cpp)
-    target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES})
+    target_link_libraries(${exename} ${libname} ${HDF5_LIBRARIES} ${GSL_LIBRARIES})
 else (link_with_lib)
     add_executable(${exename} main.cpp ${SOURCES})
-    target_link_libraries(${exename} ${HDF5_LIBRARIES})
+    target_link_libraries(${exename} ${HDF5_LIBRARIES} ${GSL_LIBRARIES})
 endif (link_with_lib)
 
 install(TARGETS ${exename} ${libname}

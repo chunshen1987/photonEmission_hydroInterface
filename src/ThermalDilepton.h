@@ -45,6 +45,8 @@ class ThermalDilepton {
 
     virtual ~ThermalDilepton();
 
+    void setRateTableFlag(bool bRateTable) { bRateTable_ = bRateTable; }
+    bool getRateTableFlag() const { return (bRateTable_); }
     double get_dy() const { return (dy); }
     double get_dMInv() const { return (dMInv_); }
 

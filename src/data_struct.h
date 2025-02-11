@@ -3,7 +3,8 @@
 
 namespace PhysConsts {
 const double hbarC = 0.19733;
-}
+const double alphaEM = 1. / 137.035999;
+}  // namespace PhysConsts
 
 struct fluidCell {
     float ed, sd, temperature, pressure;
