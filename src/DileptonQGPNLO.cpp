@@ -155,8 +155,9 @@ void DileptonQGPNLO::interp(
         for (int imu = 0; imu < 2; imu++) {
             for (int im = 0; im < 2; im++) {
                 for (int ik = 0; ik < 2; ik++) {
-                    double weight =
-                        std::abs((i - a) * (j - b) * (k - c) * (l - d));
+                    double weight = std::abs(
+                        ((1 - ialpha) - a) * ((1 - imu) - b) * ((1 - im) - c)
+                        * ((1 - ik) - d));
                     resRhoT +=
                         weight * rateRhoT[i + ialpha][j + imu][k + im][l + ik];
                     resRhoL +=
