@@ -76,6 +76,7 @@ class PhotonEmission {
     std::unique_ptr<ThermalPhoton> photon_pirho_omegat;
 
     std::unique_ptr<ThermalDilepton> dilepton_QGPLO;
+    std::unique_ptr<ThermalDilepton> dilepton_QGPNLO;
 
   public:
     PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in);

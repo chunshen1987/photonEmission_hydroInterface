@@ -2,10 +2,10 @@
 
 #include <gsl/gsl_sf_fermi_dirac.h>
 
-#include <algorithm>
 #include <cmath>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <string>
 #include <vector>
 
@@ -168,11 +168,11 @@ void DileptonQGPNLO::interp(
 }
 
 void DileptonQGPNLO::readInEmissionTables(std::string emissionProcess) {
-    ostringstream eqrate_filename_stream;
+    std::ostringstream eqrate_filename_stream;
     eqrate_filename_stream << ratePath_ << "rate_" << emissionProcess
                            << "_eqrate.dat";
-    std::cout << "reading in file: [" << eqrate_filename_stream.str()
-              << "]" << std::endl;
+    std::cout << "reading in file: [" << eqrate_filename_stream.str() << "]"
+              << std::endl;
 
     std::ifstream fin;
     fin.open(eqrate_filename_stream.str().c_str());
