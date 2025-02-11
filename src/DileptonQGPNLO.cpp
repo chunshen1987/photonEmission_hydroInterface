@@ -22,6 +22,7 @@ using ARSENAL::deleteA4DMatrix;
 DileptonQGPNLO::DileptonQGPNLO(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess)
     : ThermalDilepton {paraRdr_in, emissionProcess} {
+    ratePath_ = "ph_rates/";
     readInEmissionTables(emissionProcess);
 }
 
@@ -166,11 +167,15 @@ void DileptonQGPNLO::interp(
     }
 }
 
-void DileptonQGPNLO::readInEmissionTables(std::string fname) {
-    std::cout << "reading in file: [" << fname << "]" << std::endl;
+void DileptonQGPNLO::readInEmissionTables(std::string emissionProcess) {
+    ostringstream eqrate_filename_stream;
+    eqrate_filename_stream << ratePath_ << "rate_" << emissionProcess
+                           << "_eqrate.dat";
+    std::cout << "reading in file: [" << eqrate_filename_stream.str()
+              << "]" << std::endl;
 
     std::ifstream fin;
-    fin.open(fname);
+    fin.open(eqrate_filename_stream.str().c_str());
     if (fin.is_open() == false) {
         std::cout << "DileptonQGPNLO::readInEmissionTables error: "
                   << "the data file cannot be opened." << std::endl;

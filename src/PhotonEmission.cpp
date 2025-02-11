@@ -10,6 +10,7 @@
 
 #include "Arsenal.h"
 #include "DileptonQGPLO.h"
+#include "DileptonQGPNLO.h"
 #include "HadronGasPiRhoOmega.h"
 #include "HadronGasPipiBremsstrahlung.h"
 #include "HadronGasRhoSpectralFunction.h"
@@ -158,6 +159,8 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
 
     dilepton_QGPLO = std::unique_ptr<ThermalDilepton>(
         new DileptonQGPLO(paraRdr, "Dilepton_QGPLO"));
+    dilepton_QGPNLO = std::unique_ptr<ThermalDilepton>(
+        new DileptonQGPNLO(paraRdr, "Dilepton_QGPNLO"));
 
     photon_HG_meson = std::unique_ptr<ThermalPhoton>(
         new ThermalPhoton(paraRdr, "HG_2to2_meson_total"));
@@ -426,6 +429,9 @@ void PhotonEmission::calPhotonemission(
                         Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, idx_Tb,
                         temp_local, volume, QGP_fraction);
                     dilepton_QGPLO->calThermalDileptonemission(
+                        dilepton_Eq_localrest_Tb, idx_Tb_dilepton, temp_local,
+                        volume, QGP_fraction);
+                    dilepton_QGPNLO->calThermalDileptonemission(
                         dilepton_Eq_localrest_Tb, idx_Tb_dilepton, temp_local,
                         volume, QGP_fraction);
                     if (differential_flag == 1 || differential_flag > 10) {
@@ -842,6 +848,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
             dilepton_QGPLO->calThermalDileptonemission_3d(
                 dilepton_Eq_localrest_Tb, temp_local, muB_local, volume,
                 QGP_fraction);
+            dilepton_QGPNLO->calThermalDileptonemission_3d(
+                dilepton_Eq_localrest_Tb, temp_local, muB_local, volume,
+                QGP_fraction);
             if (differential_flag == 1 || differential_flag > 10) {
                 photon_QGP_2_to_2->calThermalPhotonemissiondTdtau_3d(
                     Eq_localrest_Tb, pi_photon_Tb, bulkPi_Tb, temp_local,
@@ -1052,6 +1061,7 @@ void PhotonEmission::calPhoton_SpvnpT_individualchannel() {
     photon_QGP_2_to_2->calPhoton_SpvnpT_shell();
     photon_QGP_collinear->calPhoton_SpvnpT_shell();
     dilepton_QGPLO->calPhoton_SpvnpT_shell();
+    dilepton_QGPNLO->calPhoton_SpvnpT_shell();
     photon_HG_meson->calPhoton_SpvnpT_shell();
     photon_HG_omega->calPhoton_SpvnpT_shell();
     photon_HG_rho_spectralfun->calPhoton_SpvnpT_shell();
@@ -1088,6 +1098,7 @@ void PhotonEmission::outputPhotonSpvn() {
     photon_QGP_2_to_2->outputPhoton_SpvnpT_shell(output_path);
     photon_QGP_collinear->outputPhoton_SpvnpT_shell(output_path);
     dilepton_QGPLO->outputPhoton_SpvnpT_shell(output_path);
+    dilepton_QGPNLO->outputPhoton_SpvnpT_shell(output_path);
     photon_HG_meson->outputPhoton_SpvnpT_shell(output_path);
     photon_HG_omega->outputPhoton_SpvnpT_shell(output_path);
     photon_HG_rho_spectralfun->outputPhoton_SpvnpT_shell(output_path);

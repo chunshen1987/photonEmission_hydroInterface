@@ -34,7 +34,7 @@ class DileptonQGPNLO : public ThermalDilepton {
     int approx_rho(double *input, double &rT, double &rL);
     double mllFactor(double x);
 
-    void readInEmissionTables(std::string fname);
+    void readInEmissionTables(std::string emissionProcess);
     void getRateFromTable(
         const double E, const double k, const double alpha_s, const double muB,
         const double T, const double m_l, double &rateTot, double &rateT,
@@ -43,6 +43,8 @@ class DileptonQGPNLO : public ThermalDilepton {
   private:
     const double OOFP = 0.0795774715459476678844418816863;  // 1/(4*pi)
     const int Nc = 3;
+
+    std::string ratePath_;
 
     double ****rateRhoT;
     double ****rateRhoL;
