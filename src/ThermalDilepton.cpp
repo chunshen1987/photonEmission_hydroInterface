@@ -15,6 +15,7 @@
 #include "Arsenal.h"
 #include "ParameterReader.h"
 #include "Table2D.h"
+#include "data_struct.h"
 #include "gauss_quadrature.h"
 
 using namespace std;
@@ -24,6 +25,8 @@ using ARSENAL::createA4DMatrix;
 using ARSENAL::deleteA2DMatrix;
 using ARSENAL::deleteA3DMatrix;
 using ARSENAL::deleteA4DMatrix;
+
+using PhysConsts::MElectron;
 
 ThermalDilepton::ThermalDilepton(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess) {
@@ -37,6 +40,8 @@ ThermalDilepton::ThermalDilepton(
     nMInv_ = paraRdr->getVal("nMInv");
     norder_ = paraRdr->getVal("norder");
     rate_path_ = "ph_rates/";
+
+    alphaS_ = paraRdr->getVal("alpha_s");
 
     bRateTable_ = false;
     bShearVisCorr_ = false;
@@ -83,30 +88,45 @@ ThermalDilepton::ThermalDilepton(
     }
 
     dNpTdpTdphidydM_eq = createA4DMatrix(nMInv_, np, nphi, nrapidity, 0.);
+    dNpTdpTdphidydM_eqT = createA4DMatrix(nMInv_, np, nphi, nrapidity, 0.);
+    dNpTdpTdphidydM_eqL = createA4DMatrix(nMInv_, np, nphi, nrapidity, 0.);
 
     vnMInvpT_cos_eq = createA3DMatrix(norder_, nMInv_, np, 0.);
     vnMInvpT_sin_eq = createA3DMatrix(norder_, nMInv_, np, 0.);
+    vnMInvpT_cos_eqT = createA3DMatrix(norder_, nMInv_, np, 0.);
+    vnMInvpT_sin_eqT = createA3DMatrix(norder_, nMInv_, np, 0.);
+    vnMInvpT_cos_eqL = createA3DMatrix(norder_, nMInv_, np, 0.);
+    vnMInvpT_sin_eqL = createA3DMatrix(norder_, nMInv_, np, 0.);
 
     vnMInv_cos_eq = createA2DMatrix(norder_, nMInv_, 0.);
     vnMInv_sin_eq = createA2DMatrix(norder_, nMInv_, 0.);
+    vnMInv_cos_eqT = createA2DMatrix(norder_, nMInv_, 0.);
+    vnMInv_sin_eqT = createA2DMatrix(norder_, nMInv_, 0.);
+    vnMInv_cos_eqL = createA2DMatrix(norder_, nMInv_, 0.);
+    vnMInv_sin_eqL = createA2DMatrix(norder_, nMInv_, 0.);
 }
 
 ThermalDilepton::~ThermalDilepton() {
-    // if (bRateTable_) {
-    //     int TbsizeX = EmissionrateTb_sizeX;
-    //     deleteA3DMatrix(Emission_eqrateTb_ptr, TbsizeX);
-    // }
-
     delete[] p;
     delete[] p_weight;
     delete[] phi;
     delete[] phi_weight;
 
     deleteA4DMatrix(dNpTdpTdphidydM_eq, nMInv_, np, nphi);
+    deleteA4DMatrix(dNpTdpTdphidydM_eqT, nMInv_, np, nphi);
+    deleteA4DMatrix(dNpTdpTdphidydM_eqL, nMInv_, np, nphi);
     deleteA3DMatrix(vnMInvpT_cos_eq, norder_, nMInv_);
     deleteA3DMatrix(vnMInvpT_sin_eq, norder_, nMInv_);
+    deleteA3DMatrix(vnMInvpT_cos_eqT, norder_, nMInv_);
+    deleteA3DMatrix(vnMInvpT_sin_eqT, norder_, nMInv_);
+    deleteA3DMatrix(vnMInvpT_cos_eqL, norder_, nMInv_);
+    deleteA3DMatrix(vnMInvpT_sin_eqL, norder_, nMInv_);
     deleteA2DMatrix(vnMInv_cos_eq, norder_);
     deleteA2DMatrix(vnMInv_sin_eq, norder_);
+    deleteA2DMatrix(vnMInv_cos_eqT, norder_);
+    deleteA2DMatrix(vnMInv_sin_eqT, norder_);
+    deleteA2DMatrix(vnMInv_cos_eqL, norder_);
+    deleteA2DMatrix(vnMInv_sin_eqL, norder_);
 }
 
 void ThermalDilepton::analyticRates(
@@ -143,7 +163,8 @@ void ThermalDilepton::checkAnalyticRates() {
 
 void ThermalDilepton::getEmissionRate(
     vector<double> &Eq, const double T, const double muB,
-    vector<double> &eqrate_ptr) {
+    vector<double> &eqrate_ptr, vector<double> &eqrateT_ptr,
+    vector<double> &eqrateL_ptr) {
     int npoints = np * nphi * nrapidity;
     if (!bRateTable_) {
         for (int i = 0; i < Eq.size(); i++) {
@@ -151,9 +172,23 @@ void ThermalDilepton::getEmissionRate(
             int iM = static_cast<int>(i / npoints) % nMInv_;
             analyticRates(T, MInv_[iM], Eq[i], eqrateLoc);
             eqrate_ptr[i] = eqrateLoc;
+            eqrateT_ptr[i] = eqrateLoc * 2. / 3.;
+            eqrateL_ptr[i] = eqrateLoc * 1. / 3.;
+        }
+        NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
+    } else {
+        for (int i = 0; i < Eq.size(); i++) {
+            int iM = static_cast<int>(i / npoints) % nMInv_;
+            double MInv = MInv_[iM];
+            double k = sqrt(Eq[i] * Eq[i] - MInv * MInv);
+            double rateTot, rateT, rateL;
+            getRateFromTable(
+                Eq[i], k, alphaS_, muB, T, MElectron, rateTot, rateT, rateL);
+            eqrate_ptr[i] = rateTot;
+            eqrateT_ptr[i] = rateT;
+            eqrateL_ptr[i] = rateL;
         }
     }
-    NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
 }
 
 void ThermalDilepton::calThermalDileptonemission_3d(
@@ -167,17 +202,21 @@ void ThermalDilepton::calThermalDileptonemission_3d(
     const double volfrac = volume * fraction;
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
+    vector<double> em_eqrateT(Tb_length, 0);
+    vector<double> em_eqrateL(Tb_length, 0);
 
-    getEmissionRate(Eq, T, muB, em_eqrate);
+    getEmissionRate(Eq, T, muB, em_eqrate, em_eqrateT, em_eqrateL);
 
     int idx = 0;
     for (int im = 0; im < nMInv_; im++) {
         for (int k = 0; k < nrapidity; k++) {
             for (int m = 0; m < nphi; m++) {
                 for (int l = 0; l < np; l++) {
-                    double local_eq = em_eqrate[idx];
-                    double temp_eq_sum = local_eq * volfrac;
-                    dNpTdpTdphidydM_eq[im][l][m][k] += temp_eq_sum;
+                    dNpTdpTdphidydM_eq[im][l][m][k] += em_eqrate[idx] * volfrac;
+                    dNpTdpTdphidydM_eqT[im][l][m][k] +=
+                        em_eqrateT[idx] * volfrac;
+                    dNpTdpTdphidydM_eqL[im][l][m][k] +=
+                        em_eqrateL[idx] * volfrac;
                     idx++;
                 }
             }
@@ -190,24 +229,36 @@ void ThermalDilepton::calThermalDileptonemission(
     double fraction) {
     // photon emission equilibrium rate at local rest cell
     vector<double> em_eqrate(Tb_length, 0);
+    vector<double> em_eqrateT(Tb_length, 0);
+    vector<double> em_eqrateL(Tb_length, 0);
 
-    getEmissionRate(Eq, T, 0., em_eqrate);
+    getEmissionRate(Eq, T, 0., em_eqrate, em_eqrateT, em_eqrateL);
 
     int n_pt_point = nMInv_ * nrapidity * np * nphi;
 
-    double temp_eq_sum;
+    double temp_eq_sum, temp_eq_sumT, temp_eq_sumL;
     int idx = 0;
     for (int im = 0; im < nMInv_; im++) {
         for (int k = 0; k < nrapidity; k++) {
             for (int m = 0; m < nphi; m++) {
                 for (int l = 0; l < np; l++) {
                     temp_eq_sum = 0.0;
+                    temp_eq_sumT = 0.0;
+                    temp_eq_sumL = 0.0;
                     for (int i = 0; i < neta; i++) {
                         // integrate over eta
                         double local_eq = em_eqrate[idx + i * n_pt_point];
                         temp_eq_sum += local_eq * volume[i] * fraction;
+
+                        double local_eqT = em_eqrateT[idx + i * n_pt_point];
+                        temp_eq_sumT += local_eqT * volume[i] * fraction;
+
+                        double local_eqL = em_eqrateL[idx + i * n_pt_point];
+                        temp_eq_sumL += local_eqL * volume[i] * fraction;
                     }
                     dNpTdpTdphidydM_eq[im][l][m][k] += temp_eq_sum;
+                    dNpTdpTdphidydM_eqT[im][l][m][k] += temp_eq_sumT;
+                    dNpTdpTdphidydM_eqL[im][l][m][k] += temp_eq_sumL;
                     idx++;
                 }
             }
@@ -268,6 +319,12 @@ void ThermalDilepton::calPhoton_SpvnpT_shell() {
     calPhoton_SpvnpT(
         dNpTdpTdphidydM_eq, vnMInvpT_cos_eq, vnMInvpT_sin_eq, vnMInv_cos_eq,
         vnMInv_sin_eq);
+    calPhoton_SpvnpT(
+        dNpTdpTdphidydM_eqT, vnMInvpT_cos_eqT, vnMInvpT_sin_eqT, vnMInv_cos_eqT,
+        vnMInv_sin_eqT);
+    calPhoton_SpvnpT(
+        dNpTdpTdphidydM_eqL, vnMInvpT_cos_eqL, vnMInvpT_sin_eqL, vnMInv_cos_eqL,
+        vnMInv_sin_eqL);
 }
 
 void ThermalDilepton::outputPhoton_SpvnpT(
@@ -319,4 +376,10 @@ void ThermalDilepton::outputPhoton_SpvnpT_shell(string path) {
     outputPhoton_SpvnpT(
         path, "eq", dNpTdpTdphidydM_eq, vnMInvpT_cos_eq, vnMInvpT_sin_eq,
         vnMInv_cos_eq, vnMInv_sin_eq);
+    outputPhoton_SpvnpT(
+        path, "eqT", dNpTdpTdphidydM_eqT, vnMInvpT_cos_eqT, vnMInvpT_sin_eqT,
+        vnMInv_cos_eqT, vnMInv_sin_eqT);
+    outputPhoton_SpvnpT(
+        path, "eqL", dNpTdpTdphidydM_eqL, vnMInvpT_cos_eqL, vnMInvpT_sin_eqL,
+        vnMInv_cos_eqL, vnMInv_sin_eqL);
 }

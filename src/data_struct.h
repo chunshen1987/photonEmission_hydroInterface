@@ -4,6 +4,7 @@
 namespace PhysConsts {
 const double hbarC = 0.19733;
 const double alphaEM = 1. / 137.035999;
+const double MElectron = 0.5109989461e-3;  // electron mass / GeV
 }  // namespace PhysConsts
 
 struct fluidCell {

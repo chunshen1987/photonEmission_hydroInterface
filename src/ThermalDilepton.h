@@ -25,6 +25,8 @@ class ThermalDilepton {
     bool bShearVisCorr_;
     bool bBulkVisCorr_;
 
+    double alphaS_;
+
     // photon spectra parameters
     std::string emissionProcess_name;
     double *p, *p_weight;
@@ -34,9 +36,15 @@ class ThermalDilepton {
     std::vector<double> MInv_;
 
     double ****dNpTdpTdphidydM_eq;
+    double ****dNpTdpTdphidydM_eqT;
+    double ****dNpTdpTdphidydM_eqL;
 
     double **vnMInv_cos_eq, **vnMInv_sin_eq;
+    double **vnMInv_cos_eqT, **vnMInv_sin_eqT;
+    double **vnMInv_cos_eqL, **vnMInv_sin_eqL;
     double ***vnMInvpT_cos_eq, ***vnMInvpT_sin_eq;
+    double ***vnMInvpT_cos_eqT, ***vnMInvpT_sin_eqT;
+    double ***vnMInvpT_cos_eqL, ***vnMInvpT_sin_eqL;
 
   public:
     ThermalDilepton(
@@ -66,11 +74,21 @@ class ThermalDilepton {
         double T, double muB, std::vector<double> &Eq,
         std::vector<double> &eqrate_ptr) {}
 
+    virtual void getRateFromTable(
+        const double E, const double k, const double alpha_s, const double muB,
+        const double T, const double m_l, double &rateTot, double &rateT,
+        double &rateL) {
+        rateTot = 0.0;
+        rateT = 0.0;
+        rateL = 0.0;
+    };
+
     void checkAnalyticRates();
 
     void getEmissionRate(
         std::vector<double> &Eq, const double T, const double muB,
-        std::vector<double> &eqrate_ptr);
+        std::vector<double> &eqrate_ptr, std::vector<double> &eqrateT_ptr,
+        std::vector<double> &eqrateL_ptr);
     void calThermalDileptonemission(
         std::vector<double> &Eq, int Tb_length, double T,
         std::vector<double> &volume, double fraction);
