@@ -36,13 +36,16 @@ class DileptonQGPNLO : public ThermalDilepton {
 
     void readInEmissionTables(std::string emissionProcess);
     void getRateFromTable(
-        const double E, const double k, const double alpha_s, const double muB,
-        const double T, const double m_l, double &rateTot, double &rateT,
-        double &rateL);
+        const double E, const double k, const double MInv, const double alpha_s,
+        const double muB, const double T, const double m_l, double &rateTot,
+        double &rateT, double &rateL);
 
   private:
     const double OOFP = 0.0795774715459476678844418816863;  // 1/(4*pi)
     const int Nc = 3;
+
+    double prefac1_;  // (2. / 3.) * pow(hbarC, -4.) * pow(alphaEM, 2.)
+    double prefac2_;  // 3. * pow(M_PI, 3.)
 
     std::string ratePath_;
 

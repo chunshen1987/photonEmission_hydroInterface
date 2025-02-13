@@ -33,6 +33,8 @@ ThermalDilepton::ThermalDilepton(
     paraRdr = paraRdr_in;
     emissionProcess_name = emissionProcess;
 
+    mlsq_ = MElectron * MElectron;
+
     neta = paraRdr->getVal("neta");
     np = paraRdr->getVal("np");
     nphi = paraRdr->getVal("nphi");
@@ -183,7 +185,7 @@ void ThermalDilepton::getEmissionRate(
             double k = sqrt(Eq[i] * Eq[i] - MInv * MInv);
             double rateTot, rateT, rateL;
             getRateFromTable(
-                Eq[i], k, alphaS_, muB, T, MElectron, rateTot, rateT, rateL);
+                Eq[i], k, MInv, alphaS_, muB, T, mlsq_, rateTot, rateT, rateL);
             eqrate_ptr[i] = rateTot;
             eqrateT_ptr[i] = rateT;
             eqrateL_ptr[i] = rateL;

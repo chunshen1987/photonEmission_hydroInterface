@@ -24,6 +24,8 @@ DileptonQGPNLO::DileptonQGPNLO(
     : ThermalDilepton {paraRdr_in, emissionProcess} {
     ratePath_ = "ph_rates/";
     readInEmissionTables(emissionProcess);
+    prefac1_ = (2. / 3.) * pow(hbarC, -4.) * pow(alphaEM, 2.);
+    prefac2_ = 3. * pow(M_PI, 3.);
 }
 
 DileptonQGPNLO::~DileptonQGPNLO() {
@@ -229,17 +231,10 @@ int DileptonQGPNLO::approx_rho(double *input, double &rT, double &rL) {
 
     double EoverT = input[0];
     double koverT = input[1];
-    double alphaS = input[2];
-    double muoverT = input[3];
+    double MoverT = input[2];
+    double alphaS = input[3];
+    double muoverT = input[4];
 
-    if (EoverT < koverT) {
-        // skip 'DIS region'
-        rT = 0.;
-        rL = 0.;
-        return -1;
-    }
-
-    double MoverT = sqrt(EoverT * EoverT - koverT * koverT);
     double al_min = alphaS_list[0];
     double M_min = MoverT_list[0];
     double M_max = MoverT_list[MoverT_list.size() - 1];
@@ -249,8 +244,7 @@ int DileptonQGPNLO::approx_rho(double *input, double &rT, double &rL) {
         double LO_rT, LO_rL;
         rho_LO(EoverT, koverT, muoverT, LO_rT, LO_rL);
         double min_rT, min_rL;
-        double in[4] = {EoverT, koverT, al_min, muoverT};
-        approx_rho(in, min_rT, min_rL);
+        interp(al_min, muoverT, MoverT, koverT, min_rT, min_rL);
 
         double weight = alphaS / al_min;
         rT = weight * min_rT + (1. - weight) * LO_rT;
@@ -266,10 +260,8 @@ int DileptonQGPNLO::approx_rho(double *input, double &rT, double &rL) {
         return 1;
     } else if (MoverT < M_min) {
         // use AMY approx. formula if M < M_min
-        double EminOverT = sqrt(M_min * M_min + koverT * koverT);
-        double in[4] = {EminOverT, koverT, alphaS, muoverT};
         double min_rT, min_rL;
-        approx_rho(in, min_rT, min_rL);
+        interp(alphaS, muoverT, M_min, koverT, min_rT, min_rL);
 
         double weight = MoverT / M_min;
         rT = weight * min_rT
@@ -284,31 +276,40 @@ int DileptonQGPNLO::approx_rho(double *input, double &rT, double &rL) {
 
 double DileptonQGPNLO::mllFactor(double x) {
     // lepton pair kinematic factor
-    if (4. * x > 1.)
+    double component = 1. - 4. * x;
+    if (component < 0.)
         return 0.;
     else
-        return (1. + 2. * x) * sqrt(1. - 4. * x);
+        return (1. + 2. * x) * sqrt(component);
 }
 
 void DileptonQGPNLO::getRateFromTable(
-    const double E, const double k, const double alpha_s, const double muB,
-    const double T, const double m_l, double &rateTot, double &rateT,
-    double &rateL) {
+    const double E, const double k, const double MInv, const double alpha_s,
+    const double muB, const double T, const double mlsq, double &rateTot,
+    double &rateT, double &rateL) {
     // NB: quantities are defined in the local rest frame, i.e. u_\mu=(1,0,0,0)
-    //
-    double M2 = E * E - k * k;
 
-    double prefactor = mllFactor(m_l * m_l / M2) * (2. / 3.) * pow(hbarC, -4.)
-                       * pow(alphaEM, 2.);
-    // units: GeV^-4.fm^-4
+    if (E < k) {
+        // skip 'DIS region'
+        rateT = 0.;
+        rateL = 0.;
+        rateTot = 0.;
+        return;
+    }
+
+    double M2 = MInv * MInv;
+
+    // double prefactor = mllFactor(mlsq / M2) * (2. / 3.) * pow(hbarC, -4.)
+    //                    * pow(alphaEM, 2.);
+    //  units: GeV^-4.fm^-4
+    double prefactor = mllFactor(mlsq / M2) * prefac1_;
 
     // m_l, T, muB, o and k must all be given in units of GeV!
-    double in[4] = {E / T, k / T, alpha_s, muB / T / 3.};
+    double in[5] = {E / T, k / T, MInv / T, alpha_s, muB / T / 3.};
     double rhoT_app, rhoL_app;
     approx_rho(in, rhoT_app, rhoL_app);
 
-    double prefac =
-        prefactor * nB(E / T) * pow(T, 2.) / (3. * pow(M_PI, 3.) * M2);
+    double prefac = prefactor * nB(E / T) * T * T / (prefac2_ * M2);
 
     rateT = prefac * rhoT_app;
     rateL = prefac * rhoL_app;

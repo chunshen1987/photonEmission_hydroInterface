@@ -19,6 +19,8 @@ class ThermalDilepton {
     int neta;
     std::string rate_path_;
 
+    double mlsq_;
+
     double dy, dMInv_;
 
     bool bRateTable_;
@@ -75,9 +77,9 @@ class ThermalDilepton {
         std::vector<double> &eqrate_ptr) {}
 
     virtual void getRateFromTable(
-        const double E, const double k, const double alpha_s, const double muB,
-        const double T, const double m_l, double &rateTot, double &rateT,
-        double &rateL) {
+        const double E, const double k, const double MInv, const double alpha_s,
+        const double muB, const double T, const double m_l, double &rateTot,
+        double &rateT, double &rateL) {
         rateTot = 0.0;
         rateT = 0.0;
         rateL = 0.0;
