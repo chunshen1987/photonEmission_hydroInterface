@@ -45,6 +45,9 @@ class ThermalDilepton {
     double ***vnMInvpT_cos_eq, ***vnMInvpT_sin_eq;
     double ***vnMInvpT_cos_eqT, ***vnMInvpT_sin_eqT;
     double ***vnMInvpT_cos_eqL, ***vnMInvpT_sin_eqL;
+    double ****vnMInvpTy_cos_eq,  ****vnMInvpTy_sin_eq;
+    double ****vnMInvpTy_cos_eqT, ****vnMInvpTy_sin_eqT;
+    double ****vnMInvpTy_cos_eqL, ****vnMInvpTy_sin_eqL;
 
   public:
     ThermalDilepton(
@@ -104,13 +107,16 @@ class ThermalDilepton {
         double fraction);
 
     void calPhoton_SpvnpT(
-        double ****dNpTdpTdphidydM, double ***vnMInvpT_cos,
-        double ***vnMInvpT_sin, double **vnMInv_cos, double **vnMInv_sin);
+        double ****dNpTdpTdphidydM, 
+	double ***vnMInvpT_cos,double ***vnMInvpT_sin, 
+	double ****vnMInvpTy_cos,double ****vnMInvpTy_sin, 
+	double **vnMInv_cos, double **vnMInv_sin);
     void calPhoton_SpvnpT_shell();
     void outputPhoton_SpvnpT(
         std::string path, std::string type_str, double ****dNpTdpTdphidydM,
-        double ***vnMInvpT_cos, double ***vnMInvpT_sin, double **vnMInv_cos,
-        double **vnMInv_sin);
+        double ***vnMInvpT_cos, double ***vnMInvpT_sin,
+        double ****vnMInvpTy_cos, double ****vnMInvpTy_sin,
+       	double **vnMInv_cos,double **vnMInv_sin);
     void outputPhoton_SpvnpT_shell(std::string path);
 };
 
