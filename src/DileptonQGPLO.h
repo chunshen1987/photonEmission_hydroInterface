@@ -14,8 +14,20 @@ class DileptonQGPLO : public ThermalDilepton {
         std::string emissionProcess);
     ~DileptonQGPLO() {}
 
+    double nB(double x);
+    double l1f(double x);
+    double l2f(double x);
+    double l3f(double x);
+
+    void rho_LO(double o, double k, double mu, double &rT, double &rL);
+    double mllFactor(double x);
+
     void analyticRates(
-        const double T, const double MInv, const double Eq, double &eqrate);
+        const double E, const double k, const double muB, const double T,
+        const double m_l, double &rateTot, double &rateT, double &rateL);
+
+  private:
+    const double OOFP = 0.0795774715459476678844418816863;  // 1/(4*pi)
 };
 
 #endif  // SRC_DILEPTONQGPLO_H

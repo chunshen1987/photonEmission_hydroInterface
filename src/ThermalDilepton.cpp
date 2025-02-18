@@ -131,37 +131,34 @@ ThermalDilepton::~ThermalDilepton() {
     deleteA2DMatrix(vnMInv_sin_eqL, norder_);
 }
 
-void ThermalDilepton::analyticRates(
-    const double T, const double MInv, const double Eq, double &eqrate) {
-    eqrate = 1e-16;
-}
-
-void ThermalDilepton::checkAnalyticRates() {
-    ofstream checkRates("checkPhotonRates.dat");
-    double Emin = 0.05;
-    double Tmin = 0.1;
-    double dE = 0.05;
-    double dT = 0.002;
-    int nE = 80;
-    int nT = 351;
-    vector<double> Eq(nE, 0);
-    for (int iE = 0; iE < nE; iE++) {
-        Eq[iE] = Emin + iE * dE;
-    }
-    vector<double> eqrate(nE, 0);
-    for (int iT = 0; iT < nT; iT++) {
-        double T_local = Tmin + iT * dT;
-        for (int iE = 0; iE < nE; iE++) {
-            analyticRates(T_local, 1.0, Eq[iE], eqrate[iE]);
-        }
-        for (const auto rate_i : eqrate) {
-            checkRates << std::scientific << std::setprecision(6)
-                       << std::setw(10) << rate_i << "  ";
-        }
-        checkRates << std::endl;
-    }
-    checkRates.close();
-}
+// void ThermalDilepton::checkAnalyticRates() {
+//     ofstream checkRates("checkPhotonRates.dat");
+//     double Emin = 0.05;
+//     double Tmin = 0.1;
+//     double dE = 0.05;
+//     double dT = 0.002;
+//     int nE = 80;
+//     int nT = 351;
+//     vector<double> Eq(nE, 0);
+//     for (int iE = 0; iE < nE; iE++) {
+//         Eq[iE] = Emin + iE * dE;
+//     }
+//     vector<double> eqrate(nE, 0);
+//     for (int iT = 0; iT < nT; iT++) {
+//         double T_local = Tmin + iT * dT;
+//         for (int iE = 0; iE < nE; iE++) {
+//             int iM = static_cast<int>(iE / npoints) % nMInv_;
+//             double MInv = MInv_[iM];
+//             analyticRates(T_local, 1.0, Eq[iE], eqrate[iE]);
+//         }
+//         for (const auto rate_i : eqrate) {
+//             checkRates << std::scientific << std::setprecision(6)
+//                        << std::setw(10) << rate_i << "  ";
+//         }
+//         checkRates << std::endl;
+//     }
+//     checkRates.close();
+// }
 
 void ThermalDilepton::getEmissionRate(
     vector<double> &Eq, const double T, const double muB,
@@ -170,12 +167,14 @@ void ThermalDilepton::getEmissionRate(
     int npoints = np * nphi * nrapidity;
     if (!bRateTable_) {
         for (int i = 0; i < Eq.size(); i++) {
-            double eqrateLoc = 0;
             int iM = static_cast<int>(i / npoints) % nMInv_;
-            analyticRates(T, MInv_[iM], Eq[i], eqrateLoc);
-            eqrate_ptr[i] = eqrateLoc;
-            eqrateT_ptr[i] = eqrateLoc * 2. / 3.;
-            eqrateL_ptr[i] = eqrateLoc * 1. / 3.;
+            double MInv = MInv_[iM];
+            double k = sqrt(Eq[i] * Eq[i] - MInv * MInv);
+            double rateTot, rateT, rateL;
+            analyticRates(Eq[i], k, muB, T, MElectron, rateTot, rateT, rateL);
+            eqrate_ptr[i] = rateTot;
+            eqrateT_ptr[i] = rateT;
+            eqrateL_ptr[i] = rateL;
         }
         NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
     } else {
