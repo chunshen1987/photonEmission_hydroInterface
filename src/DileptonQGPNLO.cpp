@@ -8,7 +8,7 @@
 #include <sstream>
 #include <string>
 #include <vector>
-
+#include <gsl/gsl_errno.h>
 #include "Arsenal.h"
 #include "data_struct.h"
 
@@ -19,6 +19,9 @@ using PhysConsts::hbarC;
 using ARSENAL::createA4DMatrix;
 using ARSENAL::deleteA4DMatrix;
 
+void error_handler_nlo(const char *reason, const char *file, int line, int gsl_errno) {
+    //fprintf(stderr, "GSL ERROR: %s:%d: %s (error code: %d)\n", file, line, reason, gsl_errno);
+}
 DileptonQGPNLO::DileptonQGPNLO(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess)
     : ThermalDilepton {paraRdr_in, emissionProcess} {
@@ -50,11 +53,52 @@ double DileptonQGPNLO::nB(double x) {
     return e / (1. - e);
 };
 
-double DileptonQGPNLO::l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
+//double DileptonQGPNLO::l1f(double x) { return +gsl_sf_fermi_dirac_0(-x); }
 
-double DileptonQGPNLO::l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
+//double DileptonQGPNLO::l2f(double x) { return -gsl_sf_fermi_dirac_1(-x); }
 
-double DileptonQGPNLO::l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
+//double DileptonQGPNLO::l3f(double x) { return -gsl_sf_fermi_dirac_2(-x); }
+
+double DileptonQGPNLO::l1f(double x) { 
+    
+    gsl_set_error_handler(&error_handler_nlo);
+    gsl_sf_result result; 
+    int status = gsl_sf_fermi_dirac_0_e(-x, &result);
+
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+	//not printf, set result.val=0.0
+    }
+    return result.val;
+
+}
+double DileptonQGPNLO::l2f(double x) { 
+    
+    gsl_set_error_handler(&error_handler_nlo);
+    gsl_sf_result result; 
+    int status = gsl_sf_fermi_dirac_1_e(-x, &result);
+
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+	//not printf, set result.val=0.0
+    }
+    return -result.val;
+
+}
+double DileptonQGPNLO::l3f(double x) { 
+    
+    gsl_set_error_handler(&error_handler_nlo);
+    gsl_sf_result result; 
+    int status = -gsl_sf_fermi_dirac_2_e(-x, &result);
+    if (status != GSL_SUCCESS) {
+        //printf("An error occurred: %f\n", result.val);
+	//not printf, set result.val=0.0
+    }
+
+
+    return -result.val;
+
+}
 
 void DileptonQGPNLO::rho_LO(
     double o, double k, double mu, double &rT, double &rL) {
@@ -230,7 +274,8 @@ int DileptonQGPNLO::approx_rho(double *input, double &rT, double &rL) {
     double EoverT = input[0];
     double koverT = input[1];
     double alphaS = input[2];
-    double muoverT = input[3];
+    double muoverBT = input[3];
+    double muoverT = input[3]/3.;
 
     if (EoverT < koverT) {
         // skip 'DIS region'
@@ -244,12 +289,12 @@ int DileptonQGPNLO::approx_rho(double *input, double &rT, double &rL) {
     double M_min = MoverT_list[0];
     double M_max = MoverT_list[MoverT_list.size() - 1];
 
-    if (alphaS < al_min) {
+    if (alphaS < al_min-1e-5) {
         // use LO result to extrapolate if alpha < alpha_min
         double LO_rT, LO_rL;
         rho_LO(EoverT, koverT, muoverT, LO_rT, LO_rL);
         double min_rT, min_rL;
-        double in[4] = {EoverT, koverT, al_min, muoverT};
+        double in[4] = {EoverT, koverT, al_min, muoverBT};
         approx_rho(in, min_rT, min_rL);
 
         double weight = alphaS / al_min;
@@ -257,17 +302,17 @@ int DileptonQGPNLO::approx_rho(double *input, double &rT, double &rL) {
         rL = weight * min_rL + (1. - weight) * LO_rL;
         return 1;
     }
-    if (MoverT > M_max) {
+    if (MoverT > M_max+1e-5) {
         // use OPE expansion to extrapolate if M > M_max
         double OPE_rT, OPE_rL;
         rho_OPE(EoverT, koverT, alphaS, muoverT, OPE_rT, OPE_rL);
         rT = OPE_rT;
         rL = OPE_rL;
         return 1;
-    } else if (MoverT < M_min) {
+    }else if (MoverT < M_min-1e-5) {
         // use AMY approx. formula if M < M_min
         double EminOverT = sqrt(M_min * M_min + koverT * koverT);
-        double in[4] = {EminOverT, koverT, alphaS, muoverT};
+        double in[4] = {EminOverT, koverT, alphaS, muoverBT};
         double min_rT, min_rL;
         approx_rho(in, min_rT, min_rL);
 
@@ -303,7 +348,7 @@ void DileptonQGPNLO::getRateFromTable(
     // units: GeV^-4.fm^-4
 
     // m_l, T, muB, o and k must all be given in units of GeV!
-    double in[4] = {E / T, k / T, alpha_s, muB / T / 3.};
+    double in[4] = {E / T, k / T, alpha_s, muB / T };
     double rhoT_app, rhoL_app;
     approx_rho(in, rhoT_app, rhoL_app);
 

@@ -68,7 +68,14 @@ class ThermalDilepton {
     double getDileptonMinv(int i) { return (MInv_[i]); }
 
     virtual void analyticRates(
-        const double T, const double MInv, const double Eq, double &eqrate);
+        const double E, const double k,  const double muB,
+        const double T, const double m_l, double &rateTot, double &rateT,
+        double &rateL){
+            rateTot = 0.0;
+            rateT = 0.0;
+            rateL = 0.0;
+
+        };
 
     virtual void NetBaryonCorrection(
         double T, double muB, std::vector<double> &Eq,
@@ -83,7 +90,7 @@ class ThermalDilepton {
         rateL = 0.0;
     };
 
-    void checkAnalyticRates();
+    //void checkAnalyticRates();
 
     void getEmissionRate(
         std::vector<double> &Eq, const double T, const double muB,
