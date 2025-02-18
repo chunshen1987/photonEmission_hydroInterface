@@ -376,11 +376,11 @@ void ThermalDilepton::outputPhoton_SpvnpT(
             for (int j = 0; j < np; j++) {
                 fphotonSpyMatrix << scientific << setprecision(6) << setw(16)<< y[k]<<" "
                             << MInv_[im] << "  " << p[j] << "  "
-                            << vnMInvpTy_cos[0][im][j];
+                            << vnMInvpTy_cos[0][im][j][k];
             for (int order = 1; order < norder_; order++) {
                 fphotonSpyMatrix << scientific << setprecision(6) << setw(16)
-                                << "  " << vnMInvpTy_cos[order][im][j] << "  "
-                                << vnMInvpTy_sin[order][im][j];
+                                << "  " << vnMInvpTy_cos[order][im][j][k] << "  "
+                                << vnMInvpTy_sin[order][im][j][k];
             }
             fphotonSpyMatrix << endl;
             }
