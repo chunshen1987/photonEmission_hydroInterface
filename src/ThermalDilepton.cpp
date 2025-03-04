@@ -27,13 +27,20 @@ using ARSENAL::deleteA3DMatrix;
 using ARSENAL::deleteA4DMatrix;
 
 using PhysConsts::MElectron;
+using PhysConsts::MMuon;
 
 ThermalDilepton::ThermalDilepton(
     std::shared_ptr<ParameterReader> paraRdr_in, std::string emissionProcess) {
     paraRdr = paraRdr_in;
     emissionProcess_name = emissionProcess;
 
-    mlsq_ = MElectron * MElectron;
+    dileptonType_ = paraRdr->getVal("dileptonType", 0);
+    ml_ = MElectron;
+    ;
+    if (dileptonType_ == 1) {
+        ml_ = MMuon;
+    }
+    mlsq_ = ml_ * ml_;
 
     neta = paraRdr->getVal("neta");
     np = paraRdr->getVal("np");
@@ -171,7 +178,7 @@ void ThermalDilepton::getEmissionRate(
             double MInv = MInv_[iM];
             double k = sqrt(Eq[i] * Eq[i] - MInv * MInv);
             double rateTot, rateT, rateL;
-            analyticRates(Eq[i], k, muB, T, MElectron, rateTot, rateT, rateL);
+            analyticRates(Eq[i], k, muB, T, ml_, rateTot, rateT, rateL);
             eqrate_ptr[i] = rateTot;
             eqrateT_ptr[i] = rateT;
             eqrateL_ptr[i] = rateL;

@@ -19,6 +19,8 @@ class ThermalDilepton {
     int neta;
     std::string rate_path_;
 
+    int dileptonType_;
+    double ml_;
     double mlsq_;
 
     double dy, dMInv_;
