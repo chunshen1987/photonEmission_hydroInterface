@@ -45,7 +45,7 @@ ThermalDilepton::ThermalDilepton(
     neta = paraRdr->getVal("neta");
     np = paraRdr->getVal("np");
     nphi = paraRdr->getVal("nphi");
-    nrapidity = paraRdr->getVal("nrapidity");
+    nrapidity = 4;
     nMInv_ = paraRdr->getVal("nMInv");
     norder_ = paraRdr->getVal("norder");
     rate_path_ = "ph_rates/";
@@ -59,15 +59,11 @@ ThermalDilepton::ThermalDilepton(
     // initial variables for photon spectra
     double p_i = paraRdr->getVal("photon_q_i");
     double p_f = paraRdr->getVal("photon_q_f");
-    double phi_i = paraRdr->getVal("photon_phi_q_i");
-    double phi_f = paraRdr->getVal("photon_phi_q_f");
-    double y_i = paraRdr->getVal("photon_y_i");
-    double y_f = paraRdr->getVal("photon_y_f");
-    if (nrapidity > 1) {
-        dy = (y_f - y_i) / (nrapidity - 1 + 1e-100);
-    } else {
-        dy = 1.0;
-    }
+    double phi_i = 0.;
+    double phi_f = 2. * M_PI;
+    double y_i = paraRdr->getVal("dilepton_y_i");
+    double y_f = paraRdr->getVal("dilepton_y_f");
+    dy = (y_f - y_i) / nrapidity;
     double m_i = paraRdr->getVal("dilepton_mass_i");
     double m_f = paraRdr->getVal("dilepton_mass_f");
 
@@ -82,7 +78,7 @@ ThermalDilepton::ThermalDilepton(
     y.resize(nrapidity, 0);
     theta.resize(nrapidity, 0);
     for (int i = 0; i < nrapidity; i++) {
-        y[i] = y_i + i * dy;
+        y[i] = y_i + (i + 0.5) * dy;
         theta[i] = acos(tanh(y[i]));  // rapidity's corresponding polar angle
     }
 
@@ -173,7 +169,7 @@ void ThermalDilepton::getEmissionRate(
     vector<double> &eqrateL_ptr) {
     int npoints = np * nphi * nrapidity;
     if (!bRateTable_) {
-        for (int i = 0; i < Eq.size(); i++) {
+        for (unsigned int i = 0; i < Eq.size(); i++) {
             int iM = static_cast<int>(i / npoints) % nMInv_;
             double MInv = MInv_[iM];
             double k = sqrt(Eq[i] * Eq[i] - MInv * MInv);
@@ -185,7 +181,7 @@ void ThermalDilepton::getEmissionRate(
         }
         NetBaryonCorrection(T, muB, Eq, eqrate_ptr);
     } else {
-        for (int i = 0; i < Eq.size(); i++) {
+        for (unsigned int i = 0; i < Eq.size(); i++) {
             int iM = static_cast<int>(i / npoints) % nMInv_;
             double MInv = MInv_[iM];
             double k = sqrt(Eq[i] * Eq[i] - MInv * MInv);
@@ -291,10 +287,9 @@ void ThermalDilepton::calPhoton_SpvnpT(
                         double sin_tmp =
                             (dNpTdpTdphidydM[im][i][j][k] * sin(order * phi[j])
                              * weight);
-                        if (std::abs(y[k]) < 0.5) {
-                            vnMInvpT_cos[order][im][i] += cos_tmp * dy;
-                            vnMInvpT_sin[order][im][i] += sin_tmp * dy;
-                        }
+                        // integrate over dilepton_y_i to dilpeton_y_f
+                        vnMInvpT_cos[order][im][i] += cos_tmp * dy;
+                        vnMInvpT_sin[order][im][i] += sin_tmp * dy;
                     }
                 }
             }
@@ -313,12 +308,13 @@ void ThermalDilepton::calPhoton_SpvnpT(
                         (vnMInvpT_cos[0][im][i] + eps);
                 }
             }
-            vnMInvpT_cos[0][im][i] /= (2 * M_PI);  // dN/(2pi dy pT dpT)
+            vnMInvpT_cos[0][im][i] /= (2 * M_PI);  // dN/(2pi pT dpT M dM)
         }
         for (int order = 1; order < norder_; order++) {
             // vn
             vnMInv_cos[order][im] /= (vnMInv_cos[0][im] + eps);
             vnMInv_sin[order][im] /= (vnMInv_cos[0][im] + eps);
+            // vnMInv_cos[0][im] is dN/(M dM);
         }
     }
 }
@@ -355,7 +351,7 @@ void ThermalDilepton::outputPhoton_SpvnpT(
         for (int j = 0; j < np; j++) {
             fphotonSpMatrix << scientific << setprecision(6) << setw(16)
                             << MInv_[im] << "  " << p[j] << "  "
-                            << vnMInvpT_cos[0][im][j];
+                            << vnMInvpT_cos[0][im][j];  // dN/(2pi pT dpT M dM)
             for (int order = 1; order < norder_; order++) {
                 fphotonSpMatrix << scientific << setprecision(6) << setw(16)
                                 << "  " << vnMInvpT_cos[order][im][j] << "  "
@@ -367,7 +363,7 @@ void ThermalDilepton::outputPhoton_SpvnpT(
 
     for (int im = 0; im < nMInv_; im++) {
         fphotonSpvn << scientific << setprecision(6) << setw(16) << MInv_[im]
-                    << "  " << vnMInv_cos[0][im];
+                    << "  " << vnMInv_cos[0][im];  // dN/(M dM)
         for (int order = 1; order < norder_; order++) {
             fphotonSpvn << scientific << setprecision(6) << setw(16) << "  "
                         << vnMInv_cos[order][im] << "  "

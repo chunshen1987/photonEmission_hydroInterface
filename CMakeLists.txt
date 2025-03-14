@@ -1,5 +1,5 @@
-cmake_minimum_required (VERSION 3.5)
-project (PhotonEmission LANGUAGES CXX C)
+cmake_minimum_required (VERSION 3.10)
+project (PhotonEmission LANGUAGES CXX)
 
 set(libname "hydro_photonEmission")
 set(exename "hydro_photonEmission.e")
