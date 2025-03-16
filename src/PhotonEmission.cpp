@@ -244,7 +244,7 @@ void PhotonEmission::calPhotonemission(
     }
     double dilepton_y[dilepton_nRapidity_];
     for (int k = 0; k < dilepton_nRapidity_; k++) {
-        dilepton_nRapidity_[k] = dilepton_QGPNLO->getDileptonRapidity(k);
+        dilepton_y[k] = dilepton_QGPNLO->getDileptonRapidity(k);
     }
     for (int l = 0; l < np; l++) {
         p_q[l] = photon_QGP_2_to_2->getPhotonp(l);
@@ -274,7 +274,8 @@ void PhotonEmission::calPhotonemission(
     pi_photon_Tb.resize(Eqtb_length, 0);
     bulkPi_Tb.resize(Eqtb_length, 0);
 
-    const int dileptonEqtb_length = neta * dilepton_nRapidity_ * np * nphi * nMInv_;
+    const int dileptonEqtb_length =
+        neta * dilepton_nRapidity_ * np * nphi * nMInv_;
     dilepton_Eq_localrest_Tb.resize(dileptonEqtb_length, 0);
 
     // main loop begins ...
@@ -662,7 +663,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     }
     double dilepton_y[dilepton_nRapidity_];
     for (int k = 0; k < dilepton_nRapidity_; k++) {
-        dilepton_nRapidity_[k] = dilepton_QGPNLO->getDileptonRapidity(k);
+        dilepton_y[k] = dilepton_QGPNLO->getDileptonRapidity(k);
     }
     for (int l = 0; l < np; l++) {
         p_q[l] = photon_QGP_2_to_2->getPhotonp(l);
