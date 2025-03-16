@@ -61,13 +61,14 @@ class ThermalDilepton {
     bool getRateTableFlag() const { return (bRateTable_); }
     double get_dy() const { return (dy); }
     double get_dMInv() const { return (dMInv_); }
+    int get_nRapidity() const { return (nrapidity); }
 
     double getPhotonp(int i) { return (p[i]); }
     double getPhoton_pweight(int i) { return (p_weight[i]); }
     double getPhotonphi(int i) { return (phi[i]); }
     double getPhoton_phiweight(int i) { return (phi_weight[i]); }
     double getPhotontheta(int i) { return (theta[i]); }
-    double getPhotonrapidity(int i) { return (y[i]); }
+    double getDileptonRapidity(int i) { return (y[i]); }
 
     double getDileptonMinv(int i) { return (MInv_[i]); }
 

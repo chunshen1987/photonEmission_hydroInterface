@@ -22,7 +22,8 @@ class PhotonEmission {
     std::string output_path;
 
     int neta;
-    int np, nphi, nrapidity, nMInv_;
+    int np, nphi, nrapidity;
+    int dilepton_nRapidity_, nMInv_;
     int norder;
 
     double gridDx, gridDy, gridDtau;

@@ -53,6 +53,7 @@ PhotonEmission::PhotonEmission(std::shared_ptr<ParameterReader> paraRdr_in) {
     nrapidity = paraRdr->getVal("nrapidity");
     norder = paraRdr->getVal("norder");
     nMInv_ = paraRdr->getVal("nMInv");
+    dilepton_nRapidity_ = dilepton_QGPNLO->get_nRapidity();
 
     dNd2pTdphidy_eq = createA3DMatrix(np, nphi, nrapidity, 0.);
     dNd2pTdphidy = createA3DMatrix(np, nphi, nrapidity, 0.);
@@ -241,6 +242,10 @@ void PhotonEmission::calPhotonemission(
     for (int k = 0; k < nrapidity; k++) {
         y_q[k] = photon_QGP_2_to_2->getPhotonrapidity(k);
     }
+    double dilepton_y[dilepton_nRapidity_];
+    for (int k = 0; k < dilepton_nRapidity_; k++) {
+        dilepton_nRapidity_[k] = dilepton_QGPNLO->getDileptonRapidity(k);
+    }
     for (int l = 0; l < np; l++) {
         p_q[l] = photon_QGP_2_to_2->getPhotonp(l);
     }
@@ -269,7 +274,7 @@ void PhotonEmission::calPhotonemission(
     pi_photon_Tb.resize(Eqtb_length, 0);
     bulkPi_Tb.resize(Eqtb_length, 0);
 
-    const int dileptonEqtb_length = neta * nrapidity * np * nphi * nMInv_;
+    const int dileptonEqtb_length = neta * dilepton_nRapidity_ * np * nphi * nMInv_;
     dilepton_Eq_localrest_Tb.resize(dileptonEqtb_length, 0);
 
     // main loop begins ...
@@ -390,9 +395,9 @@ void PhotonEmission::calPhotonemission(
 
                     // dilepton momentum loops
                     for (int im = 0; im < nMInv_; im++) {
-                        for (int k = 0; k < nrapidity; k++) {
-                            double cosh_y = cosh(y_q[k] - eta_local);
-                            double sinh_y = sinh(y_q[k] - eta_local);
+                        for (int k = 0; k < dilepton_nRapidity_; k++) {
+                            double cosh_y = cosh(dilepton_y[k] - eta_local);
+                            double sinh_y = sinh(dilepton_y[k] - eta_local);
                             for (int m = 0; m < nphi; m++) {
                                 for (int l = 0; l < np; l++) {
                                     double mT = sqrt(
@@ -655,6 +660,10 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     for (int k = 0; k < nrapidity; k++) {
         y_q[k] = photon_QGP_2_to_2->getPhotonrapidity(k);
     }
+    double dilepton_y[dilepton_nRapidity_];
+    for (int k = 0; k < dilepton_nRapidity_; k++) {
+        dilepton_nRapidity_[k] = dilepton_QGPNLO->getDileptonRapidity(k);
+    }
     for (int l = 0; l < np; l++) {
         p_q[l] = photon_QGP_2_to_2->getPhotonp(l);
     }
@@ -685,7 +694,7 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
     pi_photon_Tb.resize(Eqtb_length, 0);
     bulkPi_Tb.resize(Eqtb_length, 0);
 
-    const int dileptonEqtb_length = nrapidity * np * nphi * nMInv_;
+    const int dileptonEqtb_length = dilepton_nRapidity_ * np * nphi * nMInv_;
     dilepton_Eq_localrest_Tb.resize(dileptonEqtb_length, 0);
 
     double tau_now = 0.0;
@@ -811,9 +820,9 @@ void PhotonEmission::calPhotonemission_3d(void *hydroinfo_ptr_in) {
         // Dilepton momentum loops
         int idx_Tb_dilepton = 0;
         for (int im = 0; im < nMInv_; im++) {
-            for (int k = 0; k < nrapidity; k++) {
-                double cosh_y = cosh(y_q[k]);
-                double sinh_y = sinh(y_q[k]);
+            for (int k = 0; k < dilepton_nRapidity_; k++) {
+                double cosh_y = cosh(dilepton_y[k]);
+                double sinh_y = sinh(dilepton_y[k]);
                 for (int m = 0; m < nphi; m++) {
                     for (int l = 0; l < np; l++) {
                         double mT = sqrt(p_q[l] * p_q[l] + MInv[im] * MInv[im]);
