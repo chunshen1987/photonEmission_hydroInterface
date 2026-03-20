@@ -334,6 +334,8 @@ void PhotonEmission::calPhotonemission(
                     vx_local = fluidCellptr->vx;
                     vy_local = fluidCellptr->vy;
                     vz_local = 0.0;  // boost-invariant medium
+                    // vz_local = fluidCellptr->vz;  // IP-Glasma 2D has a nonzero vz
+
                 }
 
                 for (int mu = 0; mu < 4; mu++) {
