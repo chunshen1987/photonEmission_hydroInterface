@@ -1179,9 +1179,9 @@ void Hydroinfo_MUSIC::getHydroValues(
         info->pressure = HydroCell3DIdealInterp.pressure;
         info->sd = (info->ed + info->pressure) / (info->temperature + 1e-16);
     } else if (hydroWhichHydro == 12) {
-        float ux = HydroCell3DIdealInterp.ux;
-        float uy = HydroCell3DIdealInterp.uy;
-        float uz = HydroCell3DIdealInterp.uz;
+        float ux = HydroCell3DnewInterp.ux;
+        float uy = HydroCell3DnewInterp.uy;
+        float uz = HydroCell3DnewInterp.uz;
         float ut = sqrt(1. + ux * ux + uy * uy + uz * uz);
         info->vx = ux / ut;
         info->vy = uy / ut;
