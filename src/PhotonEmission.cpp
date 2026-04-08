@@ -190,7 +190,7 @@ void PhotonEmission::InitializePhotonEmissionRateTables() {
             photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin,
             photonrate_tb_dE, true, true);
         photon_piK = std::unique_ptr<ThermalPhoton>(
-            new ThermalPhoton(paraRdr, "pion_Kstar_to_K_gamma"));
+            new ThermalPhoton(paraRdr, "pion_K_to_Kstar_gamma"));
         photon_piK->setupEmissionrateFromFile(
             photonrate_tb_Tmin, photonrate_tb_dT, photonrate_tb_Emin,
             photonrate_tb_dE, true, true);
